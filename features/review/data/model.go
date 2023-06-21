@@ -11,7 +11,7 @@ type Review struct {
 	UserID    string `gorm:"type:varchar(45)"`
 	VenueID   string `gorm:"type:varchar(45)"`
 	Review    string `gorm:"type:text"`
-	Rating    uint8
+	Rating    float64
 	CreatedAt time.Time      `gorm:"type:datetime"`
 	UpdatedAt time.Time      `gorm:"type:datetime"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`

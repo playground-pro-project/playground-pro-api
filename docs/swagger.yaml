@@ -12,7 +12,7 @@ info:
 servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/dimasyudhana/AirBnB-RestfulAPI/1.0.0
+    url: https://virtserver.swaggerhub.com/dimasyudhana/playground-pro/1.0.0
   - description: Production
     url: https://peterzalai.biz.id
 tags:
@@ -36,6 +36,7 @@ paths:
         - Authentication
       summary: Register a new user
       description: Endpoint create a new user to the web-application
+      deprecated: true
       requestBody:
         required: true
         content:
@@ -61,6 +62,7 @@ paths:
         - Authentication
       summary: Login to system
       description: Endpoint login user to the web-application
+      deprecated: true
       requestBody:
         required: true
         content:
@@ -90,15 +92,7 @@ paths:
     get:
       tags:
         - User
-      summary: Get user that booking venue
-      parameters:
-        - name: user_id
-          in: path
-          description: User ID
-          required: true
-          schema:
-            type: string
-            format: uuid
+      summary: Get user that booking venue, order by lastest update
       responses:
         "200":
           $ref: "#/components/responses/Response200UserReservation"
@@ -116,13 +110,6 @@ paths:
       summary: Find list venue, venue's reviews and rating (pagination)
       description: Find list venue, venue's average reviews and rating accumulation
       parameters:
-        - name: venue_id
-          in: path
-          description: Venue ID
-          required: true
-          schema:
-            type: string
-            format: uuid
         - in: query
           name: category
           schema:
@@ -139,13 +126,13 @@ paths:
           name: rating
           schema:
             type: integer
-          description: String value of rating to retrieve list of rating venues
+          description: String range value of rating to retrieve list of rating venues
           required: false
         - in: query
           name: price
           schema:
             type: integer
-          description: String value of price to retrieve list of price venues
+          description: String range value of price to retrieve list of price venues
           required: false
         - in: query
           name: limit
@@ -264,7 +251,7 @@ paths:
       tags:
         - Reservation
       summary: User can cancel a reservation
-      description: User can cancel a reservation at least 1 hour before check-in, cancel payment and get refund 75% of grand_total. None of these conditions means normal delete reservation.
+      description: User can cancel a reservation at least 1 hour before check-in and cancel payment instead then get refund 75% of grand_total. None of these conditions means normal delete reservation.
       parameters:
         - name: reservation_id
           in: path
@@ -297,6 +284,7 @@ paths:
               $ref: "#/components/schemas/reservations"
             example:
               reservation_id: "string-uuid"
+              bank_account: "bca/bri/bni/mandiri/permata"
       responses:
         "201":
           $ref: "#/components/responses/Response201SubmitPayment"
@@ -313,42 +301,9 @@ paths:
         - Payment
       summary: Retrive payment notification update
       description: Retrive payment notification to update status on database
-      parameters:
-        - name: payment_id
-          in: path
-          description: Payment ID
-          required: true
-          schema:
-            type: string
-            format: uuid
       responses:
         "200":
           $ref: "#/components/responses/Response200GetPayment"
-        "400":
-          $ref: "#/components/responses/Response400"
-        "404":
-          $ref: "#/components/responses/Response404"
-        "500":
-          $ref: "#/components/responses/Response500"
-      security:
-        - bearerAuth: []
-
-  "/payments/{payment_id}":
-    put:
-      tags:
-        - Payment
-      summary: Update an existing payment
-      parameters:
-        - name: payment_id
-          in: path
-          description: Payment ID
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          $ref: "#/components/responses/Response200"
         "400":
           $ref: "#/components/responses/Response400"
         "404":
@@ -503,16 +458,20 @@ components:
               - venue_id: "string-uuid"
                 category: "basketball"
                 name: "Venue 1"
-                description: "Descriptionnya"
+                owner: "User 1"
                 address: "Jakarta"
+                distance: 1
+                unit: km
                 price: 100
                 average_rating: 5
                 count_review: 100
               - venue_id: "string-uuid"
                 category: "football"
                 name: "Venue 2"
-                description: "Descriptionnya juga"
+                owner: "User 2"
                 address: "Jakarta"
+                distance: 1.3
+                unit: km
                 price: 200
                 average_rating: 4.7
                 count_review: 250
@@ -520,7 +479,6 @@ components:
               limit: 5
               offset: 0
               page: 1
-              per_page: 5
               total_pages: 3
               total_items: 15
 
@@ -651,22 +609,28 @@ components:
                 - reservation_id: "string-uuid"
                   venue_name: "tidar basket"
                   category: "basketball"
+                  average_rating: 4.7
+                  owner: "User 2"
+                  address: "Jakarta"
+                  check-in_date: "2023/06/05 08:05"
+                  check-out_date: "2023/08/05 08:05"
                   price: 100
                   total_hours: 2
                   gross_amount: 200
-                  check-in_date: "2023/06/05 08:05"
-                  check-out_date: "2023/08/05 08:05"
                   bank_account: "bca"
                   va_number: VA4nUmber
                   status: "success"
                 - reservation_id: "string-uuid"
                   venue_name: "tidar futsal"
                   category: "futsal"
+                  average_rating: 4.7
+                  owner: "User 2"
+                  address: "Jakarta"
+                  check-in_date: "2023/07/10 14:30"
+                  check-out_date: "2023/07/15 11:00"
                   price: 150
                   total_hours: 1
                   gross_amount: 150
-                  check-in_date: "2023/07/10 14:30"
-                  check-out_date: "2023/07/15 11:00"
                   bank_account: "bri"
                   va_number: VA4nUmber
                   status: "pending"
@@ -762,22 +726,7 @@ components:
             code: 200
             message: "Successful operation"
             data:
-              - reservation_id: "string-uuid"
-                category: "futsal"
-                name: "Arena Futsal Tidar"
-                subtotal: 100
-                duration: 2
-                gross_amount: 200
-                check-in_date: "Saturday,2023-06-05 08:05"
-                check-out_date: "Saturday,2023-08-05 08:05"
-              - reservation_id: "string-uuid"
-                category: "futsal"
-                name: "Arena Futsal Tidar"
-                subtotal: 100
-                duration: 2
-                gross_amount: 200
-                check-in_date: "Saturday,2023-06-05 08:05"
-                check-out_date: "Saturday,2023-08-05 08:05"
+                reservation_id: "string-uuid"
 
     Response201SubmitPayment:
       description: Successful Operation
@@ -795,9 +744,6 @@ components:
             example:
               code: 201
               message: "Success, Bank Transfer transaction is created"
-              data:
-                payment_id: "string-midtrans"
-                va_number: "812785002530231"
 
     Response201RegisterReview:
       description: Successful operation
@@ -1057,9 +1003,6 @@ components:
         page:
           type: integer
           description: The current page number.
-        per_page:
-          type: integer
-          description: The number of items per page.
         total_pages:
           type: integer
           description: The total number of pages.
