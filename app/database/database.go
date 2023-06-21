@@ -28,16 +28,11 @@ func InitDatabase(c *config.AppConfig) *gorm.DB {
 		panic(err.Error())
 	}
 
-	err = db.SetupJoinTable(&payment.Payment{}, "Cart", &reservation.Reservation{})
-	if err != nil {
-		fmt.Println("setup error ", err)
-		return nil
-	}
-
 	err = db.AutoMigrate(
 		&user.User{},
 		&venue.Venue{},
 		&venue_picture.VenuePicture{},
+		&reservation.Reservation{},
 		&payment.Payment{},
 		&review.Review{},
 	)
