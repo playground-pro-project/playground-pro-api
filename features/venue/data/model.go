@@ -4,6 +4,7 @@ import (
 	"time"
 
 	image "github.com/playground-pro-project/playground-pro-api/features/image/data"
+	reservation "github.com/playground-pro-project/playground-pro-api/features/reservation/data"
 	review "github.com/playground-pro-project/playground-pro-api/features/review/data"
 	"gorm.io/gorm"
 )
@@ -22,5 +23,6 @@ type Venue struct {
 	UpdatedAt     time.Time            `gorm:"type:datetime"`
 	DeletedAt     gorm.DeletedAt       `gorm:"index"`
 	VenuePictures []image.VenuePicture `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	Reservations  []reservation.Reservation      `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Reviews       []review.Review      `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
