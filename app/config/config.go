@@ -9,6 +9,7 @@ import (
 
 var (
 	JWT string
+	ADMINPASSWORD string
 )
 
 type AppConfig struct {
