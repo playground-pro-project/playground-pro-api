@@ -7,11 +7,11 @@ import (
 )
 
 type Review struct {
-	ReviewID  string `gorm:"primaryKey;type:varchar(45)"`
-	UserID    string `gorm:"type:varchar(45)"`
-	VenueID   string `gorm:"type:varchar(45)"`
-	Review    string `gorm:"type:text"`
-	Rating    float64
+	ReviewID  string         `gorm:"primaryKey;type:varchar(45)"`
+	UserID    string         `gorm:"type:varchar(45)"`
+	VenueID   string         `gorm:"type:varchar(45)"`
+	Review    string         `gorm:"type:text"`
+	Rating    float64        `gorm:"type:double"`
 	CreatedAt time.Time      `gorm:"type:datetime"`
 	UpdatedAt time.Time      `gorm:"type:datetime"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
@@ -36,15 +36,15 @@ type User struct {
 }
 
 type Venue struct {
-	VenueID     string `gorm:"primaryKey;type:varchar(45)"`
-	UserID      string `gorm:"type:varchar(45)"`
-	Category    string `gorm:"type:enum('Basketball','Football','Futsal','Badminton','Swimming');default:'Basketball'"`
-	Name        string `gorm:"type:varchar(225);not null"`
-	Description string `gorm:"type:text"`
-	Location    string `gorm:"type:text"`
-	Price       float64
-	Longitude   float64
-	Latitude    float64
+	VenueID     string         `gorm:"primaryKey;type:varchar(45)"`
+	UserID      string         `gorm:"type:varchar(45)"`
+	Category    string         `gorm:"type:enum('Basketball','Football','Futsal','Badminton','Swimming');default:'Basketball'"`
+	Name        string         `gorm:"type:varchar(225);not null"`
+	Description string         `gorm:"type:text"`
+	Location    string         `gorm:"type:text"`
+	Price       float64        `gorm:"type:double"`
+	Longitude   float64        `gorm:"type:double"`
+	Latitude    float64        `gorm:"type:double"`
 	CreatedAt   time.Time      `gorm:"type:datetime"`
 	UpdatedAt   time.Time      `gorm:"type:datetime"`
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
