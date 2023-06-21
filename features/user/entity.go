@@ -2,8 +2,6 @@ package user
 
 import (
 	"time"
-
-	user "github.com/playground-pro-project/playground-pro-api/features/user/data"
 )
 
 type UserEntity struct {
@@ -77,32 +75,20 @@ type VenuePictureEntity struct {
 	DeletedAt      time.Time
 }
 
-func UserEntityToModel(u UserEntity) user.User {
-	return user.User{
-		UserID:         u.UserID,
-		Fullname:       u.Fullname,
-		Email:          u.Email,
-		Phone:          u.Phone,
-		Password:       u.Password,
-		Bio:            u.Bio,
-		Address:        u.Address,
-		ProfilePicture: u.ProfilePicture,
-	}
+type UserData interface {
+	Create(user UserEntity) (string, error)
+	GetByID(userID string) (UserEntity, error)
+	GetAll() ([]UserEntity, error)
+	UpdateByID(userID string, updatedUser UserEntity) error
+	DeleteByID(userID string) error
+	Login(email, password string) (UserEntity, string, error)
 }
 
-func UserModelToEntity(u user.User) UserEntity {
-	return UserEntity{
-		UserID:         u.UserID,
-		Fullname:       u.Fullname,
-		Email:          u.Email,
-		Phone:          u.Phone,
-		Password:       u.Password,
-		Bio:            u.Bio,
-		Address:        u.Address,
-		Role:           u.Role,
-		ProfilePicture: u.ProfilePicture,
-		CreatedAt:      u.CreatedAt,
-		UpdatedAt:      u.UpdatedAt,
-		DeletedAt:      u.DeletedAt.Time,
-	}
+type UserService interface {
+	CreateUser(user UserEntity) (string, error)
+	GetUserByID(userID string) (UserEntity, error)
+	GetAllUsers() ([]UserEntity, error)
+	UpdateUserByID(userID string, updatedUser UserEntity) error
+	DeleteUserByID(userID string) error
+	Login(email, password string) (UserEntity, string, error)
 }
