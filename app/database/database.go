@@ -43,7 +43,7 @@ func InitDatabase(c *config.AppConfig) *gorm.DB {
 
 	log.Info("success connected and migrated to database")
 
-	initSuperAdmin(db)
+	initSuperAdmin(c, db)
 
 	return db
 }

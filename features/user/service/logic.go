@@ -12,6 +12,12 @@ type userService struct {
 	userData user.UserData
 }
 
+func New(repo user.UserData) user.UserService {
+	return &userService{
+		userData: repo,
+	}
+}
+
 // CreateUser implements user.UserService.
 func (us *userService) CreateUser(user user.UserCore) (string, error) {
 	if user.Fullname == "" {
@@ -43,7 +49,7 @@ func (us *userService) CreateUser(user user.UserCore) (string, error) {
 }
 
 // DeleteUserByID implements user.UserService.
-func (us *userService) DeleteUserByID(userID string) error {
+func (us *userService) DeleteByID(userID string) error {
 	err := us.userData.DeleteByID(userID)
 	if err != nil {
 		return fmt.Errorf("error: %w", err)
@@ -53,8 +59,8 @@ func (us *userService) DeleteUserByID(userID string) error {
 }
 
 // GetUserByID implements user.UserService.
-func (us *userService) GetUserByID(userID string) (user.UserCore, error) {
-	userCore, err := us.userData.GetByID(userID)
+func (us *userService) GetByID(userID string) (user.UserCore, error) {
+	userEntity, err := us.userData.GetByID(userID)
 	if err != nil {
 		return user.UserCore{}, fmt.Errorf("error: %w", err)
 	}
@@ -80,7 +86,7 @@ func (us *userService) Login(email string, password string) (user.UserCore, stri
 }
 
 // UpdateUserByID implements user.UserService.
-func (us *userService) UpdateUserByID(userID string, updatedUser user.UserCore) error {
+func (us *userService) UpdateByID(userID string, updatedUser user.UserCore) error {
 	if updatedUser.Password != "" {
 		err := helper.ValidatePassword(updatedUser.Password)
 		if err != nil {
@@ -100,10 +106,4 @@ func (us *userService) UpdateUserByID(userID string, updatedUser user.UserCore) 
 	}
 
 	return nil
-}
-
-func New(repo user.UserData) user.UserService {
-	return &userService{
-		userData: repo,
-	}
 }

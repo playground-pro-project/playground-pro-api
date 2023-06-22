@@ -12,7 +12,7 @@ type venueQuery struct {
 }
 
 // func New(db *gorm.DB) venue.VenueData {
-// 	return &venueQuery {
-// 		db:db,
+// 	return &venueQuery{
+// 		db: db,
 // 	}
 // }

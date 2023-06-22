@@ -5,8 +5,7 @@ import "time"
 type ReservationCore struct {
 	ReservationID string
 	UserID        string
-	VenueVenueID  string
-	PaymentID     string
+	VenueID       string
 	CheckInDate   time.Time
 	CheckOutDate  time.Time
 	Duration      uint

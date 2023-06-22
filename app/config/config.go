@@ -7,10 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	JWT string
-	ADMINPASSWORD string
-)
+var JWT string
 
 type AppConfig struct {
 	DBUSER                string
@@ -20,6 +17,7 @@ type AppConfig struct {
 	DBNAME                string
 	AWS_ACCESS_KEY_ID     string
 	AWS_SECRET_ACCESS_KEY string
+	ADMINPASSWORD         string
 }
 
 func InitConfig() *AppConfig {
@@ -36,7 +34,7 @@ func readEnv() *AppConfig {
 	}
 
 	if val, found := os.LookupEnv("DBPASSWORD"); found {
-		app.DBUSER = val
+		app.DBPASSWORD = val
 		isRead = false
 	}
 
@@ -61,7 +59,7 @@ func readEnv() *AppConfig {
 	}
 
 	if val, found := os.LookupEnv("ADMINPASSWORD"); found {
-		JWT = val
+		app.ADMINPASSWORD = val
 		isRead = false
 	}
 
@@ -92,7 +90,7 @@ func readEnv() *AppConfig {
 		app.DBPORT = viper.GetString("DBPORT")
 		app.DBNAME = viper.GetString("DBNAME")
 		JWT = viper.GetString("JWT")
-		JWT = viper.GetString("ADMINPASSWORD")
+		app.ADMINPASSWORD = viper.GetString("ADMINPASSWORD")
 		app.AWS_ACCESS_KEY_ID = viper.Get("AWS_ACCESS_KEY_ID").(string)
 		app.AWS_SECRET_ACCESS_KEY = viper.Get("AWS_SECRET_ACCESS_KEY").(string)
 	}

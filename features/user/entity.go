@@ -39,24 +39,10 @@ type VenueCore struct {
 	Reviews       []ReviewCore
 }
 
-type ReviewCore struct {
-	ReviewID  string
-	UserID    string
-	VenueID   string
-	Review    string
-	Rating    string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt time.Time
-	User      UserCore
-	Venue     VenueCore
-}
-
 type ReservationCore struct {
 	ReservationID string
 	UserID        string
-	VenueVenueID  string
-	PaymentID     string
+	VenueID       string
 	CheckInDate   time.Time
 	CheckOutDate  time.Time
 	Duration      uint
@@ -64,6 +50,19 @@ type ReservationCore struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     time.Time
+}
+
+type ReviewCore struct {
+	ReviewID  string
+	UserID    string
+	VenueID   string
+	Review    string
+	Rating    float64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt time.Time
+	User      UserCore
+	Venue     VenueCore
 }
 
 type VenuePictureCore struct {
@@ -75,18 +74,18 @@ type VenuePictureCore struct {
 	DeletedAt      time.Time
 }
 
-type UserData interface {
-	Create(user UserCore) (string, error)
-	GetByID(userID string) (UserCore, error)
-	UpdateByID(userID string, updatedUser UserCore) error
-	DeleteByID(userID string) error
-	Login(email, password string) (UserCore, string, error)
-}
-
 type UserService interface {
 	CreateUser(user UserCore) (string, error)
-	GetUserByID(userID string) (UserCore, error)
-	UpdateUserByID(userID string, updatedUser UserCore) error
-	DeleteUserByID(userID string) error
-	Login(email, password string) (UserCore, string, error)
+	DeleteByID(userID string) error
+	GetByID(userID string) (UserCore, error)
+	Login(email string, password string) (UserCore, string, error)
+	UpdateByID(userID string, updatedUser UserCore) error
+}
+
+type UserData interface {
+	Create(user UserCore) (string, error)
+	DeleteByID(userID string) error
+	GetByID(userID string) (UserCore, error)
+	Login(email string, password string) (UserCore, string, error)
+	UpdateByID(userID string, updatedUser UserCore) error
 }

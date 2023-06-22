@@ -15,6 +15,12 @@ type userQuery struct {
 	db *gorm.DB
 }
 
+func New(db *gorm.DB) user.UserData {
+	return userQuery{
+		db: db,
+	}
+}
+
 // Create implements user.UserData.
 func (uq userQuery) Create(user user.UserCore) (string, error) {
 	// Convert UserCore to UserModel
@@ -140,10 +146,4 @@ func (uq userQuery) UpdateByID(userID string, updatedUser user.UserCore) error {
 	}
 
 	return nil
-}
-
-func New(db *gorm.DB) user.UserData {
-	return userQuery{
-		db: db,
-	}
 }
