@@ -31,9 +31,9 @@ func (uq userQuery) Create(user user.UserEntity) (string, error) {
 	if createResult.Error != nil {
 		// Handle specific errors related to email and phone uniqueness
 		switch {
-		case strings.Contains(createResult.Error.Error(), "email"):
+		case strings.Contains(createResult.Error.Error(), "'users.email'"):
 			return "", errors.New("email already in use")
-		case strings.Contains(createResult.Error.Error(), "phone"):
+		case strings.Contains(createResult.Error.Error(), "'users.phone'"):
 			return "", errors.New("phone already in use")
 		}
 		return "", createResult.Error
@@ -70,7 +70,7 @@ func (uq userQuery) GetAll() ([]user.UserEntity, error) {
 func (uq userQuery) GetByID(userID string) (user.UserEntity, error) {
 	var userModel User
 
-	query := uq.db.Preload("Venues").Preload("Reservations").Preload("Reviews").First(&userModel, userID)
+	query := uq.db.Preload("Venues").Preload("Reservations").Preload("Reviews").Where("user_id = ?", userID).First(&userModel)
 	if query.Error != nil {
 		if errors.Is(query.Error, gorm.ErrRecordNotFound) {
 			return user.UserEntity{}, fmt.Errorf("user not found with ID: %s", userID)
@@ -116,7 +116,7 @@ func (uq userQuery) UpdateByID(userID string, updatedUser user.UserEntity) error
 	var userModel User
 
 	// Retrieve the user from the database
-	query := uq.db.First(&userModel, userID)
+	query := uq.db.Where("user_id = ?", userID).First(&userModel)
 	if query.Error != nil {
 		if errors.Is(query.Error, gorm.ErrRecordNotFound) {
 			return fmt.Errorf("user not found with ID: %s", userID)
@@ -135,7 +135,13 @@ func (uq userQuery) UpdateByID(userID string, updatedUser user.UserEntity) error
 	// Perform the update operation
 	update := uq.db.Model(&userModel).Updates(userToUpdate)
 	if update.Error != nil {
-		return fmt.Errorf("failed to update user: %w", update.Error)
+		if strings.Contains(update.Error.Error(), "user not found") {
+			return fmt.Errorf("failed to update user: %w", update.Error)
+		} else if strings.Contains(update.Error.Error(), "'users.email'") {
+			return errors.New("email already in use")
+		} else if strings.Contains(update.Error.Error(), "'users.phone'") {
+			return errors.New("phone already in use")
+		}
 	}
 
 	return nil

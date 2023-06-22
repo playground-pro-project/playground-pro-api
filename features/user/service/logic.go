@@ -4,14 +4,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/playground-pro-project/playground-pro-api/features/user"
 	"github.com/playground-pro-project/playground-pro-api/utils/helper"
 )
 
 type userService struct {
 	userData user.UserData
-	validate *validator.Validate
 }
 
 // CreateUser implements user.UserService.
@@ -33,12 +31,12 @@ func (us *userService) CreateUser(user user.UserEntity) (string, error) {
 
 	err := helper.ValidatePassword(user.Password)
 	if err != nil {
-		return "", fmt.Errorf("%v", err)
+		return "", fmt.Errorf("%w", err)
 	}
 
 	userID, err := us.userData.Create(user)
 	if err != nil {
-		return "", fmt.Errorf("%v", err)
+		return "", fmt.Errorf("%w", err)
 	}
 
 	return userID, nil
@@ -46,7 +44,12 @@ func (us *userService) CreateUser(user user.UserEntity) (string, error) {
 
 // DeleteUserByID implements user.UserService.
 func (us *userService) DeleteUserByID(userID string) error {
-	panic("unimplemented")
+	err := us.userData.DeleteByID(userID)
+	if err != nil {
+		return fmt.Errorf("error: %w", err)
+	}
+
+	return nil
 }
 
 // GetAllUsers implements user.UserService.
@@ -56,22 +59,50 @@ func (us *userService) GetAllUsers() ([]user.UserEntity, error) {
 
 // GetUserByID implements user.UserService.
 func (us *userService) GetUserByID(userID string) (user.UserEntity, error) {
-	panic("unimplemented")
+	userEntity, err := us.userData.GetByID(userID)
+	if err != nil {
+		return user.UserEntity{}, fmt.Errorf("error: %w", err)
+	}
+
+	return userEntity, nil
 }
 
 // Login implements user.UserService.
 func (us *userService) Login(email string, password string) (user.UserEntity, string, error) {
-	panic("unimplemented")
+	if email == "" {
+		return user.UserEntity{}, "", errors.New("email is required")
+	}
+	if password == "" {
+		return user.UserEntity{}, "", errors.New("password is required")
+	}
+
+	loggedInUser, accessToken, err := us.userData.Login(email, password)
+	if err != nil {
+		return user.UserEntity{}, "", fmt.Errorf("%w", err)
+	}
+
+	return loggedInUser, accessToken, nil
 }
 
 // UpdateUserByID implements user.UserService.
 func (us *userService) UpdateUserByID(userID string, updatedUser user.UserEntity) error {
-	panic("unimplemented")
+	if updatedUser.Email != "" {
+		_, err := helper.ValidateMailAddress(updatedUser.Email)
+		if !err {
+			return errors.New("error: invalid email format")
+		}
+	}
+
+	err := us.userData.UpdateByID(userID, updatedUser)
+	if err != nil {
+		return fmt.Errorf("error: %w", err)
+	}
+
+	return nil
 }
 
 func New(repo user.UserData) user.UserService {
 	return &userService{
 		userData: repo,
-		validate: validator.New(),
 	}
 }
