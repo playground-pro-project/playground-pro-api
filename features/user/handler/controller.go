@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/user"
+	"github.com/playground-pro-project/playground-pro-api/utils/helper"
 )
 
 type userHandler struct {
@@ -90,6 +91,50 @@ func (uh *userHandler) GetUserProfile(c echo.Context) error {
 	})
 }
 
+func (uh *userHandler) UpdatePassword(c echo.Context) error {
+	req := ChangePasswordRequest{}
+	err := c.Bind(&req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "Invalid request payload",
+		})
+	}
+
+	userID := middlewares.ExtractUserIDFromToken(c)
+	user, err := uh.userService.GetUserByID(userID)
+	if err != nil {
+		if strings.Contains(err.Error(), "user not found") {
+			return c.JSON(http.StatusNotFound, map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "Internal server error, please try again later",
+		})
+	}
+
+	err = helper.ComparePass([]byte(user.Password), []byte(req.OldPassword))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "Wrong password",
+		})
+	}
+
+	// req.NewPassword = helper.HashPass(req.NewPassword)
+
+	updatedUser := UpdatePasswordRequestToEntity(req)
+	err = uh.userService.UpdateUserByID(userID, updatedUser)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "Internal server error, please try again later",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Password updated successfully",
+	})
+}
+
 func (uh *userHandler) UpdateUserProfile(c echo.Context) error {
 	req := EditProfileRequest{}
 	err := c.Bind(&req)
@@ -124,5 +169,19 @@ func (uh *userHandler) UpdateUserProfile(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "User profile updated successfully",
+	})
+}
+
+func (uh *userHandler) DeleteUser(c echo.Context) error {
+	userID := middlewares.ExtractUserIDFromToken(c)
+	err := uh.userService.DeleteUserByID(userID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		"message": "User account deleted successfully",
 	})
 }

@@ -21,5 +21,7 @@ func InitRouter(db *gorm.DB, e *echo.Echo) {
 	{
 		usersGroup.GET("", userHandler.GetUserProfile, middlewares.JWTMiddlewareFunc())
 		usersGroup.PUT("", userHandler.UpdateUserProfile, middlewares.JWTMiddlewareFunc())
+		usersGroup.PUT("/password", userHandler.UpdatePassword, middlewares.JWTMiddlewareFunc())
+		usersGroup.DELETE("", userHandler.DeleteUser, middlewares.JWTMiddlewareFunc())
 	}
 }
