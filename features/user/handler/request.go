@@ -47,3 +47,9 @@ func EditProfileRequestToEntity(e EditProfileRequest) user.UserEntity {
 		Bio:      e.Bio,
 	}
 }
+
+func UpdatePasswordRequestToEntity(p ChangePasswordRequest) user.UserEntity {
+	return user.UserEntity{
+		Password: p.NewPassword,
+	}
+}

@@ -50,7 +50,7 @@ func (uq userQuery) Create(user user.UserEntity) (string, error) {
 
 // DeleteByID implements user.UserData.
 func (uq userQuery) DeleteByID(userID string) error {
-	deleteResult := uq.db.Delete(&User{}, userID)
+	deleteResult := uq.db.Where("user_id = ?", userID).Delete(&User{})
 	if deleteResult.Error != nil {
 		return fmt.Errorf("failed to delete user: %w", deleteResult.Error)
 	}
@@ -59,11 +59,6 @@ func (uq userQuery) DeleteByID(userID string) error {
 	}
 
 	return nil
-}
-
-// GetAll implements user.UserData.
-func (uq userQuery) GetAll() ([]user.UserEntity, error) {
-	panic("unimplemented")
 }
 
 // GetByID implements user.UserData.

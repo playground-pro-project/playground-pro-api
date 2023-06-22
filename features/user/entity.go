@@ -78,7 +78,6 @@ type VenuePictureEntity struct {
 type UserData interface {
 	Create(user UserEntity) (string, error)
 	GetByID(userID string) (UserEntity, error)
-	GetAll() ([]UserEntity, error)
 	UpdateByID(userID string, updatedUser UserEntity) error
 	DeleteByID(userID string) error
 	Login(email, password string) (UserEntity, string, error)
@@ -87,7 +86,6 @@ type UserData interface {
 type UserService interface {
 	CreateUser(user UserEntity) (string, error)
 	GetUserByID(userID string) (UserEntity, error)
-	GetAllUsers() ([]UserEntity, error)
 	UpdateUserByID(userID string, updatedUser UserEntity) error
 	DeleteUserByID(userID string) error
 	Login(email, password string) (UserEntity, string, error)

@@ -52,11 +52,6 @@ func (us *userService) DeleteUserByID(userID string) error {
 	return nil
 }
 
-// GetAllUsers implements user.UserService.
-func (us *userService) GetAllUsers() ([]user.UserEntity, error) {
-	panic("unimplemented")
-}
-
 // GetUserByID implements user.UserService.
 func (us *userService) GetUserByID(userID string) (user.UserEntity, error) {
 	userEntity, err := us.userData.GetByID(userID)
@@ -86,6 +81,12 @@ func (us *userService) Login(email string, password string) (user.UserEntity, st
 
 // UpdateUserByID implements user.UserService.
 func (us *userService) UpdateUserByID(userID string, updatedUser user.UserEntity) error {
+	if updatedUser.Password != "" {
+		err := helper.ValidatePassword(updatedUser.Password)
+		if err != nil {
+			return fmt.Errorf("%w", err)
+		}
+	}
 	if updatedUser.Email != "" {
 		_, err := helper.ValidateMailAddress(updatedUser.Email)
 		if !err {
