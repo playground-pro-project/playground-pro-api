@@ -65,7 +65,7 @@ func (us *userService) GetByID(userID string) (user.UserCore, error) {
 		return user.UserCore{}, fmt.Errorf("error: %w", err)
 	}
 
-	return userCore, nil
+	return userEntity, nil
 }
 
 // Login implements user.UserService.
