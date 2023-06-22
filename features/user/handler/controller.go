@@ -189,10 +189,6 @@ func (uh *userHandler) DeleteUser(c echo.Context) error {
 	})
 }
 
-func (uh *userHandler) RemoveProfilePicture(c echo.Context) {
-
-}
-
 const (
 	MaxFileSize = 1 << 20 // 1 MB
 )
@@ -248,7 +244,18 @@ func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
 		})
 	}
 
-	user, err := uh.userService.GetUserByID(userID)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Profile picture updated successfully",
+	})
+}
+
+func (uh *userHandler) RemoveProfilePicture(c echo.Context) error {
+	userID := middlewares.ExtractUserIDFromToken(c)
+
+	updatedUser := user.UserEntity{
+		ProfilePicture: "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/profile-picture/default-image.jpg",
+	}
+	err := uh.userService.UpdateUserByID(userID, updatedUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not found") {
 			return c.JSON(http.StatusNotFound, map[string]interface{}{
@@ -256,14 +263,15 @@ func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
 			})
 		}
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": "Internal server error",
+			"error": err.Error(),
 		})
 	}
 
-	userResponse := UserEntityToGetUserResponse(user)
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"data":    userResponse,
-		"message": "Profile picture updated successfully",
+		"message": "Profile picture removed successfully",
 	})
+}
+
+func (uh *userHandler) UploadOwnerFile(c echo.Context) error {
+	panic("unimplemented")
 }
