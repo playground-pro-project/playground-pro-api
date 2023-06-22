@@ -12,11 +12,13 @@ var (
 )
 
 type AppConfig struct {
-	DBUSER     string
-	DBPASSWORD string
-	DBHOST     string
-	DBPORT     string
-	DBNAME     string
+	DBUSER                string
+	DBPASSWORD            string
+	DBHOST                string
+	DBPORT                string
+	DBNAME                string
+	AWS_ACCESS_KEY_ID     string
+	AWS_SECRET_ACCESS_KEY string
 }
 
 func InitConfig() *AppConfig {
@@ -62,6 +64,16 @@ func readEnv() *AppConfig {
 		isRead = false
 	}
 
+	if val, found := os.LookupEnv("AWS_ACCESS_KEY_ID"); found {
+		app.AWS_ACCESS_KEY_ID = val
+		isRead = false
+	}
+
+	if val, found := os.LookupEnv("AWS_SECRET_ACCESS_KEY"); found {
+		app.AWS_SECRET_ACCESS_KEY = val
+		isRead = false
+	}
+
 	if isRead {
 		viper.AddConfigPath(".")
 		viper.SetConfigName("local")
@@ -80,6 +92,8 @@ func readEnv() *AppConfig {
 		app.DBNAME = viper.GetString("DBNAME")
 		JWT = viper.GetString("JWT")
 		JWT = viper.GetString("ADMINPASSWORD")
+		app.AWS_ACCESS_KEY_ID = viper.Get("AWS_ACCESS_KEY_ID").(string)
+		app.AWS_SECRET_ACCESS_KEY = viper.Get("AWS_SECRET_ACCESS_KEY").(string)
 	}
 
 	return &app
