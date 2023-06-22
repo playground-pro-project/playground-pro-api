@@ -1,12 +1,15 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/user"
+	"github.com/playground-pro-project/playground-pro-api/utils/aws"
 	"github.com/playground-pro-project/playground-pro-api/utils/helper"
 )
 
@@ -183,5 +186,84 @@ func (uh *userHandler) DeleteUser(c echo.Context) error {
 
 	return c.JSON(http.StatusBadRequest, map[string]interface{}{
 		"message": "User account deleted successfully",
+	})
+}
+
+func (uh *userHandler) RemoveProfilePicture(c echo.Context) {
+
+}
+
+const (
+	MaxFileSize = 1 << 20 // 1 MB
+)
+
+func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
+	userID := middlewares.ExtractUserIDFromToken(c)
+
+	awsService := aws.InitS3()
+
+	file, err := c.FormFile("profile_picture")
+	if err != nil {
+		return err
+	}
+
+	// Check file size before opening it
+	fileSize := file.Size
+	if fileSize > MaxFileSize {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Please upload a picture smaller than 1 MB.",
+		})
+	}
+
+	// Get the file type from the Content-Type header
+	fileType := file.Header.Get("Content-Type")
+
+	path := "profile-picture/" + file.Filename
+	fileContent, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer fileContent.Close()
+
+	err = awsService.UploadFile(path, fileType, fileContent)
+	if err != nil {
+		return err
+	}
+
+	var updatedUser user.UserEntity
+	updatedUser.ProfilePicture = fmt.Sprintf(
+		"https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/profile-picture/%s",
+		filepath.Base(file.Filename),
+	)
+
+	err = uh.userService.UpdateUserByID(userID, updatedUser)
+	if err != nil {
+		if strings.Contains(err.Error(), "user not found") {
+			return c.JSON(http.StatusNotFound, map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	user, err := uh.userService.GetUserByID(userID)
+	if err != nil {
+		if strings.Contains(err.Error(), "user not found") {
+			return c.JSON(http.StatusNotFound, map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "Internal server error",
+		})
+	}
+
+	userResponse := UserEntityToGetUserResponse(user)
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"data":    userResponse,
+		"message": "Profile picture updated successfully",
 	})
 }

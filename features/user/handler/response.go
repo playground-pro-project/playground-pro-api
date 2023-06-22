@@ -5,14 +5,14 @@ import (
 )
 
 type GetUserResponse struct {
-	UserID         string
-	FullName       string
-	Email          string
-	Phone          string
-	Role           string
-	Bio            string
-	Address        string
-	ProfilePicture string
+	UserID         string `json:"user_id,omitempty"`
+	FullName       string `json:"full_name,omitempty"`
+	Email          string `json:"email,omitempty"`
+	Phone          string `json:"phone,omitempty"`
+	Role           string `json:"role,omitempty"`
+	Bio            string `json:"bio,omitempty"`
+	Address        string `json:"address,omitempty"`
+	ProfilePicture string `json:"profile_picture,omitempty"`
 }
 
 func UserEntityToGetUserResponse(u user.UserEntity) GetUserResponse {
