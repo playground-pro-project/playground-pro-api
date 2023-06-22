@@ -1,8 +1,8 @@
-package image
+package user
 
 import "time"
 
-type VenuePictureEntity struct {
+type VenuePictureCore struct {
 	VenuePictureID string
 	VenueID        string
 	URL            string

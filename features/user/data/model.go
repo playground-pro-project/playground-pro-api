@@ -18,7 +18,7 @@ type User struct {
 	Password       string                    `gorm:"type:text;not null"`
 	Bio            string                    `gorm:"type:text"`
 	Address        string                    `gorm:"type:text"`
-	Role           string                    `gorm:"type:enum('User', 'Owner');default:'User'"`
+	Role           string                    `gorm:"type:enum('user', 'owner', 'admin');default:'user'"`
 	ProfilePicture string                    `gorm:"type:text"`
 	CreatedAt      time.Time                 `gorm:"type:datetime"`
 	UpdatedAt      time.Time                 `gorm:"type:datetime"`

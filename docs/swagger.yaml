@@ -479,8 +479,8 @@ components:
               limit: 5
               offset: 0
               page: 1
+              total_rows: 15
               total_pages: 3
-              total_items: 15
 
     Response200CheckAvailability:
       description: Successful Operation

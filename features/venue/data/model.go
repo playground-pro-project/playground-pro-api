@@ -6,6 +6,7 @@ import (
 	image "github.com/playground-pro-project/playground-pro-api/features/image/data"
 	reservation "github.com/playground-pro-project/playground-pro-api/features/reservation/data"
 	review "github.com/playground-pro-project/playground-pro-api/features/review/data"
+	"github.com/playground-pro-project/playground-pro-api/features/venue"
 	"gorm.io/gorm"
 )
 
@@ -25,4 +26,46 @@ type Venue struct {
 	VenuePictures []image.VenuePicture `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	Reservations  []reservation.Reservation      `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Reviews       []review.Review      `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+}
+
+
+
+// Venue-Model to venue-core
+func venueModels(v Venue) venue.VenueCore{
+	return venue.VenueCore{
+		VenueID:       v.VenueID,
+		OwnerID:       v.OwnerID,
+		Category:      v.Category,
+		Name:          v.Name,
+		Description:   v.Description,
+		Location:      v.Location,
+		Price:         v.Price,
+		Longitude:     v.Longitude,
+		Latitude:      v.Latitude,
+		CreatedAt:     v.CreatedAt,
+		UpdatedAt:     v.UpdatedAt,
+		DeletedAt:     v.DeletedAt.Time,
+		VenuePictures: []venue.VenuePictureCore{},
+		Reviews:       []venue.ReviewCore{},
+	}
+}
+
+// Venue-core to venue-model
+func venueEntities(v venue.VenueCore) Venue {
+	return Venue{
+		VenueID:       v.VenueID,
+		OwnerID:       v.OwnerID,
+		Category:      v.Category,
+		Name:          v.Name,
+		Description:   v.Description,
+		Location:      v.Location,
+		Price:         v.Price,
+		Longitude:     v.Longitude,
+		Latitude:      v.Latitude,
+		CreatedAt:     v.CreatedAt,
+		UpdatedAt:     v.UpdatedAt,
+		DeletedAt:     gorm.DeletedAt{Time: v.DeletedAt},
+		VenuePictures: []image.VenuePicture{},
+		Reviews:       []review.Review{},
+	}
 }

@@ -2,55 +2,29 @@ package venue
 
 import (
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/playground-pro-project/playground-pro-api/utils/pagination"
 )
 
-type VenueEntity struct {
-	VenueID       string
-	OwnerID       string
-	Category      string
-	Name          string
-	Description   string
-	Location      string
+type VenueCore struct {
+	VenueID       string 
+	OwnerID       string 
+	Category      string 
+	Name          string 
+	Description   string 
+	Location      string 
 	Price         float64
 	Longitude     float64
 	Latitude      float64
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     time.Time
-	VenuePictures []VenuePictureEntity
-	Reviews       []ReviewEntity
+	VenuePictures []VenuePictureCore
+	Reviews       []ReviewCore
 }
 
-type ReviewEntity struct {
-	ReviewID  string
-	UserID    string
-	VenueID   string
-	Review    string
-	Rating    string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt time.Time
-	User      UserEntity
-	Venue     VenueEntity
-}
-
-type UserEntity struct {
-	UserID         string
-	Fullname       string
-	Email          string
-	Phone          string
-	Password       string
-	Bio            string
-	Address        string
-	Role           string
-	ProfilePicture string
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	DeletedAt      time.Time
-	Venues         []VenueEntity
-}
-
-type VenuePictureEntity struct {
+type VenuePictureCore struct {
 	VenuePictureID string
 	VenueID        string
 	URL            string
