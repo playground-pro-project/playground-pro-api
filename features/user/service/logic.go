@@ -13,7 +13,7 @@ type userService struct {
 }
 
 // CreateUser implements user.UserService.
-func (us *userService) CreateUser(user user.UserEntity) (string, error) {
+func (us *userService) CreateUser(user user.UserCore) (string, error) {
 	if user.Fullname == "" {
 		return "", errors.New("error, name is required")
 	}
@@ -53,34 +53,34 @@ func (us *userService) DeleteUserByID(userID string) error {
 }
 
 // GetUserByID implements user.UserService.
-func (us *userService) GetUserByID(userID string) (user.UserEntity, error) {
-	userEntity, err := us.userData.GetByID(userID)
+func (us *userService) GetUserByID(userID string) (user.UserCore, error) {
+	userCore, err := us.userData.GetByID(userID)
 	if err != nil {
-		return user.UserEntity{}, fmt.Errorf("error: %w", err)
+		return user.UserCore{}, fmt.Errorf("error: %w", err)
 	}
 
-	return userEntity, nil
+	return userCore, nil
 }
 
 // Login implements user.UserService.
-func (us *userService) Login(email string, password string) (user.UserEntity, string, error) {
+func (us *userService) Login(email string, password string) (user.UserCore, string, error) {
 	if email == "" {
-		return user.UserEntity{}, "", errors.New("email is required")
+		return user.UserCore{}, "", errors.New("email is required")
 	}
 	if password == "" {
-		return user.UserEntity{}, "", errors.New("password is required")
+		return user.UserCore{}, "", errors.New("password is required")
 	}
 
 	loggedInUser, accessToken, err := us.userData.Login(email, password)
 	if err != nil {
-		return user.UserEntity{}, "", fmt.Errorf("%w", err)
+		return user.UserCore{}, "", fmt.Errorf("%w", err)
 	}
 
 	return loggedInUser, accessToken, nil
 }
 
 // UpdateUserByID implements user.UserService.
-func (us *userService) UpdateUserByID(userID string, updatedUser user.UserEntity) error {
+func (us *userService) UpdateUserByID(userID string, updatedUser user.UserCore) error {
 	if updatedUser.Password != "" {
 		err := helper.ValidatePassword(updatedUser.Password)
 		if err != nil {

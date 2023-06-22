@@ -29,8 +29,8 @@ type ChangePasswordRequest struct {
 	NewPassword string `json:"new_password" form:"new_password"`
 }
 
-func RegisterRequestToEntity(r RegisterRequest) user.UserEntity {
-	return user.UserEntity{
+func RegisterRequestToCore(r RegisterRequest) user.UserCore {
+	return user.UserCore{
 		Fullname: r.FullName,
 		Email:    r.Email,
 		Phone:    r.Phone,
@@ -38,8 +38,8 @@ func RegisterRequestToEntity(r RegisterRequest) user.UserEntity {
 	}
 }
 
-func EditProfileRequestToEntity(e EditProfileRequest) user.UserEntity {
-	return user.UserEntity{
+func EditProfileRequestToCore(e EditProfileRequest) user.UserCore {
+	return user.UserCore{
 		Fullname: e.Fullname,
 		Email:    e.Email,
 		Phone:    e.Phone,
@@ -48,8 +48,8 @@ func EditProfileRequestToEntity(e EditProfileRequest) user.UserEntity {
 	}
 }
 
-func UpdatePasswordRequestToEntity(p ChangePasswordRequest) user.UserEntity {
-	return user.UserEntity{
+func UpdatePasswordRequestToCore(p ChangePasswordRequest) user.UserCore {
+	return user.UserCore{
 		Password: p.NewPassword,
 	}
 }
