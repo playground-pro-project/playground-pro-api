@@ -15,7 +15,7 @@ type GetUserResponse struct {
 	ProfilePicture string `json:"profile_picture,omitempty"`
 }
 
-func UserEntityToGetUserResponse(u user.UserEntity) GetUserResponse {
+func UserEntityToGetUserResponse(u user.UserCore) GetUserResponse {
 	return GetUserResponse{
 		UserID:         u.UserID,
 		FullName:       u.Fullname,

@@ -12,8 +12,14 @@ type userService struct {
 	userData user.UserData
 }
 
+func New(repo user.UserData) user.UserService {
+	return &userService{
+		userData: repo,
+	}
+}
+
 // CreateUser implements user.UserService.
-func (us *userService) CreateUser(user user.UserEntity) (string, error) {
+func (us *userService) CreateUser(user user.UserCore) (string, error) {
 	if user.Fullname == "" {
 		return "", errors.New("error, name is required")
 	}
@@ -43,7 +49,7 @@ func (us *userService) CreateUser(user user.UserEntity) (string, error) {
 }
 
 // DeleteUserByID implements user.UserService.
-func (us *userService) DeleteUserByID(userID string) error {
+func (us *userService) DeleteByID(userID string) error {
 	err := us.userData.DeleteByID(userID)
 	if err != nil {
 		return fmt.Errorf("error: %w", err)
@@ -53,34 +59,34 @@ func (us *userService) DeleteUserByID(userID string) error {
 }
 
 // GetUserByID implements user.UserService.
-func (us *userService) GetUserByID(userID string) (user.UserEntity, error) {
+func (us *userService) GetByID(userID string) (user.UserCore, error) {
 	userEntity, err := us.userData.GetByID(userID)
 	if err != nil {
-		return user.UserEntity{}, fmt.Errorf("error: %w", err)
+		return user.UserCore{}, fmt.Errorf("error: %w", err)
 	}
 
 	return userEntity, nil
 }
 
 // Login implements user.UserService.
-func (us *userService) Login(email string, password string) (user.UserEntity, string, error) {
+func (us *userService) Login(email string, password string) (user.UserCore, string, error) {
 	if email == "" {
-		return user.UserEntity{}, "", errors.New("email is required")
+		return user.UserCore{}, "", errors.New("email is required")
 	}
 	if password == "" {
-		return user.UserEntity{}, "", errors.New("password is required")
+		return user.UserCore{}, "", errors.New("password is required")
 	}
 
 	loggedInUser, accessToken, err := us.userData.Login(email, password)
 	if err != nil {
-		return user.UserEntity{}, "", fmt.Errorf("%w", err)
+		return user.UserCore{}, "", fmt.Errorf("%w", err)
 	}
 
 	return loggedInUser, accessToken, nil
 }
 
 // UpdateUserByID implements user.UserService.
-func (us *userService) UpdateUserByID(userID string, updatedUser user.UserEntity) error {
+func (us *userService) UpdateByID(userID string, updatedUser user.UserCore) error {
 	if updatedUser.Password != "" {
 		err := helper.ValidatePassword(updatedUser.Password)
 		if err != nil {
@@ -100,10 +106,4 @@ func (us *userService) UpdateUserByID(userID string, updatedUser user.UserEntity
 	}
 
 	return nil
-}
-
-func New(repo user.UserData) user.UserService {
-	return &userService{
-		userData: repo,
-	}
 }

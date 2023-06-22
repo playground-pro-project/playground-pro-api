@@ -28,7 +28,7 @@ type User struct {
 	Reviews        []review.Review           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 
-func UserEntityToModel(u user.UserEntity) User {
+func UserEntityToModel(u user.UserCore) User {
 	return User{
 		UserID:         u.UserID,
 		Fullname:       u.Fullname,
@@ -41,8 +41,8 @@ func UserEntityToModel(u user.UserEntity) User {
 	}
 }
 
-func UserModelToEntity(u User) user.UserEntity {
-	return user.UserEntity{
+func UserModelToEntity(u User) user.UserCore {
+	return user.UserCore{
 		UserID:         u.UserID,
 		Fullname:       u.Fullname,
 		Email:          u.Email,

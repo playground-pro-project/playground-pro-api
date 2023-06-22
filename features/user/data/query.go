@@ -15,8 +15,14 @@ type userQuery struct {
 	db *gorm.DB
 }
 
+func New(db *gorm.DB) user.UserData {
+	return userQuery{
+		db: db,
+	}
+}
+
 // Create implements user.UserData.
-func (uq userQuery) Create(user user.UserEntity) (string, error) {
+func (uq userQuery) Create(user user.UserCore) (string, error) {
 	// Convert UserEntity to UserModel
 	userModel := UserEntityToModel(user)
 
@@ -62,15 +68,15 @@ func (uq userQuery) DeleteByID(userID string) error {
 }
 
 // GetByID implements user.UserData.
-func (uq userQuery) GetByID(userID string) (user.UserEntity, error) {
+func (uq userQuery) GetByID(userID string) (user.UserCore, error) {
 	var userModel User
 
 	query := uq.db.Preload("Venues").Preload("Reservations").Preload("Reviews").Where("user_id = ?", userID).First(&userModel)
 	if query.Error != nil {
 		if errors.Is(query.Error, gorm.ErrRecordNotFound) {
-			return user.UserEntity{}, fmt.Errorf("user not found with ID: %s", userID)
+			return user.UserCore{}, fmt.Errorf("user not found with ID: %s", userID)
 		}
-		return user.UserEntity{}, fmt.Errorf("failed to query user: %w", query.Error)
+		return user.UserCore{}, fmt.Errorf("failed to query user: %w", query.Error)
 	}
 
 	userEntity := UserModelToEntity(userModel)
@@ -78,28 +84,28 @@ func (uq userQuery) GetByID(userID string) (user.UserEntity, error) {
 }
 
 // Login implements user.UserData.
-func (uq userQuery) Login(email string, password string) (user.UserEntity, string, error) {
+func (uq userQuery) Login(email string, password string) (user.UserCore, string, error) {
 	var userModel User
 
 	// Check if the email exists in the database
 	query := uq.db.Where("email = ?", email).First(&userModel)
 	if query.Error != nil {
 		if errors.Is(query.Error, gorm.ErrRecordNotFound) {
-			return user.UserEntity{}, "", errors.New("login failed: invalid email")
+			return user.UserCore{}, "", errors.New("login failed: invalid email")
 		}
-		return user.UserEntity{}, "", fmt.Errorf("failed to query user: %w", query.Error)
+		return user.UserCore{}, "", fmt.Errorf("failed to query user: %w", query.Error)
 	}
 
 	// Compare the provided password with the stored password
 	err := helper.ComparePass([]byte(userModel.Password), []byte(password))
 	if err != nil {
-		return user.UserEntity{}, "", errors.New("login failed: invalid password")
+		return user.UserCore{}, "", errors.New("login failed: invalid password")
 	}
 
 	// Generate an access token
 	accessToken, err := middlewares.GenerateToken(userModel.UserID)
 	if err != nil {
-		return user.UserEntity{}, "", fmt.Errorf("failed to generate access token: %w", err)
+		return user.UserCore{}, "", fmt.Errorf("failed to generate access token: %w", err)
 	}
 
 	userEntity := UserModelToEntity(userModel)
@@ -107,7 +113,7 @@ func (uq userQuery) Login(email string, password string) (user.UserEntity, strin
 }
 
 // UpdateByID implements user.UserData.
-func (uq userQuery) UpdateByID(userID string, updatedUser user.UserEntity) error {
+func (uq userQuery) UpdateByID(userID string, updatedUser user.UserCore) error {
 	var userModel User
 
 	// Retrieve the user from the database
@@ -140,10 +146,4 @@ func (uq userQuery) UpdateByID(userID string, updatedUser user.UserEntity) error
 	}
 
 	return nil
-}
-
-func New(db *gorm.DB) user.UserData {
-	return userQuery{
-		db: db,
-	}
 }

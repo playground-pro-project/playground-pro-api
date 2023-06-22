@@ -5,30 +5,30 @@ import (
 )
 
 type UserCore struct {
-	UserID         string                    
-	Fullname       string                    
-	Email          string                    
-	Phone          string                    
-	Password       string                    
-	Bio            string                    
-	Address        string                    
-	Role           string                    
-	ProfilePicture string                    
-	CreatedAt      time.Time                 
-	UpdatedAt      time.Time                 
-	DeletedAt      time.Time            
-	Venues         []VenueCore             
-	Reservations   []ReservationCore 
-	Reviews        []ReviewCore           
+	UserID         string
+	Fullname       string
+	Email          string
+	Phone          string
+	Password       string
+	Bio            string
+	Address        string
+	Role           string
+	ProfilePicture string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	DeletedAt      time.Time
+	Venues         []VenueCore
+	Reservations   []ReservationCore
+	Reviews        []ReviewCore
 }
 
 type VenueCore struct {
-	VenueID       string 
-	OwnerID       string 
-	Category      string 
-	Name          string 
-	Description   string 
-	Location      string 
+	VenueID       string
+	OwnerID       string
+	Category      string
+	Name          string
+	Description   string
+	Location      string
 	Price         float64
 	Longitude     float64
 	Latitude      float64
@@ -40,30 +40,30 @@ type VenueCore struct {
 }
 
 type ReservationCore struct {
-	ReservationID string    
-	UserID        string    
-	VenueVenueID  string    
-	PaymentID     string    
-	CheckInDate   time.Time 
-	CheckOutDate  time.Time 
+	ReservationID string
+	UserID        string
+	VenueVenueID  string
+	PaymentID     string
+	CheckInDate   time.Time
+	CheckOutDate  time.Time
 	Duration      uint
 	Subtotal      float64
-	CreatedAt     time.Time      
-	UpdatedAt     time.Time      
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 	DeletedAt     time.Time
 }
 
 type ReviewCore struct {
-	ReviewID  string 
-	UserID    string 
-	VenueID   string 
-	Review    string 
+	ReviewID  string
+	UserID    string
+	VenueID   string
+	Review    string
 	Rating    float64
-	CreatedAt time.Time      
-	UpdatedAt time.Time      
-	DeletedAt time.Time 
-	User      UserCore           
-	Venue     VenueCore          
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt time.Time
+	User      UserCore
+	Venue     VenueCore
 }
 
 type VenuePictureCore struct {
@@ -73,4 +73,20 @@ type VenuePictureCore struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      time.Time
+}
+
+type UserService interface {
+	CreateUser(user UserCore) (string, error)
+	DeleteByID(userID string) error
+	GetByID(userID string) (UserCore, error)
+	Login(email string, password string) (UserCore, string, error)
+	UpdateByID(userID string, updatedUser UserCore) error
+}
+
+type UserData interface {
+	Create(user UserCore) (string, error)
+	DeleteByID(userID string) error
+	GetByID(userID string) (UserCore, error)
+	Login(email string, password string) (UserCore, string, error)
+	UpdateByID(userID string, updatedUser UserCore) error
 }

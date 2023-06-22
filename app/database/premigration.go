@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func initSuperAdmin(db *gorm.DB) error {
+func initSuperAdmin(c *config.AppConfig, db *gorm.DB) error {
 	userID, err := uuid.NewUUID()
 	if err != nil {
 		log.Warn("error while create uuid for admin")
@@ -16,7 +16,7 @@ func initSuperAdmin(db *gorm.DB) error {
 	}
 
 	// hashed, err := helper.HashPassword("secret")
-	hashed, err := helper.HashPassword(config.ADMINPASSWORD)
+	hashed, err := helper.HashPassword(c.ADMINPASSWORD)
 	if err != nil {
 		log.Warn("error while hashing password admin")
 		return nil

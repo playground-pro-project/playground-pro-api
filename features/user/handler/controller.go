@@ -74,7 +74,7 @@ func (uh *userHandler) Login(c echo.Context) error {
 func (uh *userHandler) GetUserProfile(c echo.Context) error {
 	userID := middlewares.ExtractUserIDFromToken(c)
 
-	user, err := uh.userService.GetUserByID(userID)
+	user, err := uh.userService.GetByID(userID)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not found") {
 			return c.JSON(http.StatusNotFound, map[string]interface{}{
@@ -104,7 +104,7 @@ func (uh *userHandler) UpdatePassword(c echo.Context) error {
 	}
 
 	userID := middlewares.ExtractUserIDFromToken(c)
-	user, err := uh.userService.GetUserByID(userID)
+	user, err := uh.userService.GetByID(userID)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not found") {
 			return c.JSON(http.StatusNotFound, map[string]interface{}{
@@ -126,7 +126,7 @@ func (uh *userHandler) UpdatePassword(c echo.Context) error {
 	// req.NewPassword = helper.HashPass(req.NewPassword)
 
 	updatedUser := UpdatePasswordRequestToEntity(req)
-	err = uh.userService.UpdateUserByID(userID, updatedUser)
+	err = uh.userService.UpdateByID(userID, updatedUser)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": "Internal server error, please try again later",
@@ -150,7 +150,7 @@ func (uh *userHandler) UpdateUserProfile(c echo.Context) error {
 	userID := middlewares.ExtractUserIDFromToken(c)
 	updatedUser := EditProfileRequestToEntity(req)
 
-	err = uh.userService.UpdateUserByID(userID, updatedUser)
+	err = uh.userService.UpdateByID(userID, updatedUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not found") {
 			return c.JSON(http.StatusNotFound, map[string]interface{}{
@@ -177,7 +177,7 @@ func (uh *userHandler) UpdateUserProfile(c echo.Context) error {
 
 func (uh *userHandler) DeleteUser(c echo.Context) error {
 	userID := middlewares.ExtractUserIDFromToken(c)
-	err := uh.userService.DeleteUserByID(userID)
+	err := uh.userService.DeleteByID(userID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": err.Error(),
@@ -226,13 +226,13 @@ func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
 		return err
 	}
 
-	var updatedUser user.UserEntity
+	var updatedUser user.UserCore
 	updatedUser.ProfilePicture = fmt.Sprintf(
 		"https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/profile-picture/%s",
 		filepath.Base(file.Filename),
 	)
 
-	err = uh.userService.UpdateUserByID(userID, updatedUser)
+	err = uh.userService.UpdateByID(userID, updatedUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not found") {
 			return c.JSON(http.StatusNotFound, map[string]interface{}{
@@ -252,10 +252,10 @@ func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
 func (uh *userHandler) RemoveProfilePicture(c echo.Context) error {
 	userID := middlewares.ExtractUserIDFromToken(c)
 
-	updatedUser := user.UserEntity{
+	updatedUser := user.UserCore{
 		ProfilePicture: "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/profile-picture/default-image.jpg",
 	}
-	err := uh.userService.UpdateUserByID(userID, updatedUser)
+	err := uh.userService.UpdateByID(userID, updatedUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not found") {
 			return c.JSON(http.StatusNotFound, map[string]interface{}{
