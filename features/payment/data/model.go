@@ -3,7 +3,6 @@ package data
 import (
 	"time"
 
-	venue "github.com/playground-pro-project/playground-pro-api/features/venue/data"
 	"gorm.io/gorm"
 )
 
@@ -17,5 +16,4 @@ type Payment struct {
 	CreatedAt   time.Time      `gorm:"type:datetime"`
 	UpdatedAt   time.Time      `gorm:"type:datetime"`
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	Cart        []venue.Venue  `gorm:"many2many:Reservation;foreignKey:PaymentID;joinForeignKey:PaymentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
