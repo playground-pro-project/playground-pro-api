@@ -2,27 +2,15 @@ package venue
 
 import (
 	"time"
-
-	"github.com/labstack/echo/v4"
-	"github.com/playground-pro-project/playground-pro-api/utils/pagination"
 )
 
 type VenueCore struct {
-<<<<<<< HEAD
-	VenueID       string 
-	OwnerID       string 
-	Category      string 
-	Name          string 
-	Description   string 
-	Location      string 
-=======
 	VenueID       string
 	OwnerID       string
 	Category      string
 	Name          string
 	Description   string
 	Location      string
->>>>>>> e733440 (Update entity to core)
 	Price         float64
 	Longitude     float64
 	Latitude      float64
@@ -33,8 +21,6 @@ type VenueCore struct {
 	Reviews       []ReviewCore
 }
 
-<<<<<<< HEAD
-=======
 type ReviewCore struct {
 	ReviewID  string
 	UserID    string
@@ -64,7 +50,6 @@ type UserCore struct {
 	Venues         []VenueCore
 }
 
->>>>>>> e733440 (Update entity to core)
 type VenuePictureCore struct {
 	VenuePictureID string
 	VenueID        string

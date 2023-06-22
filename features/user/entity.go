@@ -37,8 +37,6 @@ type VenueCore struct {
 	DeletedAt     time.Time
 	VenuePictures []VenuePictureCore
 	Reviews       []ReviewCore
-	VenuePictures []VenuePictureCore
-	Reviews       []ReviewCore
 }
 
 type ReviewCore struct {
