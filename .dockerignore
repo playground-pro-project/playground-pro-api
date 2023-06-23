@@ -4,3 +4,4 @@ local-example.yaml
 *.md
 .git
 .vscode
+redis.conf
