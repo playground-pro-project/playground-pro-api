@@ -4,6 +4,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
+	rd "github.com/playground-pro-project/playground-pro-api/features/review/data"
+	rh "github.com/playground-pro-project/playground-pro-api/features/review/handler"
+	rs "github.com/playground-pro-project/playground-pro-api/features/review/service"
 	ud "github.com/playground-pro-project/playground-pro-api/features/user/data"
 	uh "github.com/playground-pro-project/playground-pro-api/features/user/handler"
 	us "github.com/playground-pro-project/playground-pro-api/features/user/service"
@@ -21,7 +24,7 @@ func InitRouter(db *gorm.DB, e *echo.Echo) {
 	}))
 
 	initUserRouter(db, e)
-	initVanueRouter(db, e)
+	initVenueRouter(db, e)
 }
 
 func initUserRouter(db *gorm.DB, e *echo.Echo) {
@@ -43,10 +46,20 @@ func initUserRouter(db *gorm.DB, e *echo.Echo) {
 	}
 }
 
-func initVanueRouter(db *gorm.DB, e *echo.Echo) {
-	vanueData := vd.New(db)
-	vanueService := vs.New(vanueData)
-	vanueHandler := vh.New(vanueService)
+func initVenueRouter(db *gorm.DB, e *echo.Echo) {
+	venueData := vd.New(db)
+	venueService := vs.New(venueData)
+	venueHandler := vh.New(venueService)
 
-	e.GET("/venues", vanueHandler.SearchVenue())
+	reviewData := rd.New(db)
+	reviewService := rs.New(reviewData)
+	reviewHandler := rh.New(reviewService)
+
+	venuesGroup := e.Group("/venues")
+	{
+		venuesGroup.GET("", venueHandler.SearchVenue())
+		venuesGroup.POST("/:venue_id/reviews", reviewHandler.CreateReview, middlewares.JWTMiddleware())
+		venuesGroup.GET("/:venue_id/reviews", reviewHandler.GetAllReview, middlewares.JWTMiddleware())
+		venuesGroup.DELETE("/:review_id", reviewHandler.DeleteReview)
+	}
 }

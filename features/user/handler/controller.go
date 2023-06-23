@@ -190,7 +190,9 @@ func (uh *userHandler) DeleteUser(c echo.Context) error {
 }
 
 const (
-	MaxFileSize = 1 << 20 // 1 MB
+	maxFileSize           = 1 << 20 // 1 MB
+	profilePictureBaseURL = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/user-profile-picture/"
+	ownerFileBaseURL      = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/owner-docs/"
 )
 
 func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
@@ -205,7 +207,7 @@ func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
 
 	// Check file size before opening it
 	fileSize := file.Size
-	if fileSize > MaxFileSize {
+	if fileSize > maxFileSize {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"message": "Please upload a picture smaller than 1 MB.",
 		})
@@ -227,10 +229,7 @@ func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
 	}
 
 	var updatedUser user.UserCore
-	updatedUser.ProfilePicture = fmt.Sprintf(
-		"https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/profile-picture/%s",
-		filepath.Base(file.Filename),
-	)
+	updatedUser.ProfilePicture = fmt.Sprintf("%s%s", profilePictureBaseURL, filepath.Base(file.Filename))
 
 	err = uh.userService.UpdateByID(userID, updatedUser)
 	if err != nil {
