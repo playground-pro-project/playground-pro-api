@@ -139,7 +139,7 @@ paths:
           schema:
             type: integer
           description: The limit number to retrieve
-          required: false
+          required: true
         - in: query
           name: offset
           schema:
@@ -151,6 +151,11 @@ paths:
           schema:
             type: integer
           description: The page number to retrieve
+          required: true
+        - in: query
+          name: sort
+          schema:
+            type: string
           required: false
       responses:
         "200":
@@ -465,6 +470,7 @@ components:
                 price: 100
                 average_rating: 5
                 count_review: 100
+                venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
               - venue_id: "string-uuid"
                 category: "football"
                 name: "Venue 2"
@@ -475,6 +481,7 @@ components:
                 price: 200
                 average_rating: 4.7
                 count_review: 250
+                venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
             pagination:
               limit: 5
               offset: 0
