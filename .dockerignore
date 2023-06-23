@@ -1,4 +1,6 @@
 mocks/
+docs/
 local-example.yaml
 *.md
 .git
+.vscode
