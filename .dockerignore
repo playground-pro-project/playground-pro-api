@@ -1,0 +1,4 @@
+mocks/
+local-example.yaml
+*.md
+.git
