@@ -190,9 +190,10 @@ func (uh *userHandler) DeleteUser(c echo.Context) error {
 }
 
 const (
-	maxFileSize           = 1 << 20 // 1 MB
-	profilePictureBaseURL = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/user-profile-picture/"
-	ownerFileBaseURL      = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/owner-docs/"
+	maxFileSize              = 1 << 20 // 1 MB
+	profilePictureBaseURL    = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/user-profile-picture/"
+	defaultProfilePictureURL = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+	ownerFileBaseURL         = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/owner-docs/"
 )
 
 func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
@@ -252,7 +253,7 @@ func (uh *userHandler) RemoveProfilePicture(c echo.Context) error {
 	userID := middlewares.ExtractUserIDFromToken(c)
 
 	updatedUser := user.UserCore{
-		ProfilePicture: "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/profile-picture/default-image.jpg",
+		ProfilePicture: defaultProfilePictureURL,
 	}
 	err := uh.userService.UpdateByID(userID, updatedUser)
 	if err != nil {
