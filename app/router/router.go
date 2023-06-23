@@ -4,6 +4,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
+	rd "github.com/playground-pro-project/playground-pro-api/features/review/data"
+	rh "github.com/playground-pro-project/playground-pro-api/features/review/handler"
+	rs "github.com/playground-pro-project/playground-pro-api/features/review/service"
 	ud "github.com/playground-pro-project/playground-pro-api/features/user/data"
 	uh "github.com/playground-pro-project/playground-pro-api/features/user/handler"
 	us "github.com/playground-pro-project/playground-pro-api/features/user/service"
@@ -41,6 +44,21 @@ func initUserRouter(db *gorm.DB, e *echo.Echo) {
 		usersGroup.PUT("", userHandler.UploadProfilePicture, middlewares.JWTMiddleware())
 		usersGroup.PUT("", userHandler.RemoveProfilePicture, middlewares.JWTMiddleware())
 	}
+
+	reviewData := rd.New(db)
+	reviewService := rs.New(reviewData)
+	reviewHandler := rh.New(reviewService)
+
+	// e.GET("/venues/:venue_id/reviews")
+	e.POST("/venues/:venue_id/reviews", reviewHandler.CreateReview, middlewares.JWTMiddlewareFunc())
+	e.DELETE("/reviews/:review_id", reviewHandler.DeleteReview)
+	// e.POST("/reviews", reviewHandler.CreateReview)
+
+	// reviewsGroup := e.Group("/reviews")
+	// {
+	// 	reviewsGroup.POST("/:venue_id", reviewHandler.CreateReview)
+	// 	reviewsGroup.DELETE("", reviewHandler.DeleteReview)
+	// }
 }
 
 func initVanueRouter(db *gorm.DB, e *echo.Echo) {
