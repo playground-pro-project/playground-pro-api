@@ -32,6 +32,7 @@ jobs:
                   file: ./Dockerfile
                   push: true
                   tags: ${{ secrets.DOCKERHUB_USERNAME }}/playgroundpro-api-images:latest
+                  build-args: DOCKER_BUILDKIT=1
 
             - name: Connect to server using SSH
               uses: appleboy/ssh-action@v0.1.10
