@@ -9,7 +9,7 @@ import (
 	"github.com/playground-pro-project/playground-pro-api/app/config"
 )
 
-func JWTMiddlewareFunc() echo.MiddlewareFunc {
+func JWTMiddleware() echo.MiddlewareFunc {
 	return echojwt.WithConfig(echojwt.Config{
 		SigningKey:    []byte(config.JWT),
 		SigningMethod: "HS256",

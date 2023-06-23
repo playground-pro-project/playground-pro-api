@@ -3,11 +3,19 @@ package config
 import (
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/spf13/viper"
 )
 
-var JWT string
+var (
+	err            error
+	JWT            string
+	REDIS_HOST     string
+	REDIS_PORT     string
+	REDIS_PASSWORD string
+	REDIS_DATABASE int
+)
 
 type AppConfig struct {
 	DBUSER                string
@@ -73,6 +81,29 @@ func readEnv() *AppConfig {
 		isRead = false
 	}
 
+	if val, found := os.LookupEnv("REDIS_HOST"); found {
+		REDIS_HOST = val
+		isRead = false
+	}
+
+	if val, found := os.LookupEnv("REDIS_PORT"); found {
+		REDIS_PORT = val
+		isRead = false
+	}
+
+	if val, found := os.LookupEnv("REDIS_PASSWORD"); found {
+		REDIS_PASSWORD = val
+		isRead = false
+	}
+
+	if val, found := os.LookupEnv("REDIS_DATABASE"); found {
+		REDIS_DATABASE, err = strconv.Atoi(val)
+		if err != nil {
+			log.Println("error while reading gomail port")
+		}
+		isRead = false
+	}
+
 	if isRead {
 		viper.AddConfigPath(".")
 		viper.SetConfigName("local")
@@ -84,15 +115,19 @@ func readEnv() *AppConfig {
 			return nil
 		}
 
+		JWT = viper.GetString("JWT")
 		app.DBUSER = viper.GetString("DBUSER")
 		app.DBPASSWORD = viper.GetString("DBPASSWORD")
 		app.DBHOST = viper.GetString("DBHOST")
 		app.DBPORT = viper.GetString("DBPORT")
 		app.DBNAME = viper.GetString("DBNAME")
-		JWT = viper.GetString("JWT")
 		app.ADMINPASSWORD = viper.GetString("ADMINPASSWORD")
 		app.AWS_ACCESS_KEY_ID = viper.Get("AWS_ACCESS_KEY_ID").(string)
 		app.AWS_SECRET_ACCESS_KEY = viper.Get("AWS_SECRET_ACCESS_KEY").(string)
+		REDIS_HOST = viper.GetString("REDIS_HOST")
+		REDIS_PORT = viper.GetString("REDIS_PORT")
+		REDIS_PASSWORD = viper.GetString("REDIS_PASSWORD")
+		REDIS_DATABASE = viper.GetInt("REDIS_DATABASE")
 	}
 
 	return &app

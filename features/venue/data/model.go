@@ -16,6 +16,7 @@ type Venue struct {
 	Category      string                    `gorm:"type:enum('Basketball','Football','Futsal','Badminton','Swimming');default:'Basketball'"`
 	Name          string                    `gorm:"type:varchar(225);not null"`
 	Description   string                    `gorm:"type:text"`
+	ServiceTime   time.Time                 `gorm:"type:datetime"`
 	Location      string                    `gorm:"type:text"`
 	Price         float64                   `gorm:"type:double"`
 	Longitude     float64                   `gorm:"type:double"`
@@ -23,9 +24,77 @@ type Venue struct {
 	CreatedAt     time.Time                 `gorm:"type:datetime"`
 	UpdatedAt     time.Time                 `gorm:"type:datetime"`
 	DeletedAt     gorm.DeletedAt            `gorm:"index"`
+	User          User                      `gorm:"references:OwnerID;foreignKey:UserID"`
 	VenuePictures []image.VenuePicture      `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	Reservations  []reservation.Reservation `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Reviews       []review.Review           `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+}
+
+type User struct {
+	UserID         string                    `gorm:"primaryKey;type:varchar(45)"`
+	Fullname       string                    `gorm:"type:varchar(225);not null"`
+	Email          string                    `gorm:"type:varchar(225);not null;unique"`
+	Phone          string                    `gorm:"type:varchar(15);not null;unique"`
+	Password       string                    `gorm:"type:text;not null"`
+	Bio            string                    `gorm:"type:text"`
+	Address        string                    `gorm:"type:text"`
+	Role           string                    `gorm:"type:enum('user', 'owner', 'admin');default:'user'"`
+	ProfilePicture string                    `gorm:"type:text"`
+	CreatedAt      time.Time                 `gorm:"type:datetime"`
+	UpdatedAt      time.Time                 `gorm:"type:datetime"`
+	DeletedAt      gorm.DeletedAt            `gorm:"index"`
+	Venues         []Venue                   `gorm:"foreignKey:UserID;;foreignKey:OwnerID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	Reservations   []reservation.Reservation `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Reviews        []review.Review           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+}
+
+func searchVenueModels(v Venue) venue.VenueCore {
+	var reviews []venue.ReviewCore
+	var totalRating float64
+	var averageRating float64 = 0.0
+	var picture string
+	for _, r := range v.Reviews {
+		tmp := venue.ReviewCore{
+			Review: r.Review,
+			Rating: r.Rating,
+		}
+		reviews = append(reviews, tmp)
+		totalRating += r.Rating
+	}
+
+	if len(v.Reviews) > 0 {
+		averageRating = totalRating / float64(len(v.Reviews))
+	}
+
+	if len(v.VenuePictures) > 0 {
+		picture = v.VenuePictures[0].URL
+	}
+
+	result := venue.VenueCore{
+		VenueID:       v.VenueID,
+		OwnerID:       v.OwnerID,
+		Category:      v.Category,
+		Name:          v.Name,
+		Description:   v.Description,
+		Username:      v.User.Fullname,
+		ServiceTime:   v.ServiceTime,
+		Location:      v.Location,
+		Price:         v.Price,
+		Longitude:     v.Longitude,
+		Latitude:      v.Latitude,
+		CreatedAt:     v.CreatedAt,
+		UpdatedAt:     v.UpdatedAt,
+		DeletedAt:     v.DeletedAt.Time,
+		TotalReviews:  uint(len(v.Reviews)),
+		AverageRating: averageRating,
+		VenuePictures: []venue.VenuePictureCore{
+			{
+				URL: picture,
+			},
+		},
+	}
+
+	return result
 }
 
 // Venue-Model to venue-core
@@ -36,6 +105,7 @@ func venueModels(v Venue) venue.VenueCore {
 		Category:      v.Category,
 		Name:          v.Name,
 		Description:   v.Description,
+		ServiceTime:   v.ServiceTime,
 		Location:      v.Location,
 		Price:         v.Price,
 		Longitude:     v.Longitude,
@@ -56,6 +126,7 @@ func venueEntities(v venue.VenueCore) Venue {
 		Category:      v.Category,
 		Name:          v.Name,
 		Description:   v.Description,
+		ServiceTime:   v.ServiceTime,
 		Location:      v.Location,
 		Price:         v.Price,
 		Longitude:     v.Longitude,

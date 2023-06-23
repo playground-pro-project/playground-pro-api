@@ -7,29 +7,26 @@ import (
 )
 
 type Pagination struct {
-	Limit uint `json:"limit,omitempty"`
-	Offset uint `json:"offset,omitempty"`
-	Page uint `json:"page,omitempty"`
-	Sort string `json:"sort,omitempty" validate:"sort,omitempty"`
-	TotalRows uint `json:"total_rows,omitempty"`
-	TotalPages uint `json:"total_pages,omitempty"`
+	Limit      int    `json:"limit,omitempty"`
+	Offset     int    `json:"offset,omitempty"`
+	Page       int    `json:"page,omitempty"`
+	Sort       string `json:"sort,omitempty" validate:"sort,omitempty"`
+	TotalRows  int64  `json:"total_rows,omitempty"`
+	TotalPages int    `json:"total_pages,omitempty"`
 }
 
-func (p *Pagination) GetLimit() uint {
+func (p *Pagination) GetLimit() int {
 	if p.Limit == 0 {
 		p.Limit = 5
 	}
 	return p.Limit
 }
 
-func (p *Pagination) GetOffset() uint {
-	if p.Offset == 0 {
-		p.Offset = 0
-	}
-	return p.Offset
+func (p *Pagination) GetOffset() int {
+	return (p.GetPage() - 1) * p.GetLimit()
 }
 
-func (p *Pagination) GetPage() uint {
+func (p *Pagination) GetPage() int {
 	if p.Page == 0 {
 		p.Page = 1
 	}
@@ -44,15 +41,15 @@ func (p *Pagination) GetSort() string {
 }
 
 // Clousure function implementation
-func Paginate(val interface{}, p *Pagination, db *gorm.DB) func(db *gorm.DB) *gorm.DB {
+func Paginate(value interface{}, pagination *Pagination, db *gorm.DB) func(db *gorm.DB) *gorm.DB {
 	var totalRows int64
-	db.Model(val).Count(&totalRows)
+	db.Model(value).Count(&totalRows)
 
-	p.TotalRows = uint(totalRows)
-	totalPages := math.Ceil(float64(totalRows) / float64(p.GetLimit()))
-	p.TotalPages = uint(totalPages)
+	pagination.TotalRows = totalRows
+	totalPages := int(math.Ceil(float64(totalRows) / float64(pagination.GetLimit())))
+	pagination.TotalPages = totalPages
 
 	return func(db *gorm.DB) *gorm.DB {
-		return db.Offset(int(p.GetOffset())).Limit(int(p.GetLimit())).Order(p.GetSort())
+		return db.Offset(pagination.GetOffset()).Limit(pagination.GetLimit()).Order(pagination.GetSort())
 	}
 }

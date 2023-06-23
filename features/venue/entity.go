@@ -2,6 +2,9 @@ package venue
 
 import (
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/playground-pro-project/playground-pro-api/utils/pagination"
 )
 
 type VenueCore struct {
@@ -10,15 +13,21 @@ type VenueCore struct {
 	Category      string
 	Name          string
 	Description   string
+	Username      string
+	ServiceTime   time.Time
 	Location      string
+	Distance      uint
 	Price         float64
 	Longitude     float64
 	Latitude      float64
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     time.Time
+	TotalReviews  uint
+	AverageRating float64
 	VenuePictures []VenuePictureCore
 	Reviews       []ReviewCore
+	User          UserCore
 }
 
 type ReviewCore struct {
@@ -26,7 +35,7 @@ type ReviewCore struct {
 	UserID    string
 	VenueID   string
 	Review    string
-	Rating    string
+	Rating    float64
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt time.Time
@@ -70,4 +79,16 @@ type ReservationCore struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     time.Time
+}
+
+type VenueHandler interface {
+	SearchVenue() echo.HandlerFunc
+}
+
+type VenueService interface {
+	SearchVenue(keyword string, page pagination.Pagination) ([]VenueCore, int64, int, error)
+}
+
+type VenueData interface {
+	SearchVenue(keyword string, page pagination.Pagination) ([]VenueCore, int64, int, error)
 }
