@@ -43,6 +43,6 @@ jobs:
                   script: |
                       docker stop playgroundpro-api-v1
                       docker rm playgroundpro-api-v1
-                      docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/playgroundpro-api-images
-                      docker pull ${{ secrets.DOCKERHUB_USERNAME }}/playgroundpro-api-images
+                      docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/playgroundpro-api-images:latest
+                      docker pull ${{ secrets.DOCKERHUB_USERNAME }}/playgroundpro-api-images:latest
                       docker run -d -p 80:8080 -e JWT_KEY=${{ secrets.JWT_KEY }} -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} -e DBUSER=${{ secrets.DBUSER }} -e DBPASS=${{ secrets.DBPASS }} -e DBHOST=${{ secrets.DBHOST }} -e DBPORT=${{ secrets.DBPORT }} -e DBNAME=${{ secrets.DBNAME }} --name playgroundpro-api-v1 ${{ secrets.DOCKERHUB_USERNAME }}/playgroundpro-api-images:latest
