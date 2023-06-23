@@ -24,7 +24,7 @@ func InitRouter(db *gorm.DB, e *echo.Echo) {
 	}))
 
 	initUserRouter(db, e)
-	initVanueRouter(db, e)
+	initVenueRouter(db, e)
 }
 
 func initUserRouter(db *gorm.DB, e *echo.Echo) {
@@ -44,27 +44,22 @@ func initUserRouter(db *gorm.DB, e *echo.Echo) {
 		usersGroup.PUT("", userHandler.UploadProfilePicture, middlewares.JWTMiddleware())
 		usersGroup.PUT("", userHandler.RemoveProfilePicture, middlewares.JWTMiddleware())
 	}
+}
+
+func initVenueRouter(db *gorm.DB, e *echo.Echo) {
+	venueData := vd.New(db)
+	venueService := vs.New(venueData)
+	venueHandler := vh.New(venueService)
 
 	reviewData := rd.New(db)
 	reviewService := rs.New(reviewData)
 	reviewHandler := rh.New(reviewService)
 
-	// e.GET("/venues/:venue_id/reviews")
-	e.POST("/venues/:venue_id/reviews", reviewHandler.CreateReview, middlewares.JWTMiddlewareFunc())
-	e.DELETE("/reviews/:review_id", reviewHandler.DeleteReview)
-	// e.POST("/reviews", reviewHandler.CreateReview)
-
-	// reviewsGroup := e.Group("/reviews")
-	// {
-	// 	reviewsGroup.POST("/:venue_id", reviewHandler.CreateReview)
-	// 	reviewsGroup.DELETE("", reviewHandler.DeleteReview)
-	// }
-}
-
-func initVanueRouter(db *gorm.DB, e *echo.Echo) {
-	vanueData := vd.New(db)
-	vanueService := vs.New(vanueData)
-	vanueHandler := vh.New(vanueService)
-
-	e.GET("/venues", vanueHandler.SearchVenue())
+	venuesGroup := e.Group("/venues")
+	{
+		venuesGroup.GET("", venueHandler.SearchVenue())
+		venuesGroup.POST("/:venue_id/reviews", reviewHandler.CreateReview, middlewares.JWTMiddleware())
+		venuesGroup.GET("/:venue_id/reviews", reviewHandler.GetAllReview, middlewares.JWTMiddleware())
+		venuesGroup.DELETE("/:review_id", reviewHandler.DeleteReview)
+	}
 }
