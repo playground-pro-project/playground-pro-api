@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	venue_picture "github.com/playground-pro-project/playground-pro-api/features/image/data"
-	payment "github.com/playground-pro-project/playground-pro-api/features/payment/data"
 	reservation "github.com/playground-pro-project/playground-pro-api/features/reservation/data"
 	review "github.com/playground-pro-project/playground-pro-api/features/review/data"
 	user "github.com/playground-pro-project/playground-pro-api/features/user/data"
@@ -32,8 +31,8 @@ func InitDatabase(c *config.AppConfig) *gorm.DB {
 		&user.User{},
 		&venue.Venue{},
 		&venue_picture.VenuePicture{},
+		&reservation.Payment{},
 		&reservation.Reservation{},
-		&payment.Payment{},
 		&review.Review{},
 	)
 

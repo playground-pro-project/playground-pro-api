@@ -29,6 +29,7 @@ func New(db *gorm.DB) venue.VenueData {
 func (vq *venueQuery) SearchVenue(keyword string, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
 	venues := []Venue{}
 	search := "%" + keyword + "%"
+	expTime := 5 * time.Second
 	cacheKey := fmt.Sprintf("venues:%s:%d", keyword, page.Page)
 	cachedVenues, err := cache.GetCached(context.Background(), cacheKey)
 	if err != nil {
@@ -71,7 +72,6 @@ func (vq *venueQuery) SearchVenue(keyword string, page pagination.Pagination) ([
 		result[i] = searchVenueModels(venue)
 	}
 
-	expTime := 5 * time.Second
 	err = cache.SetCached(context.Background(), cacheKey, result, expTime)
 	if err != nil {
 		return nil, 0, 0, err

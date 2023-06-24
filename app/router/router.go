@@ -4,6 +4,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
+	rsd "github.com/playground-pro-project/playground-pro-api/features/reservation/data"
+	rsh "github.com/playground-pro-project/playground-pro-api/features/reservation/handler"
+	rss "github.com/playground-pro-project/playground-pro-api/features/reservation/service"
 	rd "github.com/playground-pro-project/playground-pro-api/features/review/data"
 	rh "github.com/playground-pro-project/playground-pro-api/features/review/handler"
 	rs "github.com/playground-pro-project/playground-pro-api/features/review/service"
@@ -24,7 +27,8 @@ func InitRouter(db *gorm.DB, e *echo.Echo) {
 	}))
 
 	initUserRouter(db, e)
-	initVenueRouter(db, e)
+	initVanueRouter(db, e)
+	initReservationRouter(db, e)
 }
 
 func initUserRouter(db *gorm.DB, e *echo.Echo) {
@@ -62,4 +66,12 @@ func initVenueRouter(db *gorm.DB, e *echo.Echo) {
 		venuesGroup.GET("/:venue_id/reviews", reviewHandler.GetAllReview, middlewares.JWTMiddleware())
 		venuesGroup.DELETE("/:review_id", reviewHandler.DeleteReview)
 	}
+}
+
+func initReservationRouter(db *gorm.DB, e *echo.Echo) {
+	reservationData := rsd.New(db)
+	reservationService := rss.New(reservationData)
+	reservationHandler := rsh.New(reservationService)
+
+	e.POST("/reservations", reservationHandler.MakeReservation(), middlewares.JWTMiddleware())
 }

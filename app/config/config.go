@@ -9,12 +9,13 @@ import (
 )
 
 var (
-	err            error
-	JWT            string
-	REDIS_HOST     string
-	REDIS_PORT     string
-	REDIS_PASSWORD string
-	REDIS_DATABASE int
+	err                error
+	JWT                string
+	REDIS_HOST         string
+	REDIS_PORT         string
+	REDIS_PASSWORD     string
+	REDIS_DATABASE     int
+	MIDTRANS_SERVERKEY string
 )
 
 type AppConfig struct {
@@ -104,6 +105,11 @@ func readEnv() *AppConfig {
 		isRead = false
 	}
 
+	if val, found := os.LookupEnv("MIDTRANS_SERVERKEY"); found {
+		MIDTRANS_SERVERKEY = val
+		isRead = false
+	}
+
 	if isRead {
 		viper.AddConfigPath(".")
 		viper.SetConfigName("local")
@@ -128,6 +134,7 @@ func readEnv() *AppConfig {
 		REDIS_PORT = viper.GetString("REDIS_PORT")
 		REDIS_PASSWORD = viper.GetString("REDIS_PASSWORD")
 		REDIS_DATABASE = viper.GetInt("REDIS_DATABASE")
+		MIDTRANS_SERVERKEY = viper.GetString("MIDTRANS_SERVERKEY")
 	}
 
 	return &app
