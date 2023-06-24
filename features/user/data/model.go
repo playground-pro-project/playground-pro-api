@@ -24,6 +24,16 @@ type User struct {
 	OtpVerified    bool   `gorm:"default:false;"`
 	OtpSecret      string
 	OtpAuthURL     string
+	UserID         string                    `gorm:"primaryKey;type:varchar(45)"`
+	Fullname       string                    `gorm:"type:varchar(225);not null"`
+	Email          string                    `gorm:"type:varchar(225);not null;unique"`
+	Phone          string                    `gorm:"type:varchar(15);not null;unique"`
+	Password       string                    `gorm:"type:text;not null"`
+	Bio            string                    `gorm:"type:text"`
+	Address        string                    `gorm:"type:text"`
+	Role           string                    `gorm:"type:enum('user', 'owner', 'admin');default:'user'"`
+	ProfilePicture string                    `gorm:"type:text"`
+	OwnerFile      string                    `gorm:"type:text"`
 	CreatedAt      time.Time                 `gorm:"type:datetime"`
 	UpdatedAt      time.Time                 `gorm:"type:datetime"`
 	DeletedAt      gorm.DeletedAt            `gorm:"index"`
@@ -42,6 +52,7 @@ func UserCoreToModel(u user.UserCore) User {
 		Bio:            u.Bio,
 		Address:        u.Address,
 		ProfilePicture: u.ProfilePicture,
+		OwnerFile:      u.OwnerFile,
 	}
 }
 
@@ -60,6 +71,7 @@ func UserModelToCore(u User) user.UserCore {
 		OtpVerified:    u.OtpVerified,
 		OtpSecret:      u.OtpSecret,
 		OtpAuthURL:     u.OtpAuthURL,
+		OwnerFile:      u.OwnerFile,
 		CreatedAt:      u.CreatedAt,
 		UpdatedAt:      u.UpdatedAt,
 		DeletedAt:      u.DeletedAt.Time,

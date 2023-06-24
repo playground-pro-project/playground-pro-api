@@ -18,6 +18,7 @@ type UserCore struct {
 	OtpVerified    bool
 	OtpSecret      string
 	OtpAuthURL     string
+	OwnerFile      string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      time.Time
