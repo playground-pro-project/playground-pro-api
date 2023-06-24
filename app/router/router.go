@@ -27,7 +27,7 @@ func InitRouter(db *gorm.DB, e *echo.Echo) {
 	}))
 
 	initUserRouter(db, e)
-	initVanueRouter(db, e)
+	initVenueRouter(db, e)
 	initReservationRouter(db, e)
 }
 
