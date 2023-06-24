@@ -14,6 +14,7 @@ type UserCore struct {
 	Address        string
 	Role           string
 	ProfilePicture string
+	OwnerFile      string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      time.Time

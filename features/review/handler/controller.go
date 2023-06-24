@@ -7,7 +7,10 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/review"
+	"github.com/playground-pro-project/playground-pro-api/utils/helper"
 )
+
+var log = middlewares.Log()
 
 type reviewHandler struct {
 	reviewService review.ReviewService
@@ -20,42 +23,36 @@ func New(s review.ReviewService) *reviewHandler {
 }
 
 func (rh *reviewHandler) CreateReview(c echo.Context) error {
-	userID := middlewares.ExtractUserIDFromToken(c)
+	userID, err := middlewares.ExtractToken(c)
+	if err != nil {
+		log.Error("missing or malformed JWT")
+		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+	}
 	venueID := c.Param("venue_id")
 
 	req := CreateReviewRequest{}
-	err := c.Bind(&req)
+	err = c.Bind(&req)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Invalid request payload",
-		})
+		return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Invalid request payload"))
 	}
 
 	reviewCore := CreateReviewRequestToCore(req)
 	_, err = rh.reviewService.CreateReview(venueID, userID, reviewCore)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "Review created successfully",
-	})
+	return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "Review created successfully"))
 }
 
 func (rh *reviewHandler) DeleteReview(c echo.Context) error {
 	reviewID := c.Param("review_id")
 	err := rh.reviewService.DeleteByID(reviewID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 	}
 
-	return c.JSON(http.StatusBadRequest, map[string]interface{}{
-		"message": "Review deleted successfully",
-	})
+	return c.JSON(http.StatusBadRequest, helper.SuccessResponse(nil, "Review deleted successfully"))
 }
 
 func (rh *reviewHandler) GetAllReview(c echo.Context) error {
@@ -63,13 +60,9 @@ func (rh *reviewHandler) GetAllReview(c echo.Context) error {
 	reviews, err := rh.reviewService.GetAllByVenueID(venueID)
 	if err != nil {
 		if strings.Contains(err.Error(), "review not found") {
-			return c.JSON(http.StatusNotFound, map[string]interface{}{
-				"error": err.Error(),
-			})
+			return c.JSON(http.StatusNotFound, helper.ErrorResponse(err.Error()))
 		}
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": "Internal server error",
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error"))
 	}
 
 	reviewsResponse := []GetAllReviewResponse{}
@@ -77,8 +70,5 @@ func (rh *reviewHandler) GetAllReview(c echo.Context) error {
 		reviewsResponse = append(reviewsResponse, ReviewCoreToGetAllReviewResponse(review))
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"data":    reviewsResponse,
-		"message": "Reviews retrieved successfully",
-	})
+	return c.JSON(http.StatusOK, helper.SuccessResponse(reviewsResponse, "Reviews retrieved successfully"))
 }

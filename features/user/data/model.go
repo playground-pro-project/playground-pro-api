@@ -20,6 +20,7 @@ type User struct {
 	Address        string                    `gorm:"type:text"`
 	Role           string                    `gorm:"type:enum('user', 'owner', 'admin');default:'user'"`
 	ProfilePicture string                    `gorm:"type:text"`
+	OwnerFile      string                    `gorm:"type:text"`
 	CreatedAt      time.Time                 `gorm:"type:datetime"`
 	UpdatedAt      time.Time                 `gorm:"type:datetime"`
 	DeletedAt      gorm.DeletedAt            `gorm:"index"`
@@ -38,6 +39,7 @@ func UserCoreToModel(u user.UserCore) User {
 		Bio:            u.Bio,
 		Address:        u.Address,
 		ProfilePicture: u.ProfilePicture,
+		OwnerFile:      u.OwnerFile,
 	}
 }
 
@@ -52,6 +54,7 @@ func UserModelToCore(u User) user.UserCore {
 		Address:        u.Address,
 		Role:           u.Role,
 		ProfilePicture: u.ProfilePicture,
+		OwnerFile:      u.OwnerFile,
 		CreatedAt:      u.CreatedAt,
 		UpdatedAt:      u.UpdatedAt,
 		DeletedAt:      u.DeletedAt.Time,
