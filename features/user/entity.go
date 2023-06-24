@@ -6,14 +6,18 @@ import (
 
 type UserCore struct {
 	UserID         string
-	Fullname       string
-	Email          string
-	Phone          string
-	Password       string
+	Fullname       string `validate:"required"`
+	Email          string `validate:"required,email"`
+	Phone          string `validate:"required"`
+	Password       string `validate:"required"`
 	Bio            string
 	Address        string
 	Role           string
 	ProfilePicture string
+	OtpEnabled     bool
+	OtpVerified    bool
+	OtpSecret      string
+	OtpAuthURL     string
 	OwnerFile      string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
@@ -76,17 +80,19 @@ type VenuePictureCore struct {
 }
 
 type UserService interface {
-	CreateUser(user UserCore) (string, error)
+	Register(request UserCore) (UserCore, error)
+	Login(request UserCore) (UserCore, string, error)
+	GenerateOTP(request UserCore) (UserCore, error)
 	DeleteByID(userID string) error
 	GetByID(userID string) (UserCore, error)
-	Login(email string, password string) (UserCore, string, error)
 	UpdateByID(userID string, updatedUser UserCore) error
 }
 
 type UserData interface {
-	Create(user UserCore) (string, error)
+	Register(request UserCore) (UserCore, error)
+	Login(request UserCore) (UserCore, string, error)
+	GenerateOTP(request UserCore) (UserCore, error)
 	DeleteByID(userID string) error
 	GetByID(userID string) (UserCore, error)
-	Login(email string, password string) (UserCore, string, error)
 	UpdateByID(userID string, updatedUser UserCore) error
 }
