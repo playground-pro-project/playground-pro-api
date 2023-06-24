@@ -19,7 +19,7 @@ var (
 
 type AppConfig struct {
 	DBUSER                string
-	DBPASSWORD            string
+	DBPASS                string
 	DBHOST                string
 	DBPORT                string
 	DBNAME                string
@@ -42,7 +42,7 @@ func readEnv() *AppConfig {
 	}
 
 	if val, found := os.LookupEnv("DBPASSWORD"); found {
-		app.DBPASSWORD = val
+		app.DBPASS = val
 		isRead = false
 	}
 
@@ -117,7 +117,7 @@ func readEnv() *AppConfig {
 
 		JWT = viper.GetString("JWT")
 		app.DBUSER = viper.GetString("DBUSER")
-		app.DBPASSWORD = viper.GetString("DBPASSWORD")
+		app.DBPASS = viper.GetString("DBPASS")
 		app.DBHOST = viper.GetString("DBHOST")
 		app.DBPORT = viper.GetString("DBPORT")
 		app.DBNAME = viper.GetString("DBNAME")
