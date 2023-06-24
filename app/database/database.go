@@ -19,7 +19,7 @@ var log = middlewares.Log()
 
 func InitDatabase(c *config.AppConfig) *gorm.DB {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-		c.DBUSER, c.DBPASSWORD, c.DBHOST, c.DBPORT, c.DBNAME,
+		c.DBUSER, c.DBPASS, c.DBHOST, c.DBPORT, c.DBNAME,
 	)
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})

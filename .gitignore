@@ -3,4 +3,3 @@ local.yaml
 cover.out
 mockery.sh
 storagecredential.json
-generate_id.go
