@@ -11,6 +11,7 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.10.2
+	github.com/midtrans/midtrans-go v1.3.6
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.3
 	go.uber.org/zap v1.24.0

@@ -13,6 +13,8 @@ import (
 	"github.com/playground-pro-project/playground-pro-api/utils/helper"
 )
 
+var log = middlewares.Log()
+
 type userHandler struct {
 	userService user.UserService
 }
@@ -72,9 +74,13 @@ func (uh *userHandler) Login(c echo.Context) error {
 }
 
 func (uh *userHandler) GetUserProfile(c echo.Context) error {
-	userID := middlewares.ExtractUserIDFromToken(c)
+	userId, err := middlewares.ExtractToken(c)
+	if err != nil {
+		log.Error("missing or malformed JWT")
+		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+	}
 
-	user, err := uh.userService.GetByID(userID)
+	user, err := uh.userService.GetByID(userId)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not found") {
 			return c.JSON(http.StatusNotFound, map[string]interface{}{
@@ -103,8 +109,13 @@ func (uh *userHandler) UpdatePassword(c echo.Context) error {
 		})
 	}
 
-	userID := middlewares.ExtractUserIDFromToken(c)
-	user, err := uh.userService.GetByID(userID)
+	userId, err := middlewares.ExtractToken(c)
+	if err != nil {
+		log.Error("missing or malformed JWT")
+		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+	}
+
+	user, err := uh.userService.GetByID(userId)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not found") {
 			return c.JSON(http.StatusNotFound, map[string]interface{}{
@@ -126,7 +137,7 @@ func (uh *userHandler) UpdatePassword(c echo.Context) error {
 	// req.NewPassword = helper.HashPass(req.NewPassword)
 
 	updatedUser := UpdatePasswordRequestToCore(req)
-	err = uh.userService.UpdateByID(userID, updatedUser)
+	err = uh.userService.UpdateByID(userId, updatedUser)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": "Internal server error, please try again later",
@@ -147,10 +158,14 @@ func (uh *userHandler) UpdateUserProfile(c echo.Context) error {
 		})
 	}
 
-	userID := middlewares.ExtractUserIDFromToken(c)
+	userId, err := middlewares.ExtractToken(c)
+	if err != nil {
+		log.Error("missing or malformed JWT")
+		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+	}
 	updatedUser := EditProfileRequestToCore(req)
 
-	err = uh.userService.UpdateByID(userID, updatedUser)
+	err = uh.userService.UpdateByID(userId, updatedUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not found") {
 			return c.JSON(http.StatusNotFound, map[string]interface{}{
@@ -176,8 +191,13 @@ func (uh *userHandler) UpdateUserProfile(c echo.Context) error {
 }
 
 func (uh *userHandler) DeleteUser(c echo.Context) error {
-	userID := middlewares.ExtractUserIDFromToken(c)
-	err := uh.userService.DeleteByID(userID)
+	userId, errToken := middlewares.ExtractToken(c)
+	if errToken != nil {
+		log.Error("missing or malformed JWT")
+		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+	}
+
+	err := uh.userService.DeleteByID(userId)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": err.Error(),
@@ -194,7 +214,11 @@ const (
 )
 
 func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
-	userID := middlewares.ExtractUserIDFromToken(c)
+	userId, errToken := middlewares.ExtractToken(c)
+	if errToken != nil {
+		log.Error("missing or malformed JWT")
+		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+	}
 
 	awsService := aws.InitS3()
 
@@ -232,7 +256,7 @@ func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
 		filepath.Base(file.Filename),
 	)
 
-	err = uh.userService.UpdateByID(userID, updatedUser)
+	err = uh.userService.UpdateByID(userId, updatedUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not found") {
 			return c.JSON(http.StatusNotFound, map[string]interface{}{
@@ -250,12 +274,16 @@ func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
 }
 
 func (uh *userHandler) RemoveProfilePicture(c echo.Context) error {
-	userID := middlewares.ExtractUserIDFromToken(c)
+	userId, errToken := middlewares.ExtractToken(c)
+	if errToken != nil {
+		log.Error("missing or malformed JWT")
+		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+	}
 
 	updatedUser := user.UserCore{
 		ProfilePicture: "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/profile-picture/default-image.jpg",
 	}
-	err := uh.userService.UpdateByID(userID, updatedUser)
+	err := uh.userService.UpdateByID(userId, updatedUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not found") {
 			return c.JSON(http.StatusNotFound, map[string]interface{}{

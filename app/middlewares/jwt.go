@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -25,12 +26,12 @@ func GenerateToken(userId string) (string, error) {
 	return token.SignedString([]byte(config.JWT))
 }
 
-func ExtractUserIDFromToken(e echo.Context) string {
+func ExtractToken(e echo.Context) (string, error) {
 	user := e.Get("user").(*jwt.Token)
 	if user.Valid {
 		claims := user.Claims.(jwt.MapClaims)
 		userID := claims["userID"].(string)
-		return userID
+		return userID, nil
 	}
-	return ""
+	return "", errors.New("failed to extract jwt-token")
 }

@@ -3,6 +3,8 @@ package helper
 import (
 	"math/rand"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -34,4 +36,8 @@ func GenerateReviewID() string {
 
 func GenerateImageID() string {
 	return "IMG-" + generateRandomID()
+}
+
+func GenerateReservationID() string {
+	return uuid.New().String()
 }

@@ -4,6 +4,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
+	rd "github.com/playground-pro-project/playground-pro-api/features/reservation/data"
+	rh "github.com/playground-pro-project/playground-pro-api/features/reservation/handler"
+	rs "github.com/playground-pro-project/playground-pro-api/features/reservation/service"
 	ud "github.com/playground-pro-project/playground-pro-api/features/user/data"
 	uh "github.com/playground-pro-project/playground-pro-api/features/user/handler"
 	us "github.com/playground-pro-project/playground-pro-api/features/user/service"
@@ -22,6 +25,7 @@ func InitRouter(db *gorm.DB, e *echo.Echo) {
 
 	initUserRouter(db, e)
 	initVanueRouter(db, e)
+	initReservationRouter(db, e)
 }
 
 func initUserRouter(db *gorm.DB, e *echo.Echo) {
@@ -49,4 +53,12 @@ func initVanueRouter(db *gorm.DB, e *echo.Echo) {
 	vanueHandler := vh.New(vanueService)
 
 	e.GET("/venues", vanueHandler.SearchVenue())
+}
+
+func initReservationRouter(db *gorm.DB, e *echo.Echo) {
+	reservationData := rd.New(db)
+	reservationService := rs.New(reservationData)
+	reservationHandler := rh.New(reservationService)
+
+	e.POST("/reservations", reservationHandler.MakeReservation(), middlewares.JWTMiddleware())
 }
