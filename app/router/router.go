@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
@@ -27,17 +28,19 @@ func InitRouter(db *gorm.DB, e *echo.Echo) {
 	}))
 
 	initUserRouter(db, e)
-	initVanueRouter(db, e)
+	initVenueRouter(db, e)
 	initReservationRouter(db, e)
 }
 
 func initUserRouter(db *gorm.DB, e *echo.Echo) {
 	userData := ud.New(db)
-	userService := us.New(userData)
+	validate := validator.New()
+	userService := us.New(userData, validate)
 	userHandler := uh.New(userService)
 
 	e.POST("/register", userHandler.Register)
 	e.POST("/login", userHandler.Login)
+	e.POST("/otp/generate", userHandler.GenerateOTP)
 
 	usersGroup := e.Group("/users")
 	{

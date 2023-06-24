@@ -26,51 +26,95 @@ func New(service user.UserService) *userHandler {
 }
 
 func (uh *userHandler) Register(c echo.Context) error {
-	req := RegisterRequest{}
-	err := c.Bind(&req)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Invalid request payload",
-		})
+	request := RegisterRequest{}
+	errBind := c.Bind(&request)
+	if errBind != nil {
+		log.Error("controller - error on bind request")
+		return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
 	}
 
-	userCore := RegisterRequestToCore(req)
-	_, err = uh.userService.CreateUser(userCore)
+	_, err := uh.userService.Register(RequestToCore(request))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": err.Error(),
-		})
+		switch {
+		case strings.Contains(err.Error(), "empty"):
+			log.Error("bad request, request cannot be empty")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, request cannot be empty", nil, nil))
+		case strings.Contains(err.Error(), "duplicated"):
+			log.Error("bad request, duplicate data request")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, duplicate data request", nil, nil))
+		case strings.Contains(err.Error(), "email"):
+			log.Error("bad request, invalid email format")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, invalid email format", nil, nil))
+		case strings.Contains(err.Error(), "low password"):
+			log.Error("bad request, password does not match")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, password does not match", nil, nil))
+		case strings.Contains(err.Error(), "password"):
+			log.Error("internal server error, hashing password")
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		default:
+			log.Error("internal server error")
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "User registered successfully",
-	})
+	return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully created an account.", nil, nil))
 }
 
 func (uh *userHandler) Login(c echo.Context) error {
-	req := LoginRequest{}
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": err.Error(),
-		})
+	request := LoginRequest{}
+	errBind := c.Bind(&request)
+	if errBind != nil {
+		c.Logger().Error("error on bind login input")
+		return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
 	}
 
-	user, token, err := uh.userService.Login(req.Email, req.Password)
+	resp, token, err := uh.userService.Login(RequestToCore(request))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": err.Error(),
-		})
+		switch {
+		case strings.Contains(err.Error(), "invalid email format"):
+			log.Error("bad request, invalid email format")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, invalid email format", nil, nil))
+		case strings.Contains(err.Error(), "password cannot be empty"):
+			log.Error("bad request, password cannot be empty")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, password cannot be empty", nil, nil))
+		case strings.Contains(err.Error(), "invalid email and password"):
+			log.Error("bad request, invalid email and password")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, invalid email and password", nil, nil))
+		case strings.Contains(err.Error(), "password does not match"):
+			log.Error("bad request, password does not match")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, password does not match", nil, nil))
+		case strings.Contains(err.Error(), "error while creating jwt token"):
+			log.Error("internal server error, error while creating jwt token")
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		default:
+			log.Error("internal server error")
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
 	}
 
-	response := map[string]interface{}{
-		"user_id": user.UserID,
-		"token":   token,
+	return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "", "Successful login", loginResponse{
+		UserID: resp.UserID, Email: resp.Email, Token: token, OtpEnabled: resp.OtpEnabled,
+	}))
+}
+
+func (uh *userHandler) GenerateOTP(c echo.Context) error {
+	payload := OTPInput{}
+	errBind := c.Bind(&payload)
+	if errBind != nil {
+		c.Logger().Error("error on bind login input")
+		return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"data":    response,
-		"message": "Login successful",
-	})
+	resp, err := uh.userService.GenerateOTP(RequestToCore(payload))
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+		}
+		return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+	}
+	return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful operation", otpResponse{
+		OTPSecret: resp.OtpSecret, OTPAuthURL: resp.OtpAuthURL,
+	}, nil))
 }
 
 func (uh *userHandler) GetUserProfile(c echo.Context) error {
@@ -208,13 +252,6 @@ func (uh *userHandler) DeleteUser(c echo.Context) error {
 		"message": "User account deleted successfully",
 	})
 }
-
-const (
-	maxFileSize              = 1 << 20 // 1 MB
-	profilePictureBaseURL    = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/user-profile-picture/"
-	defaultProfilePictureURL = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-	ownerFileBaseURL         = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/owner-docs/"
-)
 
 func (uh *userHandler) UploadProfilePicture(c echo.Context) error {
 	userId, errToken := middlewares.ExtractToken(c)

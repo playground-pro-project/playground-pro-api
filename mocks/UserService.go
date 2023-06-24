@@ -12,30 +12,6 @@ type UserService struct {
 	mock.Mock
 }
 
-// CreateUser provides a mock function with given fields: _a0
-func (_m *UserService) CreateUser(_a0 user.UserCore) (string, error) {
-	ret := _m.Called(_a0)
-
-	var r0 string
-	var r1 error
-	if rf, ok := ret.Get(0).(func(user.UserCore) (string, error)); ok {
-		return rf(_a0)
-	}
-	if rf, ok := ret.Get(0).(func(user.UserCore) string); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	if rf, ok := ret.Get(1).(func(user.UserCore) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // DeleteByID provides a mock function with given fields: userID
 func (_m *UserService) DeleteByID(userID string) error {
 	ret := _m.Called(userID)
@@ -48,6 +24,30 @@ func (_m *UserService) DeleteByID(userID string) error {
 	}
 
 	return r0
+}
+
+// GenerateOTP provides a mock function with given fields: request
+func (_m *UserService) GenerateOTP(request user.UserCore) (user.UserCore, error) {
+	ret := _m.Called(request)
+
+	var r0 user.UserCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(user.UserCore) (user.UserCore, error)); ok {
+		return rf(request)
+	}
+	if rf, ok := ret.Get(0).(func(user.UserCore) user.UserCore); ok {
+		r0 = rf(request)
+	} else {
+		r0 = ret.Get(0).(user.UserCore)
+	}
+
+	if rf, ok := ret.Get(1).(func(user.UserCore) error); ok {
+		r1 = rf(request)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // GetByID provides a mock function with given fields: userID
@@ -74,35 +74,59 @@ func (_m *UserService) GetByID(userID string) (user.UserCore, error) {
 	return r0, r1
 }
 
-// Login provides a mock function with given fields: email, password
-func (_m *UserService) Login(email string, password string) (user.UserCore, string, error) {
-	ret := _m.Called(email, password)
+// Login provides a mock function with given fields: request
+func (_m *UserService) Login(request user.UserCore) (user.UserCore, string, error) {
+	ret := _m.Called(request)
 
 	var r0 user.UserCore
 	var r1 string
 	var r2 error
-	if rf, ok := ret.Get(0).(func(string, string) (user.UserCore, string, error)); ok {
-		return rf(email, password)
+	if rf, ok := ret.Get(0).(func(user.UserCore) (user.UserCore, string, error)); ok {
+		return rf(request)
 	}
-	if rf, ok := ret.Get(0).(func(string, string) user.UserCore); ok {
-		r0 = rf(email, password)
+	if rf, ok := ret.Get(0).(func(user.UserCore) user.UserCore); ok {
+		r0 = rf(request)
 	} else {
 		r0 = ret.Get(0).(user.UserCore)
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string) string); ok {
-		r1 = rf(email, password)
+	if rf, ok := ret.Get(1).(func(user.UserCore) string); ok {
+		r1 = rf(request)
 	} else {
 		r1 = ret.Get(1).(string)
 	}
 
-	if rf, ok := ret.Get(2).(func(string, string) error); ok {
-		r2 = rf(email, password)
+	if rf, ok := ret.Get(2).(func(user.UserCore) error); ok {
+		r2 = rf(request)
 	} else {
 		r2 = ret.Error(2)
 	}
 
 	return r0, r1, r2
+}
+
+// Register provides a mock function with given fields: request
+func (_m *UserService) Register(request user.UserCore) (user.UserCore, error) {
+	ret := _m.Called(request)
+
+	var r0 user.UserCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(user.UserCore) (user.UserCore, error)); ok {
+		return rf(request)
+	}
+	if rf, ok := ret.Get(0).(func(user.UserCore) user.UserCore); ok {
+		r0 = rf(request)
+	} else {
+		r0 = ret.Get(0).(user.UserCore)
+	}
+
+	if rf, ok := ret.Get(1).(func(user.UserCore) error); ok {
+		r1 = rf(request)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // UpdateByID provides a mock function with given fields: userID, updatedUser

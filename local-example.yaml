@@ -1,5 +1,5 @@
 DBUSER: "yourdbusername"
-DBPASSWORD: "yourdbpassword"
+DBPASS: "yourdbpassword"
 DBHOST: "localhost"
 DBPORT: "yourdbport"
 DBNAME: "yourdbname"

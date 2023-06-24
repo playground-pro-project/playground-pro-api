@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/review"
+	"github.com/playground-pro-project/playground-pro-api/utils/helper"
 )
 
 type reviewHandler struct {
@@ -20,19 +21,22 @@ func New(s review.ReviewService) *reviewHandler {
 }
 
 func (rh *reviewHandler) CreateReview(c echo.Context) error {
-	userID := middlewares.ExtractUserIDFromToken(c)
+	userId, err := middlewares.ExtractToken(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+	}
 	venueID := c.Param("venue_id")
 
 	req := CreateReviewRequest{}
-	err := c.Bind(&req)
-	if err != nil {
+	errBind := c.Bind(&req)
+	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Invalid request payload",
 		})
 	}
 
 	reviewCore := CreateReviewRequestToCore(req)
-	_, err = rh.reviewService.CreateReview(venueID, userID, reviewCore)
+	_, err = rh.reviewService.CreateReview(venueID, userId, reviewCore)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": err.Error(),
