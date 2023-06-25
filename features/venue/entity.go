@@ -82,13 +82,16 @@ type ReservationCore struct {
 }
 
 type VenueHandler interface {
+	RegisterVenue() echo.HandlerFunc
 	SearchVenue() echo.HandlerFunc
 }
 
 type VenueService interface {
+	RegisterVenue(userId string, request VenueCore) (VenueCore, error)
 	SearchVenue(keyword string, page pagination.Pagination) ([]VenueCore, int64, int, error)
 }
 
 type VenueData interface {
+	RegisterVenue(userId string, request VenueCore) (VenueCore, error)
 	SearchVenue(keyword string, page pagination.Pagination) ([]VenueCore, int64, int, error)
 }
