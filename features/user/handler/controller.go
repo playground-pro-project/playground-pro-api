@@ -236,18 +236,12 @@ func (uh *userHandler) RemoveProfilePicture(c echo.Context) error {
 	err := uh.userService.UpdateByID(userId, updatedUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "user not found") {
-			return c.JSON(http.StatusNotFound, map[string]interface{}{
-				"error": err.Error(),
-			})
+			return c.JSON(http.StatusNotFound, helper.ErrorResponse(err.Error()))
 		}
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "Profile picture removed successfully",
-	})
+	return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "Profile picture removed successfully"))
 }
 
 func (uh *userHandler) UploadOwnerFile(c echo.Context) error {
