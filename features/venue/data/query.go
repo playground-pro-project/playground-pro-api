@@ -9,6 +9,7 @@ import (
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/venue"
 	"github.com/playground-pro-project/playground-pro-api/utils/cache"
+	"github.com/playground-pro-project/playground-pro-api/utils/helper"
 	"github.com/playground-pro-project/playground-pro-api/utils/pagination"
 	"gorm.io/gorm"
 )
@@ -23,6 +24,30 @@ func New(db *gorm.DB) venue.VenueData {
 	return &venueQuery{
 		db: db,
 	}
+}
+
+// RegisterVenue implements venue.VenueData.
+func (vq *venueQuery) RegisterVenue(userId string, request venue.VenueCore) (venue.VenueCore, error) {
+	venueId := helper.GenerateVenueID()
+	request.VenueID = venueId
+	request.OwnerID = userId
+	req := venueEntities(request)
+	query := vq.db.Table("classes").Create(&req)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("list venues not found")
+		return venue.VenueCore{}, errors.New("venues not found")
+	}
+	if query.Error != nil {
+		log.Error("error executing")
+		return venue.VenueCore{}, errors.New("error insert data, duplicated")
+	}
+	if query.RowsAffected == 0 {
+		log.Warn("no venue has been created")
+		return venue.VenueCore{}, errors.New("row affected : 0")
+	}
+
+	log.Sugar().Infof("new venue has been created: %s", req.VenueID)
+	return venueModels(req), nil
 }
 
 // SearchVenue implements venue.VenueData.

@@ -13,6 +13,30 @@ type VenueService struct {
 	mock.Mock
 }
 
+// RegisterVenue provides a mock function with given fields: userId, request
+func (_m *VenueService) RegisterVenue(userId string, request venue.VenueCore) (venue.VenueCore, error) {
+	ret := _m.Called(userId, request)
+
+	var r0 venue.VenueCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, venue.VenueCore) (venue.VenueCore, error)); ok {
+		return rf(userId, request)
+	}
+	if rf, ok := ret.Get(0).(func(string, venue.VenueCore) venue.VenueCore); ok {
+		r0 = rf(userId, request)
+	} else {
+		r0 = ret.Get(0).(venue.VenueCore)
+	}
+
+	if rf, ok := ret.Get(1).(func(string, venue.VenueCore) error); ok {
+		r1 = rf(userId, request)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // SearchVenue provides a mock function with given fields: keyword, page
 func (_m *VenueService) SearchVenue(keyword string, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
 	ret := _m.Called(keyword, page)

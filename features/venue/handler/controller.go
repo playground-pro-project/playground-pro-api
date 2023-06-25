@@ -24,6 +24,38 @@ func New(vs venue.VenueService) venue.VenueHandler {
 	}
 }
 
+// RegisterVenue implements venue.VenueHandler.
+func (vh *venueHandler) RegisterVenue() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		request := RegisterClassRequest{}
+		userId, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
+		errBind := c.Bind(&request)
+		if errBind != nil {
+			log.Error("error on bind input")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request", nil, nil))
+		}
+
+		_, err := vh.service.RegisterVenue(userId, RequestToCore(request))
+		if err != nil {
+			if strings.Contains(err.Error(), "empty") {
+				log.Error("error on bind input")
+				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request", nil, nil))
+			}
+			if strings.Contains(err.Error(), "duplicated") {
+				log.Error("error on bind input")
+				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request", nil, nil))
+			}
+			log.Error("error on bind input")
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
+		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully created new class", nil, nil))
+	}
+}
+
 // SearchVenue implements venue.VenueHandler.
 func (vh *venueHandler) SearchVenue() echo.HandlerFunc {
 	return func(c echo.Context) error {
