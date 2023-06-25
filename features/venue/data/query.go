@@ -139,8 +139,27 @@ func (*venueQuery) EditVenue(userId string, venueId string, request venue.VenueC
 }
 
 // UnregisterVenue implements venue.VenueData.
-func (*venueQuery) UnregisterVenue(userId string, venueId string) error {
-	panic("unimplemented")
+func (vq *venueQuery) UnregisterVenue(userId string, venueId string) error {
+	query := vq.db.Table("venues").
+		Where("userId = ? AND class_id = ?", userId, venueId).
+		Delete(&Venue{})
+
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("venue record not found")
+		return errors.New("venue record not found")
+	}
+
+	if query.RowsAffected == 0 {
+		log.Warn("no venue has been created")
+		return errors.New("row affected : 0")
+	}
+
+	if query.Error != nil {
+		log.Error("error while delete venue")
+		return errors.New("error executing query")
+	}
+
+	return nil
 }
 
 // VenueAvailability implements venue.VenueData.

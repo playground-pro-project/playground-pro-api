@@ -52,7 +52,7 @@ func (vh *venueHandler) RegisterVenue() echo.HandlerFunc {
 			log.Error("error on bind input")
 			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
 		}
-		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully created new class", nil, nil))
+		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully created new venue", nil, nil))
 	}
 }
 
@@ -114,7 +114,7 @@ func (vh *venueHandler) SelectVenue() echo.HandlerFunc {
 			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
 		}
 
-		venueId := c.Param("id")
+		venueId := c.Param("venue_id")
 		venue, err := vh.service.SelectVenue(venueId)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
@@ -134,8 +134,24 @@ func (*venueHandler) EditVenue() echo.HandlerFunc {
 }
 
 // UnregisterVenue implements venue.VenueHandler.
-func (*venueHandler) UnregisterVenue() echo.HandlerFunc {
-	panic("unimplemented")
+func (vh *venueHandler) UnregisterVenue() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
+
+		venueId := c.Param("venue_id")
+		err := vh.service.UnregisterVenue(userId, venueId)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+			}
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Venue deleted successfully", nil, nil))
+	}
 }
 
 // VenueAvailability implements venue.VenueHandler.

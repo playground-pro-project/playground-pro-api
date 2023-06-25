@@ -99,8 +99,19 @@ func (*venueService) EditVenue(userId string, venueId string, request venue.Venu
 }
 
 // UnregisterVenue implements venue.VenueService.
-func (*venueService) UnregisterVenue(userId string, venueId string) error {
-	panic("unimplemented")
+func (vs *venueService) UnregisterVenue(userId string, venueId string) error {
+	err := vs.query.UnregisterVenue(userId, venueId)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			log.Error("venue record not found")
+			return errors.New("venue record not found")
+		} else {
+			log.Error("internal server error")
+			return errors.New("internal server error")
+		}
+	}
+
+	return nil
 }
 
 // VenueAvailability implements venue.VenueService.
