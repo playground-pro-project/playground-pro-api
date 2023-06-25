@@ -88,11 +88,12 @@ func (uq *userQuery) GenerateOTP(request user.UserCore) (user.UserCore, error) {
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      "peterzalai.biz.id",
 		AccountName: "dimas.yudhana@gmail.com",
-		SecretSize:  15,
+		Period:      300,
+		SecretSize:  10,
 	})
 
 	if err != nil {
-		panic(err)
+		return user.UserCore{}, err
 	}
 
 	result := User{}
@@ -107,9 +108,13 @@ func (uq *userQuery) GenerateOTP(request user.UserCore) (user.UserCore, error) {
 		OTPAuthURL: key.URL(),
 	}
 
-	uq.db.Model(&result).Updates(dataToUpdate)
+	if err := uq.db.Model(&result).Updates(dataToUpdate).Error; err != nil {
+		log.Error("error executing update query")
+		return user.UserCore{}, err
+	}
+
 	email.SendOTP(dataToUpdate.OTPSecret, dataToUpdate.OTPAuthURL, result.Email)
-	return UserModelToCore(dataToUpdate), err
+	return UserModelToCore(dataToUpdate), nil
 }
 
 // VerifyOTP implements user.UserData.
@@ -121,7 +126,7 @@ func (uq *userQuery) VerifyOTP(request user.UserCore) (user.UserCore, error) {
 		return user.UserCore{}, errors.New("user record not found")
 	}
 
-	log.Sugar().Info(request.OTPCode, result.OTPSecret)
+	log.Sugar().Infof("%s,%s", request.OTPCode, result.OTPSecret)
 	valid := totp.Validate(request.OTPCode, result.OTPSecret)
 	if !valid {
 		log.Warn("OTPCode does not match")
@@ -129,11 +134,14 @@ func (uq *userQuery) VerifyOTP(request user.UserCore) (user.UserCore, error) {
 	}
 
 	dataToUpdate := map[string]interface{}{
-		"otp_secret":   true,
-		"otp_auth_url": true,
+		"otp_enabled":  true,
+		"otp_verified": true,
 	}
 
-	uq.db.Model(&result).Updates(dataToUpdate)
+	if err := uq.db.Model(&result).Updates(dataToUpdate).Error; err != nil {
+		log.Error("error executing update query")
+		return user.UserCore{}, err
+	}
 
 	return UserModelToCore(result), nil
 }
