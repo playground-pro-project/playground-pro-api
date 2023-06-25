@@ -21,6 +21,10 @@ type PaymetGateway struct {
 	Request *coreapi.ChargeReq
 }
 
+type PaymentMethod interface {
+	Charge(*PaymetGateway) (*ChargeResponse, error)
+}
+
 func ChargeMidtrans(reservationID string, request reservation.PaymentCore) (*ChargeResponse, error) {
 	client := coreapi.Client{}
 	client.New(config.MIDTRANS_SERVERKEY, midtrans.Sandbox)
@@ -45,39 +49,25 @@ func ChargeMidtrans(reservationID string, request reservation.PaymentCore) (*Cha
 		},
 	}
 
-	paymentTypeMap := map[string]func() (*ChargeResponse, error){
-		"bca": func() (*ChargeResponse, error) {
-			return pg.ChargeWithBank(bca)
-		},
-		"mandiri": func() (*ChargeResponse, error) {
-			return pg.ChargeWithBank(mandiri)
-		},
-		"bni": func() (*ChargeResponse, error) {
-			return pg.ChargeWithBank(bni)
-		},
-		"indomaret": func() (*ChargeResponse, error) {
-			return pg.ChargeWithConvStore(indomaret)
-		},
-		"alfamart": func() (*ChargeResponse, error) {
-			return pg.ChargeWithConvStore(alfamart)
-		},
-		"gopay": func() (*ChargeResponse, error) {
-			return pg.ChargeWithEWallet(gopay)
-		},
-		"shopeepay": func() (*ChargeResponse, error) {
-			return pg.ChargeWithEWallet(shopeepay)
-		},
-		"qris": func() (*ChargeResponse, error) {
-			return pg.ChargeWithEWallet(qris)
-		},
+	paymentTypeMap := map[string]PaymentMethod{
+		"bri":       &BankPayment{Bank: bri},
+		"bca":       &BankPayment{Bank: bca},
+		"bni":       &BankPayment{Bank: bni},
+		"mandiri":   &BankPayment{Bank: mandiri},
+		"permata":   &BankPayment{Bank: permata},
+		"indomaret": &ConvStorePayment{Store: indomaret},
+		"alfamart":  &ConvStorePayment{Store: alfamart},
+		"gopay":     &EWalletPayment{EWallet: gopay},
+		"shopeepay": &EWalletPayment{EWallet: shopeepay},
+		"qris":      &EWalletPayment{EWallet: qris},
 	}
 
-	chargeFunc, ok := paymentTypeMap[request.PaymentType]
+	paymentMethod, ok := paymentTypeMap[request.PaymentType]
 	if !ok {
 		return nil, errors.New("invalid payment_type")
 	}
 
-	return chargeFunc()
+	return paymentMethod.Charge(&pg)
 }
 
 func (pg *PaymetGateway) CustomCharge(request *coreapi.ChargeReq) (*ChargeResponse, error) {
@@ -105,37 +95,6 @@ func (pg *PaymetGateway) CustomCharge(request *coreapi.ChargeReq) (*ChargeRespon
 	}
 
 	return &result, nil
-}
-
-func (pg *PaymetGateway) ChargeWithBank(b Bank) (*ChargeResponse, error) {
-	if b != mandiri {
-		pg.Request.PaymentType = "bank_transfer"
-		pg.Request.BankTransfer = &coreapi.BankTransferDetails{
-			Bank: midtrans.Bank(b),
-		}
-	} else {
-		pg.Request.PaymentType = coreapi.PaymentTypeEChannel
-		pg.Request.EChannel = &coreapi.EChannelDetail{
-			BillInfo1: "pembayaran",
-			BillInfo2: "pembayaran",
-		}
-	}
-
-	return pg.CustomCharge(pg.Request)
-}
-
-func (pg *PaymetGateway) ChargeWithEWallet(w Ewallet) (*ChargeResponse, error) {
-	pg.Request.PaymentType = coreapi.CoreapiPaymentType(w)
-	return pg.CustomCharge(pg.Request)
-}
-
-func (pg *PaymetGateway) ChargeWithConvStore(c ConvStore) (*ChargeResponse, error) {
-	pg.Request.PaymentType = "cstore"
-	pg.Request.ConvStore = &coreapi.ConvStoreDetails{
-		Store: string(c),
-	}
-
-	return pg.CustomCharge(pg.Request)
 }
 
 func (pg *PaymetGateway) Refund(request *coreapi.RefundReq, invoice string) error {

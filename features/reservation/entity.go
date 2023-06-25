@@ -21,9 +21,9 @@ type ReservationCore struct {
 
 type PaymentCore struct {
 	PaymentID     string
-	VANumber      string
 	PaymentMethod string
 	PaymentType   string
+	PaymentCode   string
 	GrandTotal    string
 	ServiceFee    float64
 	Status        string

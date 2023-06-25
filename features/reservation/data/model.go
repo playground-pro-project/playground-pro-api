@@ -23,9 +23,9 @@ type Reservation struct {
 
 type Payment struct {
 	PaymentID     string `gorm:"primaryKey;type:varchar(45)"`
-	VANumber      string `gorm:"type:varchar(225);not null"`
 	PaymentMethod string
 	PaymentType   string
+	PaymentCode   string `gorm:"type:varchar(225);not null"`
 	GrandTotal    string
 	ServiceFee    float64
 	Status        string         `gorm:"type:enum('pending','success','cancelled','expired');default:'pending'"`
@@ -69,7 +69,7 @@ func reservationEntities(r reservation.ReservationCore) Reservation {
 func paymentModels(p Payment) reservation.PaymentCore {
 	return reservation.PaymentCore{
 		PaymentID:     p.PaymentID,
-		VANumber:      p.VANumber,
+		PaymentCode:   p.PaymentCode,
 		PaymentMethod: p.PaymentMethod,
 		PaymentType:   p.PaymentType,
 		GrandTotal:    p.GrandTotal,
@@ -84,7 +84,7 @@ func paymentModels(p Payment) reservation.PaymentCore {
 func paymentEntities(p reservation.PaymentCore) *Payment {
 	return &Payment{
 		PaymentID:     p.PaymentID,
-		VANumber:      p.VANumber,
+		PaymentCode:   p.PaymentCode,
 		PaymentMethod: p.PaymentMethod,
 		PaymentType:   p.PaymentType,
 		GrandTotal:    p.GrandTotal,
@@ -96,23 +96,17 @@ func paymentEntities(p reservation.PaymentCore) *Payment {
 }
 
 // Payment response Midtrans to payment-core
-func paymentCoreFromChargeResponse(res *paymentgateway.ChargeResponse) reservation.PaymentCore {
-	var vaNumber string
-	if len(res.VaNumbers) > 0 {
-		vaNumber = res.VaNumbers[0].VANumber
-	}
-
+func PaymentCoreFromChargeResponse(res *paymentgateway.ChargeResponse) reservation.PaymentCore {
 	return reservation.PaymentCore{
 		PaymentID:     res.TransactionID,
-		VANumber:      vaNumber,
 		PaymentMethod: res.PaymentType,
-		PaymentType:   res.Bank,
+		PaymentType:   paymentgateway.GetBankType(res),
+		PaymentCode:   paymentgateway.GetPaymentCode(res),
 		GrandTotal:    res.GrossAmount,
 		ServiceFee:    0,
 		Status:        res.TransactionStatus,
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
-		DeletedAt:     gorm.DeletedAt{},
 		Reservation:   reservation.ReservationCore{},
 	}
 }
