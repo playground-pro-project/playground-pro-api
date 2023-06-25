@@ -30,7 +30,7 @@ func (vs *venueService) RegisterVenue(userId string, request venue.VenueCore) (v
 	if err != nil {
 		switch {
 		case strings.Contains(err.Error(), "Name"):
-			log.Warn("name cannot be empty")
+			log.Warn("n`ame cannot be empty")
 			return venue.VenueCore{}, errors.New("fullname cannot be empty")
 		case strings.Contains(err.Error(), "ServiceTime"):
 			log.Warn("service time cannot be empty")
@@ -58,13 +58,13 @@ func (vs *venueService) RegisterVenue(userId string, request venue.VenueCore) (v
 }
 
 // SearchVenue implements venue.VenueService.
-func (vs *venueService) SearchVenue(keyword string, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
+func (vs *venueService) SearchVenues(keyword string, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
 	if page.Sort != "" {
 		ps := strings.Replace(page.Sort, "_", " ", 1)
 		page.Sort = ps
 	}
 
-	venues, rows, pages, err := vs.query.SearchVenue(keyword, page)
+	venues, rows, pages, err := vs.query.SearchVenues(keyword, page)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			log.Error("list venues record not found")
@@ -76,4 +76,34 @@ func (vs *venueService) SearchVenue(keyword string, page pagination.Pagination) 
 	}
 
 	return venues, rows, pages, err
+}
+
+// SelectVenue implements venue.VenueService.
+func (vs *venueService) SelectVenue(venueId string) (venue.VenueCore, error) {
+	result, err := vs.query.SelectVenue(venueId)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			log.Error("not found, error while retrieving venue")
+			return venue.VenueCore{}, errors.New("not found, error while retrieving venue")
+		} else {
+			log.Error("internal server error")
+			return venue.VenueCore{}, errors.New("internal server error")
+		}
+	}
+	return result, nil
+}
+
+// EditVenue implements venue.VenueService.
+func (*venueService) EditVenue(userId string, venueId string, request venue.VenueCore) error {
+	panic("unimplemented")
+}
+
+// UnregisterVenue implements venue.VenueService.
+func (*venueService) UnregisterVenue(userId string, venueId string) error {
+	panic("unimplemented")
+}
+
+// VenueAvailability implements venue.VenueService.
+func (*venueService) VenueAvailability(venueId string) ([]venue.VenueCore, error) {
+	panic("unimplemented")
 }

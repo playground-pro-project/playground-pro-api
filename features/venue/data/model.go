@@ -48,6 +48,28 @@ type User struct {
 	Reviews        []review.Review           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 
+type Review struct {
+	ReviewID  string         `gorm:"primaryKey;type:varchar(45)"`
+	UserID    string         `gorm:"type:varchar(45)"`
+	VenueID   string         `gorm:"type:varchar(45)"`
+	Review    string         `gorm:"type:text"`
+	Rating    float64        `gorm:"type:double"`
+	CreatedAt time.Time      `gorm:"type:datetime"`
+	UpdatedAt time.Time      `gorm:"type:datetime"`
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+	User      User           `gorm:"references:UserID"`
+	Venue     Venue          `gorm:"references:VenueID"`
+}
+
+type VenuePicture struct {
+	VenuePictureID string         `gorm:"primaryKey;type:varchar(45)"`
+	VenueID        string         `gorm:"type:varchar(45)"`
+	URL            string         `gorm:"type:text"`
+	CreatedAt      time.Time      `gorm:"type:datetime"`
+	UpdatedAt      time.Time      `gorm:"type:datetime"`
+	DeletedAt      gorm.DeletedAt `gorm:"index"`
+}
+
 func searchVenueModels(v Venue) venue.VenueCore {
 	var reviews []venue.ReviewCore
 	var totalRating float64
@@ -92,6 +114,54 @@ func searchVenueModels(v Venue) venue.VenueCore {
 				URL: picture,
 			},
 		},
+	}
+
+	return result
+}
+
+func selectVenueModels(v Venue) venue.VenueCore {
+	var reviews []venue.ReviewCore
+	var totalRating float64
+	var averageRating float64 = 0.0
+	for _, r := range v.Reviews {
+		tmp := venue.ReviewCore{
+			Review: r.Review,
+			Rating: r.Rating,
+		}
+		reviews = append(reviews, tmp)
+		totalRating += r.Rating
+	}
+
+	if len(v.Reviews) > 0 {
+		averageRating = totalRating / float64(len(v.Reviews))
+	}
+
+	pictures := make([]venue.VenuePictureCore, len(v.VenuePictures))
+	for i, p := range v.VenuePictures {
+		pictures[i] = venue.VenuePictureCore{
+			URL: p.URL,
+		}
+	}
+
+	result := venue.VenueCore{
+		VenueID:       v.VenueID,
+		OwnerID:       v.OwnerID,
+		Category:      v.Category,
+		Name:          v.Name,
+		Description:   v.Description,
+		Username:      v.User.Fullname,
+		ServiceTime:   v.ServiceTime,
+		Location:      v.Location,
+		Price:         v.Price,
+		Longitude:     v.Longitude,
+		Latitude:      v.Latitude,
+		CreatedAt:     v.CreatedAt,
+		UpdatedAt:     v.UpdatedAt,
+		DeletedAt:     v.DeletedAt.Time,
+		TotalReviews:  uint(len(v.Reviews)),
+		AverageRating: averageRating,
+		VenuePictures: pictures,
+		Reviews:       reviews,
 	}
 
 	return result
