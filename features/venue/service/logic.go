@@ -94,8 +94,37 @@ func (vs *venueService) SelectVenue(venueId string) (venue.VenueCore, error) {
 }
 
 // EditVenue implements venue.VenueService.
-func (*venueService) EditVenue(userId string, venueId string, request venue.VenueCore) error {
-	panic("unimplemented")
+func (vs *venueService) EditVenue(userId string, venueId string, request venue.VenueCore) error {
+	errValidate := vs.validate.Struct(request)
+	if errValidate != nil {
+		switch {
+		case strings.Contains(errValidate.Error(), "Name"):
+			log.Warn("n`ame cannot be empty")
+			return errors.New("fullname cannot be empty")
+		case strings.Contains(errValidate.Error(), "ServiceTime"):
+			log.Warn("service time cannot be empty")
+			return errors.New("service time cannot be empty")
+		case strings.Contains(errValidate.Error(), "Location"):
+			log.Warn("location cannot be empty")
+			return errors.New("location cannot be empty")
+		}
+	}
+
+	err := vs.query.EditVenue(userId, venueId, request)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			log.Error("venue profile record not found")
+			return errors.New("venue profile record not found")
+		} else if strings.Contains(err.Error(), "duplicate data entry") {
+			log.Error("failed to update venue, duplicate data entry")
+			return errors.New("failed to update venue, duplicate data entry")
+		} else {
+			log.Error("internal server error")
+			return errors.New("internal server error")
+		}
+	}
+
+	return nil
 }
 
 // UnregisterVenue implements venue.VenueService.
