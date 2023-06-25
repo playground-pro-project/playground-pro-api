@@ -23,7 +23,7 @@ type User struct {
 	OTPEnabled     bool   `gorm:"default:false;"`
 	OTPVerified    bool   `gorm:"default:false;"`
 	OTPSecret      string
-	OtpAuthURL     string
+	OTPAuthURL     string
 	OwnerFile      string                    `gorm:"type:text"`
 	CreatedAt      time.Time                 `gorm:"type:datetime"`
 	UpdatedAt      time.Time                 `gorm:"type:datetime"`
@@ -61,7 +61,7 @@ func UserModelToCore(u User) user.UserCore {
 		OTPEnabled:     u.OTPEnabled,
 		OTPVerified:    u.OTPVerified,
 		OTPSecret:      u.OTPSecret,
-		OTPAuthURL:     u.OtpAuthURL,
+		OTPAuthURL:     u.OTPAuthURL,
 		OwnerFile:      u.OwnerFile,
 		CreatedAt:      u.CreatedAt,
 		UpdatedAt:      u.UpdatedAt,

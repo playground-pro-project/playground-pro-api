@@ -50,7 +50,6 @@ func (uq *userQuery) Register(request user.UserCore) (user.UserCore, error) {
 	}
 
 	log.Sugar().Infof("new user has been created: %s", req.Email)
-	email.SendOTP(req.Fullname, req.Email)
 	return UserModelToCore(req), nil
 }
 
@@ -87,8 +86,8 @@ func (uq *userQuery) Login(request user.UserCore) (user.UserCore, string, error)
 // GenerateOTP implements user.UserData.
 func (uq *userQuery) GenerateOTP(request user.UserCore) (user.UserCore, error) {
 	key, err := totp.Generate(totp.GenerateOpts{
-		Issuer:      "codevoweb.com",
-		AccountName: "admin@admin.com",
+		Issuer:      "peterzalai.biz.id",
+		AccountName: "dimas.yudhana@gmail.com",
 		SecretSize:  15,
 	})
 
@@ -105,11 +104,11 @@ func (uq *userQuery) GenerateOTP(request user.UserCore) (user.UserCore, error) {
 
 	dataToUpdate := User{
 		OTPSecret:  key.Secret(),
-		OtpAuthURL: key.URL(),
+		OTPAuthURL: key.URL(),
 	}
 
 	uq.db.Model(&result).Updates(dataToUpdate)
-
+	email.SendOTP(dataToUpdate.OTPSecret, dataToUpdate.OTPAuthURL, result.Email)
 	return UserModelToCore(dataToUpdate), err
 }
 
@@ -122,6 +121,7 @@ func (uq *userQuery) VerifyOTP(request user.UserCore) (user.UserCore, error) {
 		return user.UserCore{}, errors.New("user record not found")
 	}
 
+	log.Sugar().Info(request.OTPCode, result.OTPSecret)
 	valid := totp.Validate(request.OTPCode, result.OTPSecret)
 	if !valid {
 		log.Warn("OTPCode does not match")
@@ -129,11 +129,11 @@ func (uq *userQuery) VerifyOTP(request user.UserCore) (user.UserCore, error) {
 	}
 
 	dataToUpdate := map[string]interface{}{
-		"otp_secret":   0,
-		"otp_auth_url": 0,
+		"otp_secret":   true,
+		"otp_auth_url": true,
 	}
 
-	uq.db.Table("users").Updates(dataToUpdate)
+	uq.db.Model(&result).Updates(dataToUpdate)
 
 	return UserModelToCore(result), nil
 }
