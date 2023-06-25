@@ -4,6 +4,18 @@ import (
 	"github.com/playground-pro-project/playground-pro-api/features/user"
 )
 
+type loginResponse struct {
+	UserID     string `json:"user_id"`
+	Email      string `json:"email"`
+	Token      string `json:"token"`
+	OtpEnabled bool   `json:"otp_enabled"`
+}
+
+type otpResponse struct {
+	OTPSecret  string `json:"otp_secret"`
+	OTPAuthURL string `json:"otp_auth_url"`
+}
+
 type GetUserResponse struct {
 	UserID         string `json:"user_id,omitempty"`
 	FullName       string `json:"full_name,omitempty"`

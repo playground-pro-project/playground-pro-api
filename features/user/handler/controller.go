@@ -33,16 +33,45 @@ func New(service user.UserService) *userHandler {
 }
 
 func (uh *userHandler) Register(c echo.Context) error {
-	req := RegisterRequest{}
-	err := c.Bind(&req)
+	request := RegisterRequest{}
+	errBind := c.Bind(&request)
+	if errBind != nil {
+		log.Error("controller - error on bind request")
+		return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
+
+	_, err := uh.userService.Register(RequestToCore(request))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Invalid request payload"))
+		switch {
+		case strings.Contains(err.Error(), "empty"):
+			log.Error("bad request, request cannot be empty")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, request cannot be empty", nil, nil))
+		case strings.Contains(err.Error(), "duplicated"):
+			log.Error("bad request, duplicate data request")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, duplicate data request", nil, nil))
+		case strings.Contains(err.Error(), "email"):
+			log.Error("bad request, invalid email format")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, invalid email format", nil, nil))
+		case strings.Contains(err.Error(), "low password"):
+			log.Error("bad request, password does not match")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, password does not match", nil, nil))
+		case strings.Contains(err.Error(), "password"):
+			log.Error("internal server error, hashing password")
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		default:
+			log.Error("internal server error")
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
 	}
 
-	userCore := RegisterRequestToCore(req)
-	_, err = uh.userService.CreateUser(userCore)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
+	return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully created an account.", nil, nil))
+}
+
+func (uh *userHandler) Login(c echo.Context) error {
+	request := LoginRequest{}
+	errBind := c.Bind(&request)
+	if errBind != nil {
+		log.Error("error on bind login input")
+		return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
 	}
 
 	return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "User registered successfully"))
@@ -54,17 +83,54 @@ func (uh *userHandler) Login(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 	}
 
-	user, token, err := uh.userService.Login(req.Email, req.Password)
+	resp, token, err := uh.userService.Login(RequestToCore(request))
 	if err != nil {
+		switch {
+		case strings.Contains(err.Error(), "invalid email format"):
+			log.Error("bad request, invalid email format")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, invalid email format", nil, nil))
+		case strings.Contains(err.Error(), "password cannot be empty"):
+			log.Error("bad request, password cannot be empty")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, password cannot be empty", nil, nil))
+		case strings.Contains(err.Error(), "invalid email and password"):
+			log.Error("bad request, invalid email and password")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, invalid email and password", nil, nil))
+		case strings.Contains(err.Error(), "password does not match"):
+			log.Error("bad request, password does not match")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, password does not match", nil, nil))
+		case strings.Contains(err.Error(), "error while creating jwt token"):
+			log.Error("internal server error, error while creating jwt token")
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		default:
+			log.Error("internal server error")
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
 		return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 	}
 
-	response := map[string]interface{}{
-		"user_id": user.UserID,
-		"token":   token,
+	return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "", "Successful login", loginResponse{
+		UserID: resp.UserID, Email: resp.Email, Token: token, OtpEnabled: resp.OtpEnabled,
+	}))
+}
+
+func (uh *userHandler) GenerateOTP(c echo.Context) error {
+	payload := OTPInput{}
+	errBind := c.Bind(&payload)
+	if errBind != nil {
+		c.Logger().Error("error on bind login input")
+		return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
 	}
 
-	return c.JSON(http.StatusOK, helper.SuccessResponse(response, "Login successful"))
+	resp, err := uh.userService.GenerateOTP(RequestToCore(payload))
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+		}
+		return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+	}
+	return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful operation", otpResponse{
+		OTPSecret: resp.OtpSecret, OTPAuthURL: resp.OtpAuthURL,
+	}, nil))
 }
 
 func (uh *userHandler) GetUserProfile(c echo.Context) error {
