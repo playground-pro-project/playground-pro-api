@@ -115,6 +115,16 @@ func (us *userService) GenerateOTP(request user.UserCore) (user.UserCore, error)
 	return result, err
 }
 
+// VerifyOTP implements user.UserService.
+func (us *userService) VerifyOTP(request user.UserCore) (user.UserCore, error) {
+	result, err := us.userData.VerifyOTP(request)
+	if err != nil {
+		return user.UserCore{}, errors.New("user not found")
+	}
+
+	return result, err
+}
+
 // DeleteUserByID implements user.UserService.
 func (us *userService) DeleteByID(userID string) error {
 	err := us.userData.DeleteByID(userID)

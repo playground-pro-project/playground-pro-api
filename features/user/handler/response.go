@@ -8,12 +8,15 @@ type loginResponse struct {
 	UserID     string `json:"user_id"`
 	Email      string `json:"email"`
 	Token      string `json:"token"`
-	OtpEnabled bool   `json:"otp_enabled"`
+	OTPEnabled bool   `json:"otp_enabled"`
 }
 
 type otpResponse struct {
-	OTPSecret  string `json:"otp_secret"`
-	OTPAuthURL string `json:"otp_auth_url"`
+	UserID      string `json:"user_id,omitempty"`
+	OTPSecret   string `json:"otp_secret,omitempty"`
+	OTPAuthURL  string `json:"otp_auth_url,omitempty"`
+	OTPEnabled  bool   `json:"otp_enabled,omitempty"`
+	OTPVerified bool   `json:"otp_verified,omitempty"`
 }
 
 type GetUserResponse struct {
