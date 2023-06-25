@@ -51,7 +51,7 @@ func (vq *venueQuery) RegisterVenue(userId string, request venue.VenueCore) (ven
 }
 
 // SearchVenue implements venue.VenueData.
-func (vq *venueQuery) SearchVenue(keyword string, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
+func (vq *venueQuery) SearchVenues(keyword string, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
 	venues := []Venue{}
 	search := "%" + keyword + "%"
 	expTime := 5 * time.Second
@@ -103,4 +103,47 @@ func (vq *venueQuery) SearchVenue(keyword string, page pagination.Pagination) ([
 	}
 
 	return result, page.TotalRows, page.TotalPages, nil
+}
+
+// SelectVenueById implements venue.VenueData.
+func (vq *venueQuery) SelectVenue(venueId string) (venue.VenueCore, error) {
+	venues := Venue{}
+	query := vq.db.Table("venues").
+		Select("venues.*, AVG(reviews.rating) AS average_rating, COUNT(reviews.review_id) AS total_reviews, users.fullname").
+		Joins("LEFT JOIN venue_pictures ON venue_pictures.venue_id = venues.venue_id").
+		Joins("LEFT JOIN reviews ON reviews.venue_id = venues.venue_id").
+		Joins("LEFT JOIN users ON users.user_id = venues.owner_id").
+		Where("venues.deleted_at IS NULL").
+		Group("venues.venue_id").
+		Preload("User").
+		Preload("VenuePictures").
+		Preload("Reviews").
+		Find(&venues)
+
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("list venues not found")
+		return venue.VenueCore{}, errors.New("venues not found")
+	} else if query.Error != nil {
+		log.Sugar().Error("error executing venues query:", query.Error)
+		return venue.VenueCore{}, query.Error
+	} else {
+		log.Sugar().Info("venues data found in the database")
+	}
+
+	return selectVenueModels(venues), nil
+}
+
+// EditVenue implements venue.VenueData.
+func (*venueQuery) EditVenue(userId string, venueId string, request venue.VenueCore) error {
+	panic("unimplemented")
+}
+
+// UnregisterVenue implements venue.VenueData.
+func (*venueQuery) UnregisterVenue(userId string, venueId string) error {
+	panic("unimplemented")
+}
+
+// VenueAvailability implements venue.VenueData.
+func (*venueQuery) VenueAvailability(venueId string) ([]venue.VenueCore, error) {
+	panic("unimplemented")
 }

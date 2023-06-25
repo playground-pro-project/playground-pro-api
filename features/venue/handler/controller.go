@@ -57,7 +57,7 @@ func (vh *venueHandler) RegisterVenue() echo.HandlerFunc {
 }
 
 // SearchVenue implements venue.VenueHandler.
-func (vh *venueHandler) SearchVenue() echo.HandlerFunc {
+func (vh *venueHandler) SearchVenues() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var page pagination.Pagination
 		limitInt, err := strconv.Atoi(c.QueryParam("limit"))
@@ -77,7 +77,7 @@ func (vh *venueHandler) SearchVenue() echo.HandlerFunc {
 		page.Sort = c.QueryParam("sort")
 		keyword := c.QueryParam("keyword")
 
-		venues, rows, pages, err := vh.service.SearchVenue(keyword, page)
+		venues, rows, pages, err := vh.service.SearchVenues(keyword, page)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
 				log.Error("list venues not found")
@@ -88,9 +88,9 @@ func (vh *venueHandler) SearchVenue() echo.HandlerFunc {
 			}
 		}
 
-		result := make([]searchVenueResponse, len(venues))
+		result := make([]SearchVenueResponse, len(venues))
 		for i, venue := range venues {
-			result[i] = searchVenue(venue)
+			result[i] = SearchVenue(venue)
 		}
 
 		pagination := &pagination.Pagination{
@@ -103,4 +103,42 @@ func (vh *venueHandler) SearchVenue() echo.HandlerFunc {
 
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful Operation", result, pagination))
 	}
+}
+
+// SelectVenue implements venue.VenueHandler.
+func (vh *venueHandler) SelectVenue() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		_, err := middlewares.ExtractToken(c)
+		if err != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
+
+		venueId := c.Param("id")
+		venue, err := vh.service.SelectVenue(venueId)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+			}
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
+
+		resp := SelectVenue(venue)
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successfully operation.", resp, nil))
+	}
+}
+
+// EditVenue implements venue.VenueHandler.
+func (*venueHandler) EditVenue() echo.HandlerFunc {
+	panic("unimplemented")
+}
+
+// UnregisterVenue implements venue.VenueHandler.
+func (*venueHandler) UnregisterVenue() echo.HandlerFunc {
+	panic("unimplemented")
+}
+
+// VenueAvailability implements venue.VenueHandler.
+func (*venueHandler) VenueAvailability() echo.HandlerFunc {
+	panic("unimplemented")
 }

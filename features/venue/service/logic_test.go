@@ -50,7 +50,7 @@ func TestSearchVenue(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		data.On("SearchVenue", keyword, page).Return(expectedResult, expectedTotalRows, expectedTotalPages, nil)
 
-		result, totalRows, totalPages, err := service.SearchVenue(keyword, page)
+		result, totalRows, totalPages, err := service.SearchVenues(keyword, page)
 
 		assert.Nil(t, err)
 		assert.Len(t, result, 1)
@@ -66,7 +66,7 @@ func TestSearchVenue(t *testing.T) {
 	t.Run("list venues record not found", func(t *testing.T) {
 		data.On("SearchVenue", keyword, page).Return([]venue.VenueCore{}, int64(0), 0, errors.New("list venues record not found")).Once()
 
-		result, _, _, err := service.SearchVenue(keyword, page)
+		result, _, _, err := service.SearchVenues(keyword, page)
 
 		assert.Error(t, err)
 		assert.Len(t, result, 0)
@@ -77,7 +77,7 @@ func TestSearchVenue(t *testing.T) {
 	t.Run("internal server error", func(t *testing.T) {
 		data.On("SearchVenue", keyword, page).Return([]venue.VenueCore{}, int64(0), 0, errors.New("internal server error"))
 
-		result, _, _, err := service.SearchVenue(keyword, page)
+		result, _, _, err := service.SearchVenues(keyword, page)
 
 		assert.Error(t, err)
 		assert.Empty(t, result)
