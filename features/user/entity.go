@@ -14,10 +14,11 @@ type UserCore struct {
 	Address        string
 	Role           string
 	ProfilePicture string
-	OtpEnabled     bool
-	OtpVerified    bool
-	OtpSecret      string
-	OtpAuthURL     string
+	OTPCode        string
+	OTPEnabled     bool
+	OTPVerified    bool
+	OTPSecret      string
+	OTPAuthURL     string
 	OwnerFile      string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
@@ -83,6 +84,7 @@ type UserService interface {
 	Register(request UserCore) (UserCore, error)
 	Login(request UserCore) (UserCore, string, error)
 	GenerateOTP(request UserCore) (UserCore, error)
+	VerifyOTP(request UserCore) (UserCore, error)
 	DeleteByID(userID string) error
 	GetByID(userID string) (UserCore, error)
 	UpdateByID(userID string, updatedUser UserCore) error
@@ -92,6 +94,7 @@ type UserData interface {
 	Register(request UserCore) (UserCore, error)
 	Login(request UserCore) (UserCore, string, error)
 	GenerateOTP(request UserCore) (UserCore, error)
+	VerifyOTP(request UserCore) (UserCore, error)
 	DeleteByID(userID string) error
 	GetByID(userID string) (UserCore, error)
 	UpdateByID(userID string, updatedUser UserCore) error

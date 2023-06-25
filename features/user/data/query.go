@@ -104,13 +104,38 @@ func (uq *userQuery) GenerateOTP(request user.UserCore) (user.UserCore, error) {
 	}
 
 	dataToUpdate := User{
-		OtpSecret:  key.Secret(),
+		OTPSecret:  key.Secret(),
 		OtpAuthURL: key.URL(),
 	}
 
 	uq.db.Model(&result).Updates(dataToUpdate)
 
 	return UserModelToCore(dataToUpdate), err
+}
+
+// VerifyOTP implements user.UserData.
+func (uq *userQuery) VerifyOTP(request user.UserCore) (user.UserCore, error) {
+	result := User{}
+	query := uq.db.Table("users").Where("user_id = ?", request.UserID).First(&result)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("user record not found")
+		return user.UserCore{}, errors.New("user record not found")
+	}
+
+	valid := totp.Validate(request.OTPCode, result.OTPSecret)
+	if !valid {
+		log.Warn("OTPCode does not match")
+		return user.UserCore{}, errors.New("OTPCode does not match")
+	}
+
+	dataToUpdate := map[string]interface{}{
+		"otp_secret":   0,
+		"otp_auth_url": 0,
+	}
+
+	uq.db.Table("users").Updates(dataToUpdate)
+
+	return UserModelToCore(result), nil
 }
 
 // DeleteByID implements user.UserData.

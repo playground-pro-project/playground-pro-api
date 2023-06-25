@@ -34,7 +34,7 @@ func (uh *userHandler) Register() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
 		}
 
-		_, err := uh.userService.Register(RequestToCore(request))
+		resp, err := uh.userService.Register(RequestToCore(request))
 		if err != nil {
 			switch {
 			case strings.Contains(err.Error(), "empty"):
@@ -58,7 +58,7 @@ func (uh *userHandler) Register() echo.HandlerFunc {
 			}
 		}
 
-		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully created an account.", nil, nil))
+		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully created an account.", otpResponse{UserID: resp.UserID}, nil))
 	}
 }
 
@@ -99,7 +99,7 @@ func (uh *userHandler) Login() echo.HandlerFunc {
 			UserID:     resp.UserID,
 			Email:      resp.Email,
 			Token:      token,
-			OtpEnabled: resp.OtpEnabled,
+			OTPEnabled: resp.OTPEnabled,
 		}, nil))
 	}
 }
@@ -120,8 +120,30 @@ func (uh *userHandler) GenerateOTP() echo.HandlerFunc {
 			}
 		}
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful operation", otpResponse{
-			OTPSecret:  resp.OtpSecret,
-			OTPAuthURL: resp.OtpAuthURL,
+			OTPSecret:  resp.OTPSecret,
+			OTPAuthURL: resp.OTPAuthURL,
+		}, nil))
+	}
+}
+
+func (uh *userHandler) VerifyOTP() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// request user_id and OTPCode
+		payload := OTPInput{}
+		errBind := c.Bind(&payload)
+		if errBind != nil {
+			c.Logger().Error("error on bind login input")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
+		}
+
+		resp, err := uh.userService.VerifyOTP(RequestToCore(payload))
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+			}
+		}
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful operation", otpResponse{
+			UserID: resp.UserID, OTPEnabled: resp.OTPEnabled,
 		}, nil))
 	}
 }
