@@ -38,19 +38,16 @@ func initUserRouter(db *gorm.DB, e *echo.Echo) {
 	userService := us.New(userData, validate)
 	userHandler := uh.New(userService)
 
-	e.POST("/register", userHandler.Register)
-	e.POST("/login", userHandler.Login)
-	e.POST("/otp/generate", userHandler.GenerateOTP)
+	e.POST("/register", userHandler.Register())
+	e.POST("/login", userHandler.Login())
+	e.POST("/otp/generate", userHandler.GenerateOTP())
 
-	usersGroup := e.Group("/users")
-	{
-		usersGroup.GET("", userHandler.GetUserProfile, middlewares.JWTMiddleware())
-		usersGroup.PUT("", userHandler.UpdateUserProfile, middlewares.JWTMiddleware())
-		usersGroup.PUT("/password", userHandler.UpdatePassword, middlewares.JWTMiddleware())
-		usersGroup.DELETE("", userHandler.DeleteUser, middlewares.JWTMiddleware())
-		usersGroup.PUT("", userHandler.UploadProfilePicture, middlewares.JWTMiddleware())
-		usersGroup.PUT("", userHandler.RemoveProfilePicture, middlewares.JWTMiddleware())
-	}
+	e.GET("/users", userHandler.GetUserProfile(), middlewares.JWTMiddleware())
+	e.PUT("/users", userHandler.UpdateUserProfile(), middlewares.JWTMiddleware())
+	e.PUT("/users/password", userHandler.UpdatePassword(), middlewares.JWTMiddleware())
+	e.DELETE("/users", userHandler.DeleteUser(), middlewares.JWTMiddleware())
+	e.PUT("/users", userHandler.UploadProfilePicture(), middlewares.JWTMiddleware())
+	e.PUT("/users", userHandler.RemoveProfilePicture(), middlewares.JWTMiddleware())
 }
 
 func initVenueRouter(db *gorm.DB, e *echo.Echo) {
