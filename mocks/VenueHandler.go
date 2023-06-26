@@ -12,8 +12,88 @@ type VenueHandler struct {
 	mock.Mock
 }
 
-// SearchVenue provides a mock function with given fields:
-func (_m *VenueHandler) SearchVenue() echo.HandlerFunc {
+// EditVenue provides a mock function with given fields:
+func (_m *VenueHandler) EditVenue() echo.HandlerFunc {
+	ret := _m.Called()
+
+	var r0 echo.HandlerFunc
+	if rf, ok := ret.Get(0).(func() echo.HandlerFunc); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(echo.HandlerFunc)
+		}
+	}
+
+	return r0
+}
+
+// RegisterVenue provides a mock function with given fields:
+func (_m *VenueHandler) RegisterVenue() echo.HandlerFunc {
+	ret := _m.Called()
+
+	var r0 echo.HandlerFunc
+	if rf, ok := ret.Get(0).(func() echo.HandlerFunc); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(echo.HandlerFunc)
+		}
+	}
+
+	return r0
+}
+
+// SearchVenues provides a mock function with given fields:
+func (_m *VenueHandler) SearchVenues() echo.HandlerFunc {
+	ret := _m.Called()
+
+	var r0 echo.HandlerFunc
+	if rf, ok := ret.Get(0).(func() echo.HandlerFunc); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(echo.HandlerFunc)
+		}
+	}
+
+	return r0
+}
+
+// SelectVenue provides a mock function with given fields:
+func (_m *VenueHandler) SelectVenue() echo.HandlerFunc {
+	ret := _m.Called()
+
+	var r0 echo.HandlerFunc
+	if rf, ok := ret.Get(0).(func() echo.HandlerFunc); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(echo.HandlerFunc)
+		}
+	}
+
+	return r0
+}
+
+// UnregisterVenue provides a mock function with given fields:
+func (_m *VenueHandler) UnregisterVenue() echo.HandlerFunc {
+	ret := _m.Called()
+
+	var r0 echo.HandlerFunc
+	if rf, ok := ret.Get(0).(func() echo.HandlerFunc); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(echo.HandlerFunc)
+		}
+	}
+
+	return r0
+}
+
+// VenueAvailability provides a mock function with given fields:
+func (_m *VenueHandler) VenueAvailability() echo.HandlerFunc {
 	ret := _m.Called()
 
 	var r0 echo.HandlerFunc

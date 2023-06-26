@@ -143,6 +143,30 @@ func (_m *UserService) UpdateByID(userID string, updatedUser user.UserCore) erro
 	return r0
 }
 
+// VerifyOTP provides a mock function with given fields: request
+func (_m *UserService) VerifyOTP(request user.UserCore) (user.UserCore, error) {
+	ret := _m.Called(request)
+
+	var r0 user.UserCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(user.UserCore) (user.UserCore, error)); ok {
+		return rf(request)
+	}
+	if rf, ok := ret.Get(0).(func(user.UserCore) user.UserCore); ok {
+		r0 = rf(request)
+	} else {
+		r0 = ret.Get(0).(user.UserCore)
+	}
+
+	if rf, ok := ret.Get(1).(func(user.UserCore) error); ok {
+		r1 = rf(request)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewUserService creates a new instance of UserService. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewUserService(t interface {

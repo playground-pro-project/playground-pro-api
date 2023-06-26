@@ -13,8 +13,46 @@ type VenueData struct {
 	mock.Mock
 }
 
-// SearchVenue provides a mock function with given fields: keyword, page
-func (_m *VenueData) SearchVenue(keyword string, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
+// EditVenue provides a mock function with given fields: userId, venueId, request
+func (_m *VenueData) EditVenue(userId string, venueId string, request venue.VenueCore) error {
+	ret := _m.Called(userId, venueId, request)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string, venue.VenueCore) error); ok {
+		r0 = rf(userId, venueId, request)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// RegisterVenue provides a mock function with given fields: userId, request
+func (_m *VenueData) RegisterVenue(userId string, request venue.VenueCore) (venue.VenueCore, error) {
+	ret := _m.Called(userId, request)
+
+	var r0 venue.VenueCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, venue.VenueCore) (venue.VenueCore, error)); ok {
+		return rf(userId, request)
+	}
+	if rf, ok := ret.Get(0).(func(string, venue.VenueCore) venue.VenueCore); ok {
+		r0 = rf(userId, request)
+	} else {
+		r0 = ret.Get(0).(venue.VenueCore)
+	}
+
+	if rf, ok := ret.Get(1).(func(string, venue.VenueCore) error); ok {
+		r1 = rf(userId, request)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// SearchVenues provides a mock function with given fields: keyword, page
+func (_m *VenueData) SearchVenues(keyword string, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
 	ret := _m.Called(keyword, page)
 
 	var r0 []venue.VenueCore
@@ -51,6 +89,70 @@ func (_m *VenueData) SearchVenue(keyword string, page pagination.Pagination) ([]
 	}
 
 	return r0, r1, r2, r3
+}
+
+// SelectVenue provides a mock function with given fields: venueId
+func (_m *VenueData) SelectVenue(venueId string) (venue.VenueCore, error) {
+	ret := _m.Called(venueId)
+
+	var r0 venue.VenueCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (venue.VenueCore, error)); ok {
+		return rf(venueId)
+	}
+	if rf, ok := ret.Get(0).(func(string) venue.VenueCore); ok {
+		r0 = rf(venueId)
+	} else {
+		r0 = ret.Get(0).(venue.VenueCore)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(venueId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UnregisterVenue provides a mock function with given fields: userId, venueId
+func (_m *VenueData) UnregisterVenue(userId string, venueId string) error {
+	ret := _m.Called(userId, venueId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(userId, venueId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// VenueAvailability provides a mock function with given fields: venueId
+func (_m *VenueData) VenueAvailability(venueId string) ([]venue.VenueCore, error) {
+	ret := _m.Called(venueId)
+
+	var r0 []venue.VenueCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]venue.VenueCore, error)); ok {
+		return rf(venueId)
+	}
+	if rf, ok := ret.Get(0).(func(string) []venue.VenueCore); ok {
+		r0 = rf(venueId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]venue.VenueCore)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(venueId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // NewVenueData creates a new instance of VenueData. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

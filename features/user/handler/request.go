@@ -24,7 +24,8 @@ type LoginRequest struct {
 }
 
 type OTPInput struct {
-	UserID string `json:"user_id"`
+	UserID  string `json:"user_id"`
+	OTPCode string `json:"otp_code"`
 }
 
 type EditProfileRequest struct {
@@ -53,6 +54,7 @@ func RequestToCore(data interface{}) user.UserCore {
 		res.Password = v.Password
 	case OTPInput:
 		res.UserID = v.UserID
+		res.OTPCode = v.OTPCode
 	default:
 		return user.UserCore{}
 	}

@@ -11,7 +11,7 @@ type makeReservationResponse struct {
 	GrandTotal    string           `json:"grand_total"`
 	PaymentMethod string           `json:"payment_method"`
 	PaymentType   string           `json:"payment_type"`
-	VANumber      string           `json:"va_number"`
+	PaymentCode   string           `json:"payment_code"`
 	Status        string           `json:"status"`
 	CreatedAt     helper.LocalTime `json:"created_at"`
 	UpdatedAt     helper.LocalTime `json:"updated_at"`
@@ -24,7 +24,7 @@ func makeReservation(p reservation.PaymentCore) makeReservationResponse {
 		GrandTotal:    p.GrandTotal,
 		PaymentMethod: p.PaymentMethod,
 		PaymentType:   p.PaymentType,
-		VANumber:      p.VANumber,
+		PaymentCode:   p.PaymentCode,
 		Status:        p.Status,
 		CreatedAt:     helper.LocalTime(p.CreatedAt),
 		UpdatedAt:     helper.LocalTime(p.UpdatedAt),

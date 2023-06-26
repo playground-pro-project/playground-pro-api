@@ -1,6 +1,8 @@
 package helper
 
-import "time"
+import (
+	"time"
+)
 
 type LocalTime time.Time
 

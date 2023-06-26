@@ -51,7 +51,7 @@ func (rq *reservationQuery) MakeReservation(userID string, r reservation.Reserva
 	}
 
 	// TODO 3 : Create payment
-	if err := tx.Create(paymentEntities(paymentCoreFromChargeResponse(paymentModel))).Error; err != nil {
+	if err := tx.Create(paymentEntities(PaymentCoreFromChargeResponse(paymentModel))).Error; err != nil {
 		tx.Rollback()
 		log.Error("error while saving payment")
 		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New("internal server error while saving payment")
@@ -71,7 +71,7 @@ func (rq *reservationQuery) MakeReservation(userID string, r reservation.Reserva
 		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New("internal server error on committing database transaction")
 	}
 
-	return reservationModels(reservationModel), paymentCoreFromChargeResponse(paymentModel), nil
+	return reservationModels(reservationModel), PaymentCoreFromChargeResponse(paymentModel), nil
 }
 
 // TODO 5: Callback Midtrans for updated payment status during reservation validation

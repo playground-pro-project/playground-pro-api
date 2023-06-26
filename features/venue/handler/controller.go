@@ -24,8 +24,41 @@ func New(vs venue.VenueService) venue.VenueHandler {
 	}
 }
 
+// RegisterVenue implements venue.VenueHandler.
+func (vh *venueHandler) RegisterVenue() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		request := RegisterVenueRequest{}
+		userId, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
+
+		errBind := c.Bind(&request)
+		if errBind != nil {
+			log.Error("error on bind input")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request", nil, nil))
+		}
+
+		_, err := vh.service.RegisterVenue(userId, RequestToCore(request))
+		if err != nil {
+			if strings.Contains(err.Error(), "empty") {
+				log.Error("request cannot be empty")
+				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request", nil, nil))
+			}
+			if strings.Contains(err.Error(), "duplicated") {
+				log.Error("error on bind input")
+				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request", nil, nil))
+			}
+			log.Error("internal server error")
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
+		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully created new venue", nil, nil))
+	}
+}
+
 // SearchVenue implements venue.VenueHandler.
-func (vh *venueHandler) SearchVenue() echo.HandlerFunc {
+func (vh *venueHandler) SearchVenues() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var page pagination.Pagination
 		limitInt, err := strconv.Atoi(c.QueryParam("limit"))
@@ -45,7 +78,7 @@ func (vh *venueHandler) SearchVenue() echo.HandlerFunc {
 		page.Sort = c.QueryParam("sort")
 		keyword := c.QueryParam("keyword")
 
-		venues, rows, pages, err := vh.service.SearchVenue(keyword, page)
+		venues, rows, pages, err := vh.service.SearchVenues(keyword, page)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
 				log.Error("list venues not found")
@@ -56,9 +89,9 @@ func (vh *venueHandler) SearchVenue() echo.HandlerFunc {
 			}
 		}
 
-		result := make([]searchVenueResponse, len(venues))
+		result := make([]SearchVenueResponse, len(venues))
 		for i, venue := range venues {
-			result[i] = searchVenue(venue)
+			result[i] = SearchVenue(venue)
 		}
 
 		pagination := &pagination.Pagination{
@@ -72,3 +105,98 @@ func (vh *venueHandler) SearchVenue() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful Operation", result, pagination))
 	}
 }
+
+// SelectVenue implements venue.VenueHandler.
+func (vh *venueHandler) SelectVenue() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		_, err := middlewares.ExtractToken(c)
+		if err != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
+
+		venueId := c.Param("venue_id")
+		venue, err := vh.service.SelectVenue(venueId)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+			}
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
+
+		resp := SelectVenue(venue)
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successfully operation.", resp, nil))
+	}
+}
+
+// EditVenue implements venue.VenueHandler.
+func (vh *venueHandler) EditVenue() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		request := EditVenueRequest{}
+		userId, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
+
+		errBind := c.Bind(&request)
+		if errBind != nil {
+			log.Error("error on bind input")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request", nil, nil))
+		}
+
+		venueId := c.Param("venue_id")
+		err := vh.service.EditVenue(userId, venueId, RequestToCore(&request))
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+			}
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Venue updated successfully", nil, nil))
+	}
+}
+
+// UnregisterVenue implements venue.VenueHandler.
+func (vh *venueHandler) UnregisterVenue() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
+
+		venueId := c.Param("venue_id")
+		err := vh.service.UnregisterVenue(userId, venueId)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+			}
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Venue deleted successfully", nil, nil))
+	}
+}
+
+// VenueAvailability implements venue.VenueHandler.
+// func (vh *venueHandler) VenueAvailability() echo.HandlerFunc {
+// 	return func(c echo.Context) error {
+// 		_, err := middlewares.ExtractToken(c)
+// 		if err != nil {
+// 			log.Error("missing or malformed JWT")
+// 			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+// 		}
+
+// 		venueId := c.Param("venue_id")
+// 		_, err := vh.service.VenueAvailability(venueId)
+// 		if err != nil {
+// 			if strings.Contains(err.Error(), "not found") {
+// 				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+// 			}
+// 			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+// 		}
+
+// 		// resp := Availability(venue)
+// 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successfully operation.", nil, nil))
+// 	}
+// }

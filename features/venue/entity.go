@@ -10,14 +10,14 @@ import (
 type VenueCore struct {
 	VenueID       string
 	OwnerID       string
-	Category      string
-	Name          string
+	Category      string `validate:"required"`
+	Name          string `validate:"required"`
 	Description   string
 	Username      string
-	ServiceTime   time.Time
-	Location      string
+	ServiceTime   string `validate:"required"`
+	Location      string `validate:"required"`
 	Distance      uint
-	Price         float64
+	Price         float64 `validate:"required"`
 	Longitude     float64
 	Latitude      float64
 	CreatedAt     time.Time
@@ -82,13 +82,28 @@ type ReservationCore struct {
 }
 
 type VenueHandler interface {
-	SearchVenue() echo.HandlerFunc
+	RegisterVenue() echo.HandlerFunc
+	SearchVenues() echo.HandlerFunc
+	SelectVenue() echo.HandlerFunc
+	EditVenue() echo.HandlerFunc
+	UnregisterVenue() echo.HandlerFunc
+	// VenueAvailability() echo.HandlerFunc
 }
 
 type VenueService interface {
-	SearchVenue(keyword string, page pagination.Pagination) ([]VenueCore, int64, int, error)
+	RegisterVenue(userId string, request VenueCore) (VenueCore, error)
+	SearchVenues(keyword string, page pagination.Pagination) ([]VenueCore, int64, int, error)
+	SelectVenue(venueId string) (VenueCore, error)
+	EditVenue(userId string, venueId string, request VenueCore) error
+	UnregisterVenue(userId string, venueId string) error
+	// VenueAvailability(venueId string) ([]VenueCore, error)
 }
 
 type VenueData interface {
-	SearchVenue(keyword string, page pagination.Pagination) ([]VenueCore, int64, int, error)
+	RegisterVenue(userId string, request VenueCore) (VenueCore, error)
+	SearchVenues(keyword string, page pagination.Pagination) ([]VenueCore, int64, int, error)
+	SelectVenue(venueId string) (VenueCore, error)
+	EditVenue(userId string, venueId string, request VenueCore) error
+	UnregisterVenue(userId string, venueId string) error
+	// VenueAvailability(venueId string) ([]VenueCore, error)
 }

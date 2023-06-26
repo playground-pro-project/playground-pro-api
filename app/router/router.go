@@ -39,18 +39,16 @@ func initUserRouter(db *gorm.DB, e *echo.Echo) {
 	userHandler := uh.New(userService)
 
 	e.POST("/register", userHandler.Register)
-	e.POST("/login", userHandler.Login)
-	e.POST("/otp/generate", userHandler.GenerateOTP)
+	e.POST("/login", userHandler.Login())
+	e.POST("/otp/generate", userHandler.GenerateOTP())
+	e.POST("/otp/verify", userHandler.VerifyOTP())
 
-	usersGroup := e.Group("/users")
-	{
-		usersGroup.GET("", userHandler.GetUserProfile, middlewares.JWTMiddleware())
-		usersGroup.PUT("/update", userHandler.UpdateUserProfile, middlewares.JWTMiddleware())
-		usersGroup.PUT("/password", userHandler.UpdatePassword, middlewares.JWTMiddleware())
-		usersGroup.DELETE("", userHandler.DeleteUser, middlewares.JWTMiddleware())
-		usersGroup.PUT("/profile-picture/upload", userHandler.UploadProfilePicture, middlewares.JWTMiddleware())
-		usersGroup.PUT("/profile-picture/remove", userHandler.RemoveProfilePicture, middlewares.JWTMiddleware())
-	}
+	e.GET("/users", userHandler.GetUserProfile(), middlewares.JWTMiddleware())
+	e.PUT("/users", userHandler.UpdateUserProfile(), middlewares.JWTMiddleware())
+	e.PUT("/users/password", userHandler.UpdatePassword(), middlewares.JWTMiddleware())
+	e.DELETE("/users", userHandler.DeleteUser(), middlewares.JWTMiddleware())
+	e.PUT("/users", userHandler.UploadProfilePicture(), middlewares.JWTMiddleware())
+
 }
 
 func initVenueRouter(db *gorm.DB, e *echo.Echo) {
@@ -62,13 +60,15 @@ func initVenueRouter(db *gorm.DB, e *echo.Echo) {
 	reviewService := rs.New(reviewData)
 	reviewHandler := rh.New(reviewService)
 
-	venuesGroup := e.Group("/venues")
-	{
-		venuesGroup.GET("", venueHandler.SearchVenue())
-		venuesGroup.POST("/:venue_id/reviews", reviewHandler.CreateReview, middlewares.JWTMiddleware())
-		venuesGroup.GET("/:venue_id/reviews", reviewHandler.GetAllReview, middlewares.JWTMiddleware())
-		venuesGroup.DELETE("/:review_id", reviewHandler.DeleteReview)
-	}
+	e.POST("/venues", venueHandler.RegisterVenue(), middlewares.JWTMiddleware())
+	e.GET("/venues", venueHandler.SearchVenues())
+	e.GET("/venues/:venue_id", venueHandler.SelectVenue(), middlewares.JWTMiddleware())
+	// e.GET("/venues/:venue_id/availability", venueHandler.VenueAvailability(), middlewares.JWTMiddleware())
+	e.PUT("/venues/:venue_id", venueHandler.EditVenue(), middlewares.JWTMiddleware())
+	e.DELETE("/venues/:venue_id", venueHandler.UnregisterVenue(), middlewares.JWTMiddleware())
+	e.POST("/venues/:venue_id/reviews", reviewHandler.CreateReview, middlewares.JWTMiddleware())
+	e.GET("/venues/:venue_id/reviews", reviewHandler.GetAllReview, middlewares.JWTMiddleware())
+	e.DELETE("/reviews/:review_id", reviewHandler.DeleteReview)
 }
 
 func initReservationRouter(db *gorm.DB, e *echo.Echo) {

@@ -50,7 +50,6 @@ func (uq *userQuery) Register(request user.UserCore) (user.UserCore, error) {
 	}
 
 	log.Sugar().Infof("new user has been created: %s", req.Email)
-	email.SendOTP(req.Fullname, req.Email)
 	return UserModelToCore(req), nil
 }
 
@@ -87,13 +86,14 @@ func (uq *userQuery) Login(request user.UserCore) (user.UserCore, string, error)
 // GenerateOTP implements user.UserData.
 func (uq *userQuery) GenerateOTP(request user.UserCore) (user.UserCore, error) {
 	key, err := totp.Generate(totp.GenerateOpts{
-		Issuer:      "codevoweb.com",
-		AccountName: "admin@admin.com",
-		SecretSize:  15,
+		Issuer:      "peterzalai.biz.id",
+		AccountName: "dimas.yudhana@gmail.com",
+		Period:      300,
+		SecretSize:  10,
 	})
 
 	if err != nil {
-		panic(err)
+		return user.UserCore{}, err
 	}
 
 	result := User{}
@@ -104,13 +104,46 @@ func (uq *userQuery) GenerateOTP(request user.UserCore) (user.UserCore, error) {
 	}
 
 	dataToUpdate := User{
-		OtpSecret:  key.Secret(),
-		OtpAuthURL: key.URL(),
+		OTPSecret:  key.Secret(),
+		OTPAuthURL: key.URL(),
 	}
 
-	uq.db.Model(&result).Updates(dataToUpdate)
+	if err := uq.db.Model(&result).Updates(dataToUpdate).Error; err != nil {
+		log.Error("error executing update query")
+		return user.UserCore{}, err
+	}
 
-	return UserModelToCore(dataToUpdate), err
+	email.SendOTP(dataToUpdate.OTPSecret, dataToUpdate.OTPAuthURL, result.Email)
+	return UserModelToCore(dataToUpdate), nil
+}
+
+// VerifyOTP implements user.UserData.
+func (uq *userQuery) VerifyOTP(request user.UserCore) (user.UserCore, error) {
+	result := User{}
+	query := uq.db.Table("users").Where("user_id = ?", request.UserID).First(&result)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("user record not found")
+		return user.UserCore{}, errors.New("user record not found")
+	}
+
+	log.Sugar().Infof("%s,%s", request.OTPCode, result.OTPSecret)
+	valid := totp.Validate(request.OTPCode, result.OTPSecret)
+	if !valid {
+		log.Warn("OTPCode does not match")
+		return user.UserCore{}, errors.New("OTPCode does not match")
+	}
+
+	dataToUpdate := map[string]interface{}{
+		"otp_enabled":  true,
+		"otp_verified": true,
+	}
+
+	if err := uq.db.Model(&result).Updates(dataToUpdate).Error; err != nil {
+		log.Error("error executing update query")
+		return user.UserCore{}, err
+	}
+
+	return UserModelToCore(result), nil
 }
 
 // DeleteByID implements user.UserData.

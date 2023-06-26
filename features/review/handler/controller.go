@@ -33,9 +33,7 @@ func (rh *reviewHandler) CreateReview(c echo.Context) error {
 	req := CreateReviewRequest{}
 	errBind := c.Bind(&req)
 	if errBind != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Invalid request payload",
-		})
+		return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Invalid request payload"))
 	}
 
 	reviewCore := CreateReviewRequestToCore(req)
@@ -54,7 +52,7 @@ func (rh *reviewHandler) DeleteReview(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 	}
 
-	return c.JSON(http.StatusBadRequest, helper.SuccessResponse(nil, "Review deleted successfully"))
+	return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "Review deleted successfully"))
 }
 
 func (rh *reviewHandler) GetAllReview(c echo.Context) error {

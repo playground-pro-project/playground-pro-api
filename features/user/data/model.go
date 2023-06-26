@@ -20,10 +20,10 @@ type User struct {
 	Address        string `gorm:"type:text"`
 	Role           string `gorm:"type:enum('user', 'owner', 'admin');default:'user'"`
 	ProfilePicture string `gorm:"type:text"`
-	OtpEnabled     bool   `gorm:"default:false;"`
-	OtpVerified    bool   `gorm:"default:false;"`
-	OtpSecret      string
-	OtpAuthURL     string
+	OTPEnabled     bool   `gorm:"default:false;"`
+	OTPVerified    bool   `gorm:"default:false;"`
+	OTPSecret      string
+	OTPAuthURL     string
 	OwnerFile      string                    `gorm:"type:text"`
 	CreatedAt      time.Time                 `gorm:"type:datetime"`
 	UpdatedAt      time.Time                 `gorm:"type:datetime"`
@@ -58,10 +58,10 @@ func UserModelToCore(u User) user.UserCore {
 		Address:        u.Address,
 		Role:           u.Role,
 		ProfilePicture: u.ProfilePicture,
-		OtpEnabled:     u.OtpEnabled,
-		OtpVerified:    u.OtpVerified,
-		OtpSecret:      u.OtpSecret,
-		OtpAuthURL:     u.OtpAuthURL,
+		OTPEnabled:     u.OTPEnabled,
+		OTPVerified:    u.OTPVerified,
+		OTPSecret:      u.OTPSecret,
+		OTPAuthURL:     u.OTPAuthURL,
 		OwnerFile:      u.OwnerFile,
 		CreatedAt:      u.CreatedAt,
 		UpdatedAt:      u.UpdatedAt,
