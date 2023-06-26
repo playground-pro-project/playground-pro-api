@@ -130,20 +130,18 @@ func (_m *VenueData) UnregisterVenue(userId string, venueId string) error {
 }
 
 // VenueAvailability provides a mock function with given fields: venueId
-func (_m *VenueData) VenueAvailability(venueId string) ([]venue.VenueCore, error) {
+func (_m *VenueData) VenueAvailability(venueId string) (venue.VenueCore, error) {
 	ret := _m.Called(venueId)
 
-	var r0 []venue.VenueCore
+	var r0 venue.VenueCore
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]venue.VenueCore, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) (venue.VenueCore, error)); ok {
 		return rf(venueId)
 	}
-	if rf, ok := ret.Get(0).(func(string) []venue.VenueCore); ok {
+	if rf, ok := ret.Get(0).(func(string) venue.VenueCore); ok {
 		r0 = rf(venueId)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]venue.VenueCore)
-		}
+		r0 = ret.Get(0).(venue.VenueCore)
 	}
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {

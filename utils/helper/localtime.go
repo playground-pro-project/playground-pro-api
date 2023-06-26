@@ -12,5 +12,5 @@ func (lt LocalTime) MarshalJSON() ([]byte, error) {
 		return []byte(`""`), nil
 	}
 
-	return []byte(`"` + t.Format("Monday, 02 January 2006 15:04:00") + `"`), nil
+	return []byte(`"` + t.Format("Monday, 02 January 2006 15:04:00 WIB") + `"`), nil
 }

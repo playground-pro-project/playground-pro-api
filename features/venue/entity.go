@@ -27,6 +27,7 @@ type VenueCore struct {
 	AverageRating float64
 	VenuePictures []VenuePictureCore
 	Reviews       []ReviewCore
+	Reservations  []ReservationCore
 	User          UserCore
 }
 
@@ -72,6 +73,7 @@ type ReservationCore struct {
 	ReservationID string
 	UserID        string
 	VenueID       string
+	Username      string
 	CheckInDate   time.Time
 	CheckOutDate  time.Time
 	Duration      uint
@@ -79,6 +81,7 @@ type ReservationCore struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     time.Time
+	User          UserCore
 }
 
 type VenueHandler interface {
@@ -87,7 +90,7 @@ type VenueHandler interface {
 	SelectVenue() echo.HandlerFunc
 	EditVenue() echo.HandlerFunc
 	UnregisterVenue() echo.HandlerFunc
-	// VenueAvailability() echo.HandlerFunc
+	VenueAvailability() echo.HandlerFunc
 }
 
 type VenueService interface {
@@ -96,7 +99,7 @@ type VenueService interface {
 	SelectVenue(venueId string) (VenueCore, error)
 	EditVenue(userId string, venueId string, request VenueCore) error
 	UnregisterVenue(userId string, venueId string) error
-	// VenueAvailability(venueId string) ([]VenueCore, error)
+	VenueAvailability(venueId string) (VenueCore, error)
 }
 
 type VenueData interface {
@@ -105,5 +108,5 @@ type VenueData interface {
 	SelectVenue(venueId string) (VenueCore, error)
 	EditVenue(userId string, venueId string, request VenueCore) error
 	UnregisterVenue(userId string, venueId string) error
-	// VenueAvailability(venueId string) ([]VenueCore, error)
+	VenueAvailability(venueId string) (VenueCore, error)
 }
