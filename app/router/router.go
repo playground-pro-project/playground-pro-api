@@ -60,10 +60,10 @@ func initVenueRouter(db *gorm.DB, e *echo.Echo) {
 	reviewService := rs.New(reviewData)
 	reviewHandler := rh.New(reviewService)
 
-	e.POST("/venues/", venueHandler.RegisterVenue(), middlewares.JWTMiddleware())
+	e.POST("/venues", venueHandler.RegisterVenue(), middlewares.JWTMiddleware())
 	e.GET("/venues", venueHandler.SearchVenues())
 	e.GET("/venues/:venue_id", venueHandler.SelectVenue(), middlewares.JWTMiddleware())
-	e.GET("/venues/:venue_id/availability", venueHandler.VenueAvailability(), middlewares.JWTMiddleware())
+	// e.GET("/venues/:venue_id/availability", venueHandler.VenueAvailability(), middlewares.JWTMiddleware())
 	e.PUT("/venues/:venue_id", venueHandler.EditVenue(), middlewares.JWTMiddleware())
 	e.DELETE("/venues/:venue_id", venueHandler.UnregisterVenue(), middlewares.JWTMiddleware())
 	e.POST("/venues/:venue_id/reviews", reviewHandler.CreateReview, middlewares.JWTMiddleware())

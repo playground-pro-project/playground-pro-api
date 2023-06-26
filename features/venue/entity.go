@@ -14,8 +14,8 @@ type VenueCore struct {
 	Name          string `validate:"required"`
 	Description   string
 	Username      string
-	ServiceTime   time.Time `validate:"required"`
-	Location      string    `validate:"required"`
+	ServiceTime   string `validate:"required"`
+	Location      string `validate:"required"`
 	Distance      uint
 	Price         float64 `validate:"required"`
 	Longitude     float64
@@ -87,7 +87,7 @@ type VenueHandler interface {
 	SelectVenue() echo.HandlerFunc
 	EditVenue() echo.HandlerFunc
 	UnregisterVenue() echo.HandlerFunc
-	VenueAvailability() echo.HandlerFunc
+	// VenueAvailability() echo.HandlerFunc
 }
 
 type VenueService interface {
@@ -96,7 +96,7 @@ type VenueService interface {
 	SelectVenue(venueId string) (VenueCore, error)
 	EditVenue(userId string, venueId string, request VenueCore) error
 	UnregisterVenue(userId string, venueId string) error
-	VenueAvailability(venueId string) ([]VenueCore, error)
+	// VenueAvailability(venueId string) ([]VenueCore, error)
 }
 
 type VenueData interface {
@@ -105,5 +105,5 @@ type VenueData interface {
 	SelectVenue(venueId string) (VenueCore, error)
 	EditVenue(userId string, venueId string, request VenueCore) error
 	UnregisterVenue(userId string, venueId string) error
-	VenueAvailability(venueId string) ([]VenueCore, error)
+	// VenueAvailability(venueId string) ([]VenueCore, error)
 }

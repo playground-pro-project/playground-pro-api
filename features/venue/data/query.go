@@ -38,8 +38,8 @@ func (vq *venueQuery) RegisterVenue(userId string, request venue.VenueCore) (ven
 		return venue.VenueCore{}, errors.New("venues not found")
 	}
 	if query.Error != nil {
-		log.Error("error executing")
-		return venue.VenueCore{}, errors.New("error insert data, duplicated")
+		log.Error("error executing query")
+		return venue.VenueCore{}, errors.New("error executing query")
 	}
 	if query.RowsAffected == 0 {
 		log.Warn("no venue has been created")
@@ -113,13 +113,12 @@ func (vq *venueQuery) SelectVenue(venueId string) (venue.VenueCore, error) {
 		Joins("LEFT JOIN venue_pictures ON venue_pictures.venue_id = venues.venue_id").
 		Joins("LEFT JOIN reviews ON reviews.venue_id = venues.venue_id").
 		Joins("LEFT JOIN users ON users.user_id = venues.owner_id").
-		Where("venues.deleted_at IS NULL").
+		Where("venues.venue_id = ?", venueId).
 		Group("venues.venue_id").
 		Preload("User").
 		Preload("VenuePictures").
 		Preload("Reviews").
-		Find(&venues)
-
+		First(&venues)
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
 		log.Error("list venues not found")
 		return venue.VenueCore{}, errors.New("venues not found")
@@ -137,30 +136,29 @@ func (vq *venueQuery) SelectVenue(venueId string) (venue.VenueCore, error) {
 func (vq *venueQuery) EditVenue(userId string, venueId string, request venue.VenueCore) error {
 	req := venueEntities(request)
 	query := vq.db.Table("venues").
-		Where("userId = ? AND venue_id = ?", userId, venueId).
+		Where("owner_id = ? AND venue_id = ?", userId, venueId).
 		Updates(&req)
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
-		log.Error("mentee profile record not found")
-		return errors.New("mentee profile record not found")
+		log.Error("venue profile record not found")
+		return errors.New("venue profile record not found")
 	}
 
 	if query.RowsAffected == 0 {
-		log.Warn("no mentee has been created")
+		log.Warn("no venue has been created")
 		return errors.New("row affected : 0")
 	}
 
 	if query.Error != nil {
-		log.Error("error while updating mentee")
-		return errors.New("duplicate data entry")
+		log.Sugar().Error("error executing venues query:", query.Error)
+		return errors.New("error executing venues query")
 	}
-
 	return nil
 }
 
 // UnregisterVenue implements venue.VenueData.
 func (vq *venueQuery) UnregisterVenue(userId string, venueId string) error {
 	query := vq.db.Table("venues").
-		Where("userId = ? AND venue_id = ?", userId, venueId).
+		Where("owner_id = ? AND venue_id = ?", userId, venueId).
 		Delete(&Venue{})
 
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
@@ -181,7 +179,7 @@ func (vq *venueQuery) UnregisterVenue(userId string, venueId string) error {
 	return nil
 }
 
-// VenueAvailability implements venue.VenueData.
-func (*venueQuery) VenueAvailability(venueId string) ([]venue.VenueCore, error) {
-	panic("unimplemented")
-}
+// // VenueAvailability implements venue.VenueData.
+// func (*venueQuery) VenueAvailability(venueId string) ([]venue.VenueCore, error) {
+// 	panic("unimplemented")
+// }
