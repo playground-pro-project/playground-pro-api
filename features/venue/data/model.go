@@ -11,23 +11,23 @@ import (
 )
 
 type Venue struct {
-	VenueID       string                    `gorm:"primaryKey;type:varchar(45)"`
-	OwnerID       string                    `gorm:"type:varchar(45)"`
-	Category      string                    `gorm:"type:enum('basketball','football','futsal','badminton');default:'basketball'"`
-	Name          string                    `gorm:"type:varchar(225);not null;unique"`
-	Description   string                    `gorm:"type:text"`
-	ServiceTime   string                    `gorm:"type:varchar(100)"`
-	Location      string                    `gorm:"type:text"`
-	Price         float64                   `gorm:"type:double"`
-	Longitude     float64                   `gorm:"type:double"`
-	Latitude      float64                   `gorm:"type:double"`
-	CreatedAt     time.Time                 `gorm:"type:datetime"`
-	UpdatedAt     time.Time                 `gorm:"type:datetime"`
-	DeletedAt     gorm.DeletedAt            `gorm:"index"`
-	User          User                      `gorm:"references:OwnerID;foreignKey:UserID"`
-	VenuePictures []image.VenuePicture      `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
-	Reservations  []reservation.Reservation `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Reviews       []review.Review           `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	VenueID       string               `gorm:"primaryKey;type:varchar(45)"`
+	OwnerID       string               `gorm:"type:varchar(45)"`
+	Category      string               `gorm:"type:enum('basketball','football','futsal','badminton');default:'basketball'"`
+	Name          string               `gorm:"type:varchar(225);not null;unique"`
+	Description   string               `gorm:"type:text"`
+	ServiceTime   string               `gorm:"type:varchar(100)"`
+	Location      string               `gorm:"type:text"`
+	Price         float64              `gorm:"type:double"`
+	Longitude     float64              `gorm:"type:double"`
+	Latitude      float64              `gorm:"type:double"`
+	CreatedAt     time.Time            `gorm:"type:datetime"`
+	UpdatedAt     time.Time            `gorm:"type:datetime"`
+	DeletedAt     gorm.DeletedAt       `gorm:"index"`
+	User          User                 `gorm:"references:OwnerID;foreignKey:UserID"`
+	VenuePictures []image.VenuePicture `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	Reservations  []Reservation        `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Reviews       []review.Review      `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 
 type User struct {
@@ -68,6 +68,20 @@ type VenuePicture struct {
 	CreatedAt      time.Time      `gorm:"type:datetime"`
 	UpdatedAt      time.Time      `gorm:"type:datetime"`
 	DeletedAt      gorm.DeletedAt `gorm:"index"`
+}
+
+type Reservation struct {
+	ReservationID string `gorm:"primaryKey;type:varchar(45)"`
+	UserID        string `gorm:"foreignKey:UserID;type:varchar(45)"`
+	VenueID       string `gorm:"foreignKey:VenueID;type:varchar(45)"`
+	PaymentID     *string
+	CheckInDate   time.Time `gorm:"type:datetime"`
+	CheckOutDate  time.Time `gorm:"type:datetime"`
+	Duration      uint
+	CreatedAt     time.Time      `gorm:"type:datetime"`
+	UpdatedAt     time.Time      `gorm:"type:datetime"`
+	DeletedAt     gorm.DeletedAt `gorm:"index"`
+	User          User           `gorm:"references:UserID"`
 }
 
 func searchVenueModels(v Venue) venue.VenueCore {
@@ -164,6 +178,27 @@ func selectVenueModels(v Venue) venue.VenueCore {
 		Reviews:       reviews,
 	}
 
+	return result
+}
+
+func Availability(v Venue) venue.VenueCore {
+	reservations := make([]venue.ReservationCore, len(v.Reservations))
+	for i, r := range v.Reservations {
+		reservations[i] = venue.ReservationCore{
+			ReservationID: r.ReservationID,
+			Username:      r.User.Fullname,
+			CheckInDate:   r.CheckInDate,
+			CheckOutDate:  r.CheckOutDate,
+		}
+	}
+
+	result := venue.VenueCore{
+		VenueID:      v.VenueID,
+		OwnerID:      v.OwnerID,
+		Category:     v.Category,
+		Name:         v.Name,
+		Reservations: reservations,
+	}
 	return result
 }
 

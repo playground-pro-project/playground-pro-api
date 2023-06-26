@@ -119,8 +119,10 @@ func (vh *venueHandler) SelectVenue() echo.HandlerFunc {
 		venue, err := vh.service.SelectVenue(venueId)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
+				log.Error("venue not found")
 				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
 			}
+			log.Error("internal server error")
 			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
 		}
 
@@ -149,8 +151,10 @@ func (vh *venueHandler) EditVenue() echo.HandlerFunc {
 		err := vh.service.EditVenue(userId, venueId, RequestToCore(&request))
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
+				log.Error("venue not found")
 				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
 			}
+			log.Error("internal server error")
 			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
 		}
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Venue updated successfully", nil, nil))
@@ -170,8 +174,10 @@ func (vh *venueHandler) UnregisterVenue() echo.HandlerFunc {
 		err := vh.service.UnregisterVenue(userId, venueId)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
+				log.Error("venue not found")
 				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
 			}
+			log.Error("internal server error")
 			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
 		}
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Venue deleted successfully", nil, nil))
@@ -179,24 +185,27 @@ func (vh *venueHandler) UnregisterVenue() echo.HandlerFunc {
 }
 
 // VenueAvailability implements venue.VenueHandler.
-// func (vh *venueHandler) VenueAvailability() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		_, err := middlewares.ExtractToken(c)
-// 		if err != nil {
-// 			log.Error("missing or malformed JWT")
-// 			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
-// 		}
+func (vh *venueHandler) VenueAvailability() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		_, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
 
-// 		venueId := c.Param("venue_id")
-// 		_, err := vh.service.VenueAvailability(venueId)
-// 		if err != nil {
-// 			if strings.Contains(err.Error(), "not found") {
-// 				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
-// 			}
-// 			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
-// 		}
+		venueId := c.Param("venue_id")
+		availables, err := vh.service.VenueAvailability(venueId)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				log.Info("there is no reservation at this moment")
+				return c.JSON(http.StatusFound, helper.ResponseFormat(http.StatusFound, "There is no reservation at this moment", nil, nil))
+			}
+			log.Error("internal server error")
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
 
-// 		// resp := Availability(venue)
-// 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successfully operation.", nil, nil))
-// 	}
-// }
+		resp := Availability(availables)
+		log.Sugar().Infoln(resp)
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successfully operation.", resp, nil))
+	}
+}
