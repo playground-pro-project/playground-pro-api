@@ -17,7 +17,7 @@ type Pagination struct {
 
 func (p *Pagination) GetLimit() int {
 	if p.Limit == 0 {
-		p.Limit = 5
+		p.Limit = 6
 	}
 	return p.Limit
 }
