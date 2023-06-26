@@ -4,12 +4,12 @@ import (
 	"github.com/playground-pro-project/playground-pro-api/features/user"
 )
 
-// const (
-// 	maxFileSize              = 1 << 20 // 1 MB
-// 	profilePictureBaseURL    = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/user-profile-picture/"
-// 	defaultProfilePictureURL = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-// 	ownerFileBaseURL         = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/owner-docs/"
-// )
+const (
+	maxFileSize              = 1 << 20 // 1 MB
+	profilePictureBaseURL    = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/user-profile-picture/"
+	defaultProfilePictureURL = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+	ownerFileBaseURL         = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/owner-docs/"
+)
 
 type RegisterRequest struct {
 	FullName string `json:"full_name" form:"full_name"`
