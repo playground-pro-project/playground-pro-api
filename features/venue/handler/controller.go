@@ -61,18 +61,8 @@ func (vh *venueHandler) RegisterVenue() echo.HandlerFunc {
 func (vh *venueHandler) SearchVenues() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var page pagination.Pagination
-		limitInt, err := strconv.Atoi(c.QueryParam("limit"))
-		if err != nil {
-			log.Error("error while converting 'limit' to integer")
-			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad Request", nil, nil))
-		}
-
-		pageInt, err := strconv.Atoi(c.QueryParam("page"))
-		if err != nil {
-			log.Error("error while converting 'page' to integer")
-			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad Request", nil, nil))
-		}
-
+		limitInt, _ := strconv.Atoi(c.QueryParam("limit"))
+		pageInt, _ := strconv.Atoi(c.QueryParam("page"))
 		page.Limit = limitInt
 		page.Page = pageInt
 		page.Sort = c.QueryParam("sort")
