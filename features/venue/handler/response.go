@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/playground-pro-project/playground-pro-api/features/venue"
+	"github.com/playground-pro-project/playground-pro-api/utils/helper"
 )
 
 type SearchVenueResponse struct {
@@ -35,15 +36,23 @@ type SelectVenueResponse struct {
 	AverageRating float64        `json:"average_rating,omitempty"`
 	VenuePictures []VenuePicture `json:"venue_pictures,omitempty"`
 	Reviews       []Review       `json:"reviews,omitempty"`
+	Reservations  []Reservation  `json:"reservations,omitempty"`
 }
 
 type Review struct {
-	Review string  `json:"review" form:"review"`
-	Rating float64 `json:"rating" form:"rating"`
+	Review string  `json:"review,omitempty"`
+	Rating float64 `json:"rating,omitempty"`
 }
 
 type VenuePicture struct {
-	VenuePictureURL string `json:"venue_picture_url" form:"venue_picture_url"`
+	VenuePictureURL string `json:"venue_picture_url,omitempty"`
+}
+
+type Reservation struct {
+	ReservationID string           `json:"reservation_id,omitempty"`
+	Username      string           `json:"username,omitempty"`
+	CheckInDate   helper.LocalTime `json:"check_in_date,omitempty"`
+	CheckOutDate  helper.LocalTime `json:"check_out_date,omitempty"`
 }
 
 func SearchVenue(v venue.VenueCore) SearchVenueResponse {
@@ -109,5 +118,26 @@ func SelectVenue(v venue.VenueCore) SelectVenueResponse {
 		Reviews:       reviews,
 	}
 
+	return response
+}
+
+func Availability(a venue.VenueCore) SelectVenueResponse {
+	reservations := make([]Reservation, len(a.Reservations))
+	for i, r := range a.Reservations {
+		reservations[i] = Reservation{
+			ReservationID: r.ReservationID,
+			Username:      r.Username,
+			CheckInDate:   helper.LocalTime(r.CheckInDate),
+			CheckOutDate:  helper.LocalTime(r.CheckOutDate),
+		}
+	}
+
+	response := SelectVenueResponse{
+		VenueID:      a.VenueID,
+		OwnerID:      a.OwnerID,
+		Category:     a.Category,
+		Name:         a.Name,
+		Reservations: reservations,
+	}
 	return response
 }

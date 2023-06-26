@@ -134,7 +134,18 @@ func (vs *venueService) UnregisterVenue(userId string, venueId string) error {
 	return nil
 }
 
-// // VenueAvailability implements venue.VenueService.
-// func (*venueService) VenueAvailability(venueId string) ([]venue.VenueCore, error) {
-// 	panic("unimplemented")
-// }
+// VenueAvailability implements venue.VenueService.
+func (vs *venueService) VenueAvailability(venueId string) (venue.VenueCore, error) {
+	venues, err := vs.query.VenueAvailability(venueId)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			log.Warn("list venues record not found")
+			return venue.VenueCore{}, errors.New("list venues record not found")
+		} else {
+			log.Error("internal server error")
+			return venue.VenueCore{}, errors.New("internal server error")
+		}
+	}
+
+	return venues, err
+}

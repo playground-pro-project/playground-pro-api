@@ -179,7 +179,28 @@ func (vq *venueQuery) UnregisterVenue(userId string, venueId string) error {
 	return nil
 }
 
-// // VenueAvailability implements venue.VenueData.
-// func (*venueQuery) VenueAvailability(venueId string) ([]venue.VenueCore, error) {
-// 	panic("unimplemented")
-// }
+// VenueAvailability implements venue.VenueData.
+func (vq *venueQuery) VenueAvailability(venueId string) (venue.VenueCore, error) {
+	venues := Venue{}
+	query := vq.db.Table("venues").
+		Select("venues.venue_id, venues.owner_id, venues.category, venues.name, reservations.reservation_id, reservations.check_in_date, reservations.check_out_date, users.fullname").
+		Joins("JOIN reservations ON reservations.venue_id = venues.venue_id").
+		Joins("JOIN users ON users.user_id = reservations.user_id").
+		Where("venues.venue_id = ?", venueId).
+		Where("reservations.check_in_date BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 3 DAY)").
+		Group("venues.venue_id, reservations.reservation_id").
+		Preload("Reservations.User").
+		First(&venues)
+	if query.Error != nil {
+		if query.Error == gorm.ErrRecordNotFound {
+			log.Warn("venues not found")
+			return venue.VenueCore{}, errors.New("venues not found")
+		}
+		log.Sugar().Error("error executing venues query:", query.Error)
+		return venue.VenueCore{}, query.Error
+	}
+
+	result := Availability(venues)
+	log.Sugar().Info(result)
+	return result, nil
+}
