@@ -23,7 +23,7 @@ func New(s review.ReviewService) *reviewHandler {
 }
 
 func (rh *reviewHandler) CreateReview(c echo.Context) error {
-	userID, err := middlewares.ExtractToken(c)
+	userId, err := middlewares.ExtractToken(c)
 	if err != nil {
 		log.Error("missing or malformed JWT")
 		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
@@ -36,11 +36,6 @@ func (rh *reviewHandler) CreateReview(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Invalid request payload",
 		})
-
-	err = c.Bind(&req)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Invalid request payload"))
-
 	}
 
 	reviewCore := CreateReviewRequestToCore(req)

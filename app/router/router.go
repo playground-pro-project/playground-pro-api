@@ -45,11 +45,11 @@ func initUserRouter(db *gorm.DB, e *echo.Echo) {
 	usersGroup := e.Group("/users")
 	{
 		usersGroup.GET("", userHandler.GetUserProfile, middlewares.JWTMiddleware())
-		usersGroup.PUT("", userHandler.UpdateUserProfile, middlewares.JWTMiddleware())
+		usersGroup.PUT("/update", userHandler.UpdateUserProfile, middlewares.JWTMiddleware())
 		usersGroup.PUT("/password", userHandler.UpdatePassword, middlewares.JWTMiddleware())
 		usersGroup.DELETE("", userHandler.DeleteUser, middlewares.JWTMiddleware())
-		usersGroup.PUT("", userHandler.UploadProfilePicture, middlewares.JWTMiddleware())
-		usersGroup.PUT("", userHandler.RemoveProfilePicture, middlewares.JWTMiddleware())
+		usersGroup.PUT("/profile-picture/upload", userHandler.UploadProfilePicture, middlewares.JWTMiddleware())
+		usersGroup.PUT("/profile-picture/remove", userHandler.RemoveProfilePicture, middlewares.JWTMiddleware())
 	}
 }
 

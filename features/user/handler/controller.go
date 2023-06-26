@@ -38,7 +38,7 @@ func (uh *userHandler) Register(c echo.Context) error {
 	if errBind != nil {
 		log.Error("controller - error on bind request")
 		return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
-
+	}
 	_, err := uh.userService.Register(RequestToCore(request))
 	if err != nil {
 		switch {
@@ -67,23 +67,12 @@ func (uh *userHandler) Register(c echo.Context) error {
 }
 
 func (uh *userHandler) Login(c echo.Context) error {
-	request := LoginRequest{}
-	errBind := c.Bind(&request)
-	if errBind != nil {
-		log.Error("error on bind login input")
-		return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
-	}
-
-	return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "User registered successfully"))
-}
-
-func (uh *userHandler) Login(c echo.Context) error {
 	req := LoginRequest{}
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 	}
 
-	resp, token, err := uh.userService.Login(RequestToCore(request))
+	resp, token, err := uh.userService.Login(RequestToCore(req))
 	if err != nil {
 		switch {
 		case strings.Contains(err.Error(), "invalid email format"):
@@ -105,7 +94,6 @@ func (uh *userHandler) Login(c echo.Context) error {
 			log.Error("internal server error")
 			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
 		}
-		return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "", "Successful login", loginResponse{
