@@ -27,40 +27,21 @@ func New(service user.UserService) *userHandler {
 
 func (uh *userHandler) Register() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		request := RegisterRequest{}
-		errBind := c.Bind(&request)
-		if errBind != nil {
-			log.Error("controller - error on bind request")
-			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
-		}
-
-		user, err := uh.userService.Register(RequestToCore(request))
+		req := RegisterRequest{}
+		err := c.Bind(&req)
 		if err != nil {
-			switch {
-			case strings.Contains(err.Error(), "empty"):
-				log.Error("bad request, request cannot be empty")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, request cannot be empty", nil, nil))
-			case strings.Contains(err.Error(), "duplicated"):
-				log.Error("bad request, duplicate data request")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, duplicate data request", nil, nil))
-			case strings.Contains(err.Error(), "email"):
-				log.Error("bad request, invalid email format")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, invalid email format", nil, nil))
-			case strings.Contains(err.Error(), "low password"):
-				log.Error("bad request, password does not match")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, password does not match", nil, nil))
-			case strings.Contains(err.Error(), "password"):
-				log.Error("internal server error, hashing password")
-				return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
-			default:
-				log.Error("internal server error")
-				return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
-			}
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Invalid request payload"))
 		}
 
-		userResp := UserCoreToRegisterResponse(user)
+		userCore := RegisterRequestToCore(req)
+		_, err = uh.userService.Register(userCore)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
+		}
 
-		return c.JSON(http.StatusCreated, helper.SuccessResponse(userResp, "Account registered successfully"))
+		userResp := UserCoreToRegisterResponse(userCore)
+
+		return c.JSON(http.StatusCreated, helper.SuccessResponse(userResp, "User registered successfully"))
 	}
 }
 
