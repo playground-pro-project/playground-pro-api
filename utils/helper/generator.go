@@ -41,3 +41,14 @@ func GenerateImageID() string {
 func GenerateReservationID() string {
 	return uuid.New().String()
 }
+
+func GenerateOTP(length int) string {
+	rand.Seed(time.Now().UnixNano())
+
+	otp := make([]byte, length)
+	for i := 0; i < length; i++ {
+		otp[i] = byte(rand.Intn(10)) + '0'
+	}
+
+	return string(otp)
+}

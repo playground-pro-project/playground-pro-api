@@ -12,7 +12,7 @@ const (
 )
 
 type RegisterRequest struct {
-	FullName string `json:"full_name" form:"full_name"`
+	FullName string `json:"fullname" form:"fullname"`
 	Email    string `json:"email" form:"email"`
 	Phone    string `json:"phone" form:"phone"`
 	Password string `json:"password" form:"password"`
@@ -23,13 +23,13 @@ type LoginRequest struct {
 	Password string `json:"password" form:"password"`
 }
 
-type OTPInput struct {
-	UserID  string `json:"user_id"`
-	OTPCode string `json:"otp_code"`
+type OTPInputReq struct {
+	UserID string `json:"user_id"`
+	OTP    string `json:"otp_code"`
 }
 
 type EditProfileRequest struct {
-	Fullname string `json:"full_name" form:"full_name"`
+	Fullname string `json:"fullname" form:"fullname"`
 	Email    string `json:"email" form:"email"`
 	Phone    string `json:"phone" form:"phone"`
 	Address  string `json:"address" form:"address"`
@@ -52,9 +52,6 @@ func RequestToCore(data interface{}) user.UserCore {
 	case LoginRequest:
 		res.Email = v.Email
 		res.Password = v.Password
-	case OTPInput:
-		res.UserID = v.UserID
-		res.OTPCode = v.OTPCode
 	default:
 		return user.UserCore{}
 	}

@@ -11,19 +11,16 @@ import (
 )
 
 type User struct {
-	UserID         string `gorm:"primaryKey;type:varchar(45)"`
-	Fullname       string `gorm:"type:varchar(225);not null"`
-	Email          string `gorm:"type:varchar(225);not null;unique"`
-	Phone          string `gorm:"type:varchar(15);not null;unique"`
-	Password       string `gorm:"type:text;not null"`
-	Bio            string `gorm:"type:text"`
-	Address        string `gorm:"type:text"`
-	Role           string `gorm:"type:enum('user', 'owner', 'admin');default:'user'"`
-	ProfilePicture string `gorm:"type:text"`
-	OTPEnabled     bool   `gorm:"default:false;"`
-	OTPVerified    bool   `gorm:"default:false;"`
-	OTPSecret      string
-	OTPAuthURL     string
+	UserID         string                    `gorm:"primaryKey;type:varchar(45)"`
+	Fullname       string                    `gorm:"type:varchar(225);not null"`
+	Email          string                    `gorm:"type:varchar(225);not null;unique"`
+	Phone          string                    `gorm:"type:varchar(15);not null;unique"`
+	Password       string                    `gorm:"type:text;not null"`
+	Bio            string                    `gorm:"type:text"`
+	Address        string                    `gorm:"type:text"`
+	Role           string                    `gorm:"type:enum('user', 'owner', 'admin');default:'user'"`
+	AccountStatus  string                    `gorm:"type:enum('verified', 'unverified');default:'unverified'"`
+	ProfilePicture string                    `gorm:"type:text"`
 	OwnerFile      string                    `gorm:"type:text"`
 	CreatedAt      time.Time                 `gorm:"type:datetime"`
 	UpdatedAt      time.Time                 `gorm:"type:datetime"`
@@ -42,6 +39,8 @@ func UserCoreToModel(u user.UserCore) User {
 		Password:       u.Password,
 		Bio:            u.Bio,
 		Address:        u.Address,
+		Role:           u.Role,
+		AccountStatus:  u.AccountStatus,
 		ProfilePicture: u.ProfilePicture,
 		OwnerFile:      u.OwnerFile,
 	}
@@ -57,11 +56,8 @@ func UserModelToCore(u User) user.UserCore {
 		Bio:            u.Bio,
 		Address:        u.Address,
 		Role:           u.Role,
+		AccountStatus:  u.AccountStatus,
 		ProfilePicture: u.ProfilePicture,
-		OTPEnabled:     u.OTPEnabled,
-		OTPVerified:    u.OTPVerified,
-		OTPSecret:      u.OTPSecret,
-		OTPAuthURL:     u.OTPAuthURL,
 		OwnerFile:      u.OwnerFile,
 		CreatedAt:      u.CreatedAt,
 		UpdatedAt:      u.UpdatedAt,

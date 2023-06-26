@@ -7,9 +7,7 @@ import (
 
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/user"
-	"github.com/playground-pro-project/playground-pro-api/utils/email"
 	"github.com/playground-pro-project/playground-pro-api/utils/helper"
-	"github.com/pquerna/otp/totp"
 	"gorm.io/gorm"
 )
 
@@ -27,15 +25,15 @@ func New(db *gorm.DB) user.UserData {
 
 // Register implements user.UserData
 func (uq *userQuery) Register(request user.UserCore) (user.UserCore, error) {
-	userId := helper.GenerateUserID()
-	hashed, err := helper.HashPassword(request.Password)
+	userID := helper.GenerateUserID()
+	hashedPass, err := helper.HashPassword(request.Password)
 	if err != nil {
 		log.Error("error while hashing password")
 		return user.UserCore{}, errors.New("error while hashing password")
 	}
 
-	request.UserID = userId
-	request.Password = hashed
+	request.UserID = userID
+	request.Password = hashedPass
 	req := UserCoreToModel(request)
 	query := uq.db.Table("users").Create(&req)
 	if query.Error != nil {
@@ -81,69 +79,6 @@ func (uq *userQuery) Login(request user.UserCore) (user.UserCore, string, error)
 
 	log.Sugar().Infof("user has been logged in: %s", result.UserID)
 	return UserModelToCore(result), token, nil
-}
-
-// GenerateOTP implements user.UserData.
-func (uq *userQuery) GenerateOTP(request user.UserCore) (user.UserCore, error) {
-	key, err := totp.Generate(totp.GenerateOpts{
-		Issuer:      "peterzalai.biz.id",
-		AccountName: "dimas.yudhana@gmail.com",
-		Period:      300,
-		SecretSize:  10,
-	})
-
-	if err != nil {
-		return user.UserCore{}, err
-	}
-
-	result := User{}
-	query := uq.db.Table("users").Where("user_id = ?", request.UserID).First(&result)
-	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
-		log.Error("user record not found")
-		return user.UserCore{}, errors.New("user record not found")
-	}
-
-	dataToUpdate := User{
-		OTPSecret:  key.Secret(),
-		OTPAuthURL: key.URL(),
-	}
-
-	if err := uq.db.Model(&result).Updates(dataToUpdate).Error; err != nil {
-		log.Error("error executing update query")
-		return user.UserCore{}, err
-	}
-
-	email.SendOTP(dataToUpdate.OTPSecret, dataToUpdate.OTPAuthURL, result.Email)
-	return UserModelToCore(dataToUpdate), nil
-}
-
-// VerifyOTP implements user.UserData.
-func (uq *userQuery) VerifyOTP(request user.UserCore) (user.UserCore, error) {
-	result := User{}
-	query := uq.db.Table("users").Where("user_id = ?", request.UserID).First(&result)
-	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
-		log.Error("user record not found")
-		return user.UserCore{}, errors.New("user record not found")
-	}
-
-	log.Sugar().Infof("%s,%s", request.OTPCode, result.OTPSecret)
-	valid := totp.Validate(request.OTPCode, result.OTPSecret)
-	if !valid {
-		log.Warn("OTPCode does not match")
-		return user.UserCore{}, errors.New("OTPCode does not match")
-	}
-
-	dataToUpdate := map[string]interface{}{
-		"otp_enabled":  true,
-		"otp_verified": true,
-	}
-
-	if err := uq.db.Model(&result).Updates(dataToUpdate).Error; err != nil {
-		log.Error("error executing update query")
-		return user.UserCore{}, err
-	}
-
-	return UserModelToCore(result), nil
 }
 
 // DeleteByID implements user.UserData.

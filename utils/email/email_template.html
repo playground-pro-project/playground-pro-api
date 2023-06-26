@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Account Verification - One-Time Password (OTP) Required</title>
+    </head>
+    <body>
+        <p>Hello {{.Name}},</p>
+        <p>
+            Thank you for choosing our platform. We are committed to ensuring
+            the security of your account and protecting your valuable
+            information. As part of our ongoing efforts to strengthen account
+            security, we have implemented a One-Time Password (OTP) verification
+            process.
+        </p>
+
+        <p>
+            To complete the registration/verification process, please use the
+            following OTP code:
+        </p>
+
+        <p>OTP:</p>
+        <h1>{{.OTP}}</h1>
+
+        <p>
+            Please note that this OTP is valid for a limited time period and
+            should not be shared with anyone. It serves as a one-time
+            verification code to authenticate your account.
+        </p>
+
+        <p>
+            Thank you for your cooperation. We appreciate your trust in our
+            platform.
+        </p>
+
+        <p>Best regards,</p>
+
+        <p>
+            Team<br />
+            Playground Pro
+        </p>
+    </body>
+</html>
