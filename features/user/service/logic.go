@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"html/template"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -130,7 +130,7 @@ func (s *userService) SendOTP(recipientName string, toEmailAddr string) (string,
 
 	subject := "Account Verification - One-Time Password (OTP) Required"
 
-	templateFile := "./utils/helper/email_template.html"
+	templateFile := "./utils/email/email_template.html"
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
 		log.Sugar().Errorf("failed to parse email template: %v", err)
