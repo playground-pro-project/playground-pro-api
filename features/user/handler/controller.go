@@ -109,6 +109,12 @@ func (uh *userHandler) Login() echo.HandlerFunc {
 	}
 }
 
+func (uh *userHandler) SendOTP() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return nil
+	}
+}
+
 func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		req := OTPInputReq{}
