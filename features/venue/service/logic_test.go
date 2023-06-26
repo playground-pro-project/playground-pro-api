@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/playground-pro-project/playground-pro-api/features/venue"
 	"github.com/playground-pro-project/playground-pro-api/mocks"
@@ -27,7 +26,7 @@ func TestSearchVenue(t *testing.T) {
 			Name:          "venue_name_1",
 			Description:   "venue_description_1",
 			Username:      "owner_username_1",
-			ServiceTime:   time.Now(),
+			ServiceTime:   "07:00 - 23:00",
 			Location:      "venue_location_1",
 			Distance:      10,
 			Price:         9.99,

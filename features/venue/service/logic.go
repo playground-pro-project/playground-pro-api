@@ -29,13 +29,13 @@ func (vs *venueService) RegisterVenue(userId string, request venue.VenueCore) (v
 	err := vs.validate.Struct(request)
 	if err != nil {
 		switch {
-		case strings.Contains(err.Error(), "Name"):
-			log.Warn("n`ame cannot be empty")
-			return venue.VenueCore{}, errors.New("fullname cannot be empty")
-		case strings.Contains(err.Error(), "ServiceTime"):
-			log.Warn("service time cannot be empty")
-			return venue.VenueCore{}, errors.New("service time cannot be empty")
-		case strings.Contains(err.Error(), "Location"):
+		case strings.Contains(err.Error(), "name"):
+			log.Warn("name cannot be empty")
+			return venue.VenueCore{}, errors.New("name cannot be empty")
+		// case strings.Contains(err.Error(), "servicetime"):
+		// 	log.Warn("service time cannot be empty")
+		// 	return venue.VenueCore{}, errors.New("service time cannot be empty")
+		case strings.Contains(err.Error(), "location"):
 			log.Warn("location cannot be empty")
 			return venue.VenueCore{}, errors.New("location cannot be empty")
 		}
@@ -95,21 +95,6 @@ func (vs *venueService) SelectVenue(venueId string) (venue.VenueCore, error) {
 
 // EditVenue implements venue.VenueService.
 func (vs *venueService) EditVenue(userId string, venueId string, request venue.VenueCore) error {
-	errValidate := vs.validate.Struct(request)
-	if errValidate != nil {
-		switch {
-		case strings.Contains(errValidate.Error(), "Name"):
-			log.Warn("n`ame cannot be empty")
-			return errors.New("fullname cannot be empty")
-		case strings.Contains(errValidate.Error(), "ServiceTime"):
-			log.Warn("service time cannot be empty")
-			return errors.New("service time cannot be empty")
-		case strings.Contains(errValidate.Error(), "Location"):
-			log.Warn("location cannot be empty")
-			return errors.New("location cannot be empty")
-		}
-	}
-
 	err := vs.query.EditVenue(userId, venueId, request)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {

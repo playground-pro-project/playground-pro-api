@@ -16,7 +16,7 @@ type Venue struct {
 	Category      string                    `gorm:"type:enum('Basketball','Football','Futsal','Badminton','Swimming');default:'Basketball'"`
 	Name          string                    `gorm:"type:varchar(225);not null"`
 	Description   string                    `gorm:"type:text"`
-	ServiceTime   time.Time                 `gorm:"type:datetime"`
+	ServiceTime   string                    `gorm:"type:varchar(100)"`
 	Location      string                    `gorm:"type:text"`
 	Price         float64                   `gorm:"type:double"`
 	Longitude     float64                   `gorm:"type:double"`

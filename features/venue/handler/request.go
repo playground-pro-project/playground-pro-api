@@ -1,12 +1,10 @@
 package handler
 
 import (
-	"time"
-
 	"github.com/playground-pro-project/playground-pro-api/features/venue"
 )
 
-type RegisterClassRequest struct {
+type RegisterVenueRequest struct {
 	Category    string  `json:"category" form:"category"`
 	Name        string  `json:"name" form:"name"`
 	Description string  `json:"description" form:"description"`
@@ -15,7 +13,7 @@ type RegisterClassRequest struct {
 	Price       float64 `json:"price" form:"price"`
 }
 
-type EditClassRequest struct {
+type EditVenueRequest struct {
 	Category    *string  `json:"category" form:"category"`
 	Name        *string  `json:"name" form:"name"`
 	Description *string  `json:"description" form:"description"`
@@ -27,19 +25,14 @@ type EditClassRequest struct {
 func RequestToCore(data interface{}) venue.VenueCore {
 	res := venue.VenueCore{}
 	switch v := data.(type) {
-	case RegisterClassRequest:
+	case RegisterVenueRequest:
 		res.Category = v.Category
 		res.Name = v.Name
 		res.Description = v.Description
-		serviceTime, err := time.ParseInLocation("07:45:00", v.ServiceTime, time.Local)
-		if err != nil {
-			log.Error("error while parsing string to time format")
-			return venue.VenueCore{}
-		}
-		res.ServiceTime = serviceTime
+		res.ServiceTime = v.ServiceTime
 		res.Location = v.Location
 		res.Price = v.Price
-	case *EditClassRequest:
+	case *EditVenueRequest:
 		if v.Category != nil {
 			res.Category = *v.Category
 		}
@@ -50,12 +43,7 @@ func RequestToCore(data interface{}) venue.VenueCore {
 			res.Description = *v.Description
 		}
 		if v.ServiceTime != nil {
-			serviceTime, err := time.ParseInLocation("07:45:00", *v.ServiceTime, time.Local)
-			if err != nil {
-				log.Error("error while parsing string to time format")
-				return venue.VenueCore{}
-			}
-			res.ServiceTime = serviceTime
+			res.ServiceTime = *v.ServiceTime
 		}
 		if v.Location != nil {
 			res.Location = *v.Location

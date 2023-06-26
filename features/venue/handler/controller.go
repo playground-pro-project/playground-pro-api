@@ -27,7 +27,7 @@ func New(vs venue.VenueService) venue.VenueHandler {
 // RegisterVenue implements venue.VenueHandler.
 func (vh *venueHandler) RegisterVenue() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		request := RegisterClassRequest{}
+		request := RegisterVenueRequest{}
 		userId, errToken := middlewares.ExtractToken(c)
 		if errToken != nil {
 			log.Error("missing or malformed JWT")
@@ -132,7 +132,7 @@ func (vh *venueHandler) SelectVenue() echo.HandlerFunc {
 // EditVenue implements venue.VenueHandler.
 func (vh *venueHandler) EditVenue() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		request := EditClassRequest{}
+		request := EditVenueRequest{}
 		userId, errToken := middlewares.ExtractToken(c)
 		if errToken != nil {
 			log.Error("missing or malformed JWT")
@@ -146,7 +146,7 @@ func (vh *venueHandler) EditVenue() echo.HandlerFunc {
 		}
 
 		venueId := c.Param("venue_id")
-		err := vh.service.EditVenue(userId, venueId, RequestToCore(request))
+		err := vh.service.EditVenue(userId, venueId, RequestToCore(&request))
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
 				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
@@ -179,6 +179,24 @@ func (vh *venueHandler) UnregisterVenue() echo.HandlerFunc {
 }
 
 // VenueAvailability implements venue.VenueHandler.
-func (*venueHandler) VenueAvailability() echo.HandlerFunc {
-	panic("unimplemented")
-}
+// func (vh *venueHandler) VenueAvailability() echo.HandlerFunc {
+// 	return func(c echo.Context) error {
+// 		_, err := middlewares.ExtractToken(c)
+// 		if err != nil {
+// 			log.Error("missing or malformed JWT")
+// 			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+// 		}
+
+// 		venueId := c.Param("venue_id")
+// 		_, err := vh.service.VenueAvailability(venueId)
+// 		if err != nil {
+// 			if strings.Contains(err.Error(), "not found") {
+// 				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+// 			}
+// 			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+// 		}
+
+// 		// resp := Availability(venue)
+// 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successfully operation.", nil, nil))
+// 	}
+// }
