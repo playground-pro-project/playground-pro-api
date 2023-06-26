@@ -43,14 +43,14 @@ func (vh *venueHandler) RegisterVenue() echo.HandlerFunc {
 		_, err := vh.service.RegisterVenue(userId, RequestToCore(request))
 		if err != nil {
 			if strings.Contains(err.Error(), "empty") {
-				log.Error("error on bind input")
+				log.Error("request cannot be empty")
 				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request", nil, nil))
 			}
 			if strings.Contains(err.Error(), "duplicated") {
 				log.Error("error on bind input")
 				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request", nil, nil))
 			}
-			log.Error("error on bind input")
+			log.Error("internal server error")
 			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
 		}
 		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully created new venue", nil, nil))
