@@ -18,9 +18,11 @@ import (
 )
 
 const (
-	otpExpiration = 5 * 60 * time.Second
-	defaultEmail  = "default@mail.com"
-	defaultOTP    = "123456"
+	otpExpiration   = 5 * 60 * time.Second
+	defaultEmail    = "default@mail.com"
+	defaultOTP      = "123456"
+	emailSenderName = "Playground Pro"
+	emailSenderAddr = "dmsprd11@gmail.com"
 )
 
 var log = middlewares.Log()
@@ -126,7 +128,7 @@ func (s *userService) Register(req user.UserCore) (user.UserCore, error) {
 // SendOTP implements user.UserService.
 func (s *userService) SendOTP(recipientName string, toEmailAddr string) (string, error) {
 	otp := helper.GenerateOTP(6)
-	sender := mail.NewGmailSender(config.EMAIL_SENDER_NAME, config.EMAIL_SENDER_ADDRESS, config.EMAIL_SENDER_PASSWORD)
+	sender := mail.NewGmailSender(emailSenderName, emailSenderAddr, config.EMAIL_SENDER_PASSWORD)
 
 	subject := "Account Verification - One-Time Password (OTP) Required"
 

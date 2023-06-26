@@ -58,6 +58,15 @@ func RequestToCore(data interface{}) user.UserCore {
 	return res
 }
 
+func RegisterRequestToCore(r RegisterRequest) user.UserCore {
+	return user.UserCore{
+		Fullname: r.FullName,
+		Email:    r.Email,
+		Phone:    r.Phone,
+		Password: r.Password,
+	}
+}
+
 func EditProfileRequestToCore(e EditProfileRequest) user.UserCore {
 	return user.UserCore{
 		Fullname: e.Fullname,
