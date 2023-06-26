@@ -33,7 +33,7 @@ type SelectVenueResponse struct {
 	Price         float64        `json:"price,omitempty"`
 	TotalReviews  uint           `json:"total_reviews,omitempty"`
 	AverageRating float64        `json:"average_rating,omitempty"`
-	VenuePictures []VenuePicture `json:"venue_picture,omitempty"`
+	VenuePictures []VenuePicture `json:"venue_pictures,omitempty"`
 	Reviews       []Review       `json:"reviews,omitempty"`
 }
 
@@ -105,6 +105,8 @@ func SelectVenue(v venue.VenueCore) SelectVenueResponse {
 		Price:         v.Price,
 		TotalReviews:  v.TotalReviews,
 		AverageRating: v.AverageRating,
+		VenuePictures: pictures,
+		Reviews:       reviews,
 	}
 
 	return response

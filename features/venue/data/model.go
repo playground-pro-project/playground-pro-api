@@ -13,8 +13,8 @@ import (
 type Venue struct {
 	VenueID       string                    `gorm:"primaryKey;type:varchar(45)"`
 	OwnerID       string                    `gorm:"type:varchar(45)"`
-	Category      string                    `gorm:"type:enum('Basketball','Football','Futsal','Badminton','Swimming');default:'Basketball'"`
-	Name          string                    `gorm:"type:varchar(225);not null"`
+	Category      string                    `gorm:"type:enum('basketball','football','futsal','badminton');default:'basketball'"`
+	Name          string                    `gorm:"type:varchar(225);not null;unique"`
 	Description   string                    `gorm:"type:text"`
 	ServiceTime   string                    `gorm:"type:varchar(100)"`
 	Location      string                    `gorm:"type:text"`

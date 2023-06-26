@@ -29,15 +29,21 @@ func (vs *venueService) RegisterVenue(userId string, request venue.VenueCore) (v
 	err := vs.validate.Struct(request)
 	if err != nil {
 		switch {
+		case strings.Contains(err.Error(), "category"):
+			log.Warn("category cannot be empty")
+			return venue.VenueCore{}, errors.New("category cannot be empty")
 		case strings.Contains(err.Error(), "name"):
 			log.Warn("name cannot be empty")
 			return venue.VenueCore{}, errors.New("name cannot be empty")
-		// case strings.Contains(err.Error(), "servicetime"):
-		// 	log.Warn("service time cannot be empty")
-		// 	return venue.VenueCore{}, errors.New("service time cannot be empty")
+		case strings.Contains(err.Error(), "servicetime"):
+			log.Warn("service time cannot be empty")
+			return venue.VenueCore{}, errors.New("service time cannot be empty")
 		case strings.Contains(err.Error(), "location"):
 			log.Warn("location cannot be empty")
 			return venue.VenueCore{}, errors.New("location cannot be empty")
+		case strings.Contains(err.Error(), "price"):
+			log.Warn("price cannot be empty")
+			return venue.VenueCore{}, errors.New("price cannot be empty")
 		}
 	}
 
@@ -128,7 +134,7 @@ func (vs *venueService) UnregisterVenue(userId string, venueId string) error {
 	return nil
 }
 
-// VenueAvailability implements venue.VenueService.
-func (*venueService) VenueAvailability(venueId string) ([]venue.VenueCore, error) {
-	panic("unimplemented")
-}
+// // VenueAvailability implements venue.VenueService.
+// func (*venueService) VenueAvailability(venueId string) ([]venue.VenueCore, error) {
+// 	panic("unimplemented")
+// }
