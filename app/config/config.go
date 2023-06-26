@@ -9,18 +9,16 @@ import (
 )
 
 var (
-	err                error
-	JWT                string
-	OTP                string
-	REDIS_HOST         string
-	REDIS_PORT         string
-	REDIS_PASSWORD     string
-	REDIS_DATABASE     int
-	MIDTRANS_SERVERKEY string
-	GOMAIL_EMAIL       string
-	GOMAIL_PASSWORD    string
-	GOMAIL_HOST        string
-	GOMAIL_PORT        int
+	err                   error
+	JWT                   string
+	REDIS_HOST            string
+	REDIS_PORT            string
+	REDIS_PASSWORD        string
+	REDIS_DATABASE        int
+	MIDTRANS_SERVERKEY    string
+	EMAIL_SENDER_NAME     string
+	EMAIL_SENDER_ADDRESS  string
+	EMAIL_SENDER_PASSWORD string
 )
 
 type AppConfig struct {
@@ -72,11 +70,6 @@ func readEnv() *AppConfig {
 		isRead = false
 	}
 
-	if val, found := os.LookupEnv("OTP"); found {
-		OTP = val
-		isRead = false
-	}
-
 	if val, found := os.LookupEnv("ADMINPASSWORD"); found {
 		app.ADMINPASSWORD = val
 		isRead = false
@@ -120,27 +113,19 @@ func readEnv() *AppConfig {
 		isRead = false
 	}
 
-	if val, found := os.LookupEnv("GOMAIL_EMAIL"); found {
-		GOMAIL_EMAIL = val
-		isRead = false
+	if val, found := os.LookupEnv("EMAIL_SENDER_NAME"); found {
+		EMAIL_SENDER_NAME = val
+		isRead = true
 	}
 
-	if val, found := os.LookupEnv("GOMAIL_PASSWORD"); found {
-		GOMAIL_PASSWORD = val
-		isRead = false
+	if val, found := os.LookupEnv("EMAIL_SENDER_ADDRESS"); found {
+		EMAIL_SENDER_ADDRESS = val
+		isRead = true
 	}
 
-	if val, found := os.LookupEnv("GOMAIL_HOST"); found {
-		GOMAIL_HOST = val
-		isRead = false
-	}
-
-	if val, found := os.LookupEnv("GOMAIL_PORT"); found {
-		GOMAIL_PORT, err = strconv.Atoi(val)
-		if err != nil {
-			log.Println("error while reading gomail port")
-		}
-		isRead = false
+	if val, found := os.LookupEnv("EMAIL_SENDER_PASSWORD"); found {
+		EMAIL_SENDER_PASSWORD = val
+		isRead = true
 	}
 
 	if isRead {
@@ -155,7 +140,6 @@ func readEnv() *AppConfig {
 		}
 
 		JWT = viper.GetString("JWT")
-		OTP = viper.GetString("OTP")
 		app.DBUSER = viper.GetString("DBUSER")
 		app.DBPASS = viper.GetString("DBPASS")
 		app.DBHOST = viper.GetString("DBHOST")
@@ -169,10 +153,9 @@ func readEnv() *AppConfig {
 		REDIS_PASSWORD = viper.GetString("REDIS_PASSWORD")
 		REDIS_DATABASE = viper.GetInt("REDIS_DATABASE")
 		MIDTRANS_SERVERKEY = viper.GetString("MIDTRANS_SERVERKEY")
-		GOMAIL_EMAIL = viper.GetString("GOMAIL_EMAIL")
-		GOMAIL_PASSWORD = viper.GetString("GOMAIL_PASSWORD")
-		GOMAIL_HOST = viper.GetString("GOMAIL_HOST")
-		GOMAIL_PORT = viper.GetInt("GOMAIL_PORT")
+		EMAIL_SENDER_ADDRESS = viper.GetString("EMAIL_SENDER_ADDRESS")
+		EMAIL_SENDER_NAME = viper.GetString("EMAIL_SENDER_NAME")
+		EMAIL_SENDER_PASSWORD = viper.GetString("EMAIL_SENDER_PASSWORD")
 	}
 
 	return &app

@@ -1,58 +1,54 @@
-package email
+package mail
 
 import (
-	"bytes"
-	"html/template"
+	"fmt"
+	"net/smtp"
 
-	"github.com/playground-pro-project/playground-pro-api/app/config"
+	"github.com/jordan-wright/email"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
-	"gopkg.in/gomail.v2"
 )
 
 var log = middlewares.Log()
 
-func SendOTP(otp_secret, otp_auth_url, email string) {
-	var body bytes.Buffer
-	t := template.New("otp.html")
-	t, err := t.Parse(`
-		<html>
-			<body>
-				<h3>Kode OTP Anda</h3>
-				<p>OTPSecret: {{.OTPSecret}}</p>
-				<p>OTPAuthURL: {{.OTPAuthURL}}</p>
-			</body>
-		</html>
-	`)
-	if err != nil {
-		log.Error("error parsing template email")
-		return
+const (
+	smtpAuthAddress   = "smtp.gmail.com"
+	smtpServerAddress = "smtp.gmail.com:587"
+)
+
+type EmailSender interface {
+	SendEmail(subject string, content string, to, cc, bcc, attachFiles []string) error
+}
+
+type GmailSender struct {
+	name              string
+	fromEmailAddress  string
+	fromEmailPassword string
+}
+
+func (sender *GmailSender) SendEmail(subject string, content string, to, cc, bcc, attachFiles []string) error {
+	e := email.NewEmail()
+	e.From = fmt.Sprintf("%s <%s>", sender.name, sender.fromEmailAddress)
+	e.Subject = subject
+	e.HTML = []byte(content)
+	e.To = to
+	e.Cc = cc
+	e.Bcc = bcc
+
+	for _, f := range attachFiles {
+		if _, err := e.AttachFile(f); err != nil {
+			log.Error("failed to attach file")
+			return fmt.Errorf("failed to attach file %s: %w", f, err)
+		}
 	}
 
-	if err != nil {
-		panic(err)
-	}
-	err = t.Execute(&body, struct {
-		OTPSecret  string
-		OTPAuthURL string
-	}{
-		OTPSecret:  otp_secret,
-		OTPAuthURL: otp_auth_url,
-	})
-	if err != nil {
-		log.Error("error rendering template email")
-		return
-	}
+	smtpAuth := smtp.PlainAuth("", sender.fromEmailAddress, sender.fromEmailPassword, smtpAuthAddress)
+	return e.Send(smtpServerAddress, smtpAuth)
+}
 
-	m := gomail.NewMessage()
-	m.SetHeader("From", config.GOMAIL_EMAIL)
-	m.SetHeader("To", email)
-	m.SetHeader("Subject", "Kode OTP Anda")
-	m.SetBody("text/html", body.String())
-	d := gomail.NewDialer(config.GOMAIL_HOST, config.GOMAIL_PORT, config.GOMAIL_EMAIL, config.GOMAIL_PASSWORD)
-	if err := d.DialAndSend(m); err != nil {
-		log.Sugar().Error("Gagal mengirim email: ", err.Error())
-		return
+func NewGmailSender(name, fromEmailAddress, fromEmailPassword string) EmailSender {
+	return &GmailSender{
+		name:              name,
+		fromEmailAddress:  fromEmailAddress,
+		fromEmailPassword: fromEmailPassword,
 	}
-
-	log.Info("Email terkirim.")
 }

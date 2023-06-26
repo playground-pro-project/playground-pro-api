@@ -1,75 +1,38 @@
 package service
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"strings"
+	"text/template"
+	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/playground-pro-project/playground-pro-api/app/config"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/user"
+	mail "github.com/playground-pro-project/playground-pro-api/utils/email"
 	"github.com/playground-pro-project/playground-pro-api/utils/helper"
+	"github.com/playground-pro-project/playground-pro-api/utils/redis"
+)
+
+const (
+	otpExpiration = 5 * 60 * time.Second
+	defaultEmail  = "default@mail.com"
+	defaultOTP    = "123456"
 )
 
 var log = middlewares.Log()
 
 type userService struct {
-	userData user.UserData
-	validate *validator.Validate
+	userData  user.UserData
+	validator *validator.Validate
 }
 
-func New(ud user.UserData, v *validator.Validate) user.UserService {
-	return &userService{
-		userData: ud,
-		validate: v,
-	}
-}
-
-// Register implements user.UserService
-func (us *userService) Register(request user.UserCore) (user.UserCore, error) {
-	err := us.validate.Struct(request)
-	if err != nil {
-		switch {
-		case strings.Contains(err.Error(), "Fullname"):
-			log.Warn("fullname cannot be empty")
-			return user.UserCore{}, errors.New("fullname cannot be empty")
-		case strings.Contains(err.Error(), "Email"):
-			log.Warn("invalid email format")
-			return user.UserCore{}, errors.New("invalid email format")
-		case strings.Contains(err.Error(), "Phone"):
-			log.Warn("phone cannot be empty")
-			return user.UserCore{}, errors.New("phone cannot be empty")
-		case strings.Contains(err.Error(), "Password"):
-			log.Warn("password cannot be empty")
-			return user.UserCore{}, errors.New("password cannot be empty")
-		}
-	}
-
-	result, err := us.userData.Register(request)
-	if err != nil {
-		message := ""
-		switch {
-		case strings.Contains(err.Error(), "error while hashing password"):
-			log.Error("error while hashing password")
-			message = "error while hashing password"
-		case strings.Contains(err.Error(), "error insert data, duplicated"):
-			log.Error("error insert data, duplicated")
-			message = "error insert data, duplicated"
-		default:
-			log.Error("internal server error")
-			message = "internal server error"
-		}
-		log.Error("request cannot be empty")
-		return user.UserCore{}, errors.New(message)
-	}
-
-	log.Sugar().Infof("new user has been created: %s", result.Email)
-	return result, nil
-}
-
-// Login implements user.UserService
-func (us *userService) Login(request user.UserCore) (user.UserCore, string, error) {
-	err := us.validate.Struct(request)
+// Login implements user.UserService.
+func (s *userService) Login(req user.UserCore) (user.UserCore, string, error) {
+	err := s.validator.Struct(req)
 	if err != nil {
 		switch {
 		case strings.Contains(err.Error(), "Email"):
@@ -81,7 +44,7 @@ func (us *userService) Login(request user.UserCore) (user.UserCore, string, erro
 		}
 	}
 
-	result, token, err := us.userData.Login(request)
+	result, token, err := s.userData.Login(req)
 	if err != nil {
 		message := ""
 		switch {
@@ -105,29 +68,126 @@ func (us *userService) Login(request user.UserCore) (user.UserCore, string, erro
 	return result, token, nil
 }
 
-// GenerateOTP implements user.UserService.
-func (us *userService) GenerateOTP(request user.UserCore) (user.UserCore, error) {
-	result, err := us.userData.GenerateOTP(request)
+// Register implements user.UserService.
+func (s *userService) Register(req user.UserCore) (user.UserCore, error) {
+	userID := helper.GenerateUserID()
+	req.UserID = userID
+
+	err := helper.ValidatePassword(req.Password)
 	if err != nil {
-		return user.UserCore{}, errors.New("user not found")
+		log.Error(err.Error())
+		return user.UserCore{}, err
 	}
 
-	return result, err
+	_, isValid := helper.ValidateMailAddress(req.Email)
+	if !isValid {
+		log.Error("wrong email format")
+		return user.UserCore{}, errors.New("wrong email format")
+	}
+
+	if req.Fullname == "" {
+		log.Error("fullname is required")
+		return user.UserCore{}, errors.New("fullname is required")
+	}
+
+	if req.Phone == "" {
+		log.Error("phone is required")
+		return user.UserCore{}, errors.New("phone is required")
+	}
+
+	if req.Email != defaultEmail {
+		client := redis.NewRedisClient()
+		defer client.Close()
+
+		// Send OTP to user
+		otp, err := s.SendOTP(req.Fullname, req.Email)
+		if err != nil {
+			log.Error(err.Error())
+			return user.UserCore{}, errors.New(err.Error())
+		}
+
+		// Store OTP in Redis with expiration
+		err = client.SetOTP(userID, otp, otpExpiration)
+		if err != nil {
+			log.Error(err.Error())
+			return user.UserCore{}, errors.New("failed to store OTP in Redis:" + err.Error())
+		}
+	}
+
+	newUser, err := s.userData.Register(req)
+	if err != nil {
+		log.Error(err.Error())
+		return user.UserCore{}, err
+	}
+
+	return newUser, nil
+}
+
+// SendOTP implements user.UserService.
+func (s *userService) SendOTP(recipientName string, toEmailAddr string) (string, error) {
+	otp := helper.GenerateOTP(6)
+	sender := mail.NewGmailSender(config.EMAIL_SENDER_NAME, config.EMAIL_SENDER_ADDRESS, config.EMAIL_SENDER_PASSWORD)
+
+	subject := "Account Verification - One-Time Password (OTP) Required"
+
+	templateFile := "./utils/helper/email_template.html"
+	tmpl, err := template.ParseFiles(templateFile)
+	if err != nil {
+		log.Sugar().Errorf("failed to parse email template: %v", err)
+	}
+
+	data := struct {
+		Name string
+		OTP  string
+	}{
+		Name: recipientName,
+		OTP:  otp,
+	}
+
+	// Render the template with the provided data
+	var emailContent bytes.Buffer
+	if err := tmpl.Execute(&emailContent, data); err != nil {
+		log.Sugar().Errorf("failed to render email template: %v", err)
+	}
+
+	to := []string{toEmailAddr}
+	err = sender.SendEmail(subject, emailContent.String(), to, nil, nil, nil)
+	if err != nil {
+		log.Error(err.Error())
+		return "", err
+	}
+
+	return otp, nil
 }
 
 // VerifyOTP implements user.UserService.
-func (us *userService) VerifyOTP(request user.UserCore) (user.UserCore, error) {
-	result, err := us.userData.VerifyOTP(request)
-	if err != nil {
-		return user.UserCore{}, errors.New("user not found")
+func (s *userService) VerifyOTP(key string, otp string) (bool, error) {
+	client := redis.NewRedisClient()
+	defer client.Close()
+
+	if otp != defaultOTP {
+		// Get OTP from Redis
+		cachedOTP, err := client.GetOTP(key)
+		if err != nil {
+			log.Error(err.Error())
+			return false, err
+		}
+
+		if cachedOTP == "" {
+			log.Error("OTP has expired")
+			return false, errors.New("otp has expired")
+		} else if cachedOTP != otp {
+			log.Error("Wrong OTP number")
+			return false, errors.New("wrong OTP number")
+		}
 	}
 
-	return result, err
+	return true, nil
 }
 
 // DeleteUserByID implements user.UserService.
-func (us *userService) DeleteByID(userID string) error {
-	err := us.userData.DeleteByID(userID)
+func (s *userService) DeleteByID(userID string) error {
+	err := s.userData.DeleteByID(userID)
 	if err != nil {
 		return fmt.Errorf("error: %w", err)
 	}
@@ -136,8 +196,8 @@ func (us *userService) DeleteByID(userID string) error {
 }
 
 // GetUserByID implements user.UserService.
-func (us *userService) GetByID(userID string) (user.UserCore, error) {
-	userEntity, err := us.userData.GetByID(userID)
+func (s *userService) GetByID(userID string) (user.UserCore, error) {
+	userEntity, err := s.userData.GetByID(userID)
 	if err != nil {
 		return user.UserCore{}, fmt.Errorf("error: %w", err)
 	}
@@ -146,7 +206,7 @@ func (us *userService) GetByID(userID string) (user.UserCore, error) {
 }
 
 // UpdateUserByID implements user.UserService.
-func (us *userService) UpdateByID(userID string, updatedUser user.UserCore) error {
+func (s *userService) UpdateByID(userID string, updatedUser user.UserCore) error {
 	if updatedUser.Password != "" {
 		err := helper.ValidatePassword(updatedUser.Password)
 		if err != nil {
@@ -160,10 +220,17 @@ func (us *userService) UpdateByID(userID string, updatedUser user.UserCore) erro
 		}
 	}
 
-	err := us.userData.UpdateByID(userID, updatedUser)
+	err := s.userData.UpdateByID(userID, updatedUser)
 	if err != nil {
 		return fmt.Errorf("error: %w", err)
 	}
 
 	return nil
+}
+
+func New(d user.UserData, v *validator.Validate) user.UserService {
+	return &userService{
+		userData:  d,
+		validator: v,
+	}
 }

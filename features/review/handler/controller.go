@@ -23,7 +23,7 @@ func New(s review.ReviewService) *reviewHandler {
 }
 
 func (rh *reviewHandler) CreateReview(c echo.Context) error {
-	userID, err := middlewares.ExtractToken(c)
+	userId, err := middlewares.ExtractToken(c)
 	if err != nil {
 		log.Error("missing or malformed JWT")
 		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
@@ -37,7 +37,7 @@ func (rh *reviewHandler) CreateReview(c echo.Context) error {
 	}
 
 	reviewCore := CreateReviewRequestToCore(req)
-	_, err = rh.reviewService.CreateReview(venueID, userID, reviewCore)
+	_, err = rh.reviewService.CreateReview(venueID, userId, reviewCore)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 	}

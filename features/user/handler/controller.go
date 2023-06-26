@@ -34,7 +34,7 @@ func (uh *userHandler) Register() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
 		}
 
-		resp, err := uh.userService.Register(RequestToCore(request))
+		user, err := uh.userService.Register(RequestToCore(request))
 		if err != nil {
 			switch {
 			case strings.Contains(err.Error(), "empty"):
@@ -58,7 +58,9 @@ func (uh *userHandler) Register() echo.HandlerFunc {
 			}
 		}
 
-		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully created an account.", otpResponse{UserID: resp.UserID}, nil))
+		userResp := UserCoreToRegisterResponse(user)
+
+		return c.JSON(http.StatusCreated, helper.SuccessResponse(userResp, "Account registered successfully"))
 	}
 }
 
@@ -95,56 +97,47 @@ func (uh *userHandler) Login() echo.HandlerFunc {
 			}
 		}
 
-		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful login", loginResponse{
-			UserID:     resp.UserID,
-			Email:      resp.Email,
-			Token:      token,
-			OTPEnabled: resp.OTPEnabled,
-		}, nil))
+		loginResp := LoginResponse{
+			UserID:        resp.UserID,
+			Email:         resp.Email,
+			Role:          resp.Role,
+			AccountStatus: resp.AccountStatus,
+			Token:         token,
+		}
+
+		return c.JSON(http.StatusOK, helper.SuccessResponse(loginResp, "Login success"))
 	}
 }
 
-func (uh *userHandler) GenerateOTP() echo.HandlerFunc {
+func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		payload := OTPInput{}
-		errBind := c.Bind(&payload)
-		if errBind != nil {
-			c.Logger().Error("error on bind login input")
-			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
-		}
-
-		resp, err := uh.userService.GenerateOTP(RequestToCore(payload))
+		req := OTPInputReq{}
+		err := c.Bind(&req)
 		if err != nil {
-			if strings.Contains(err.Error(), "not found") {
-				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
-			}
-		}
-		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful operation", otpResponse{
-			OTPSecret:  resp.OTPSecret,
-			OTPAuthURL: resp.OTPAuthURL,
-		}, nil))
-	}
-}
-
-func (uh *userHandler) VerifyOTP() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// request user_id and OTPCode
-		payload := OTPInput{}
-		errBind := c.Bind(&payload)
-		if errBind != nil {
-			c.Logger().Error("error on bind login input")
-			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
+			log.Error("error binding request")
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"error": "error binding request",
+			})
 		}
 
-		resp, err := uh.userService.VerifyOTP(RequestToCore(payload))
+		isValid, err := uh.userService.VerifyOTP(req.UserID, req.OTP)
+		if !isValid {
+			log.Error("OTP has been expired")
+			return c.JSON(http.StatusOK, map[string]interface{}{
+				"message": "OTP has been expired",
+			})
+		}
+
 		if err != nil {
-			if strings.Contains(err.Error(), "not found") {
-				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
-			}
+			log.Error(err.Error())
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
-		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful operation", otpResponse{
-			UserID: resp.UserID, OTPEnabled: resp.OTPEnabled,
-		}, nil))
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"message": "Verification success",
+		})
 	}
 }
 

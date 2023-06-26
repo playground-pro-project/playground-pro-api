@@ -13,12 +13,8 @@ type UserCore struct {
 	Bio            string
 	Address        string
 	Role           string
+	AccountStatus  string
 	ProfilePicture string
-	OTPCode        string
-	OTPEnabled     bool
-	OTPVerified    bool
-	OTPSecret      string
-	OTPAuthURL     string
 	OwnerFile      string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
@@ -80,21 +76,28 @@ type VenuePictureCore struct {
 	DeletedAt      time.Time
 }
 
+// type UserHandler interface {
+// 	Register() echo.HandlerFunc
+// 	Login() echo.HandlerFunc
+// 	ValidateOTP() echo.HandlerFunc
+// 	DeleteUser() echo.HandlerFunc
+// 	GetUser() echo.HandlerFunc
+// 	UpdateUser() echo.HandlerFunc
+// }
+
 type UserService interface {
-	Register(request UserCore) (UserCore, error)
-	Login(request UserCore) (UserCore, string, error)
-	GenerateOTP(request UserCore) (UserCore, error)
-	VerifyOTP(request UserCore) (UserCore, error)
+	Register(req UserCore) (UserCore, error)
+	Login(req UserCore) (UserCore, string, error)
+	SendOTP(recipientName, toEmailAddr string) (string, error)
+	VerifyOTP(key, otp string) (bool, error)
 	DeleteByID(userID string) error
 	GetByID(userID string) (UserCore, error)
 	UpdateByID(userID string, updatedUser UserCore) error
 }
 
 type UserData interface {
-	Register(request UserCore) (UserCore, error)
-	Login(request UserCore) (UserCore, string, error)
-	GenerateOTP(request UserCore) (UserCore, error)
-	VerifyOTP(request UserCore) (UserCore, error)
+	Register(req UserCore) (UserCore, error)
+	Login(req UserCore) (UserCore, string, error)
 	DeleteByID(userID string) error
 	GetByID(userID string) (UserCore, error)
 	UpdateByID(userID string, updatedUser UserCore) error
