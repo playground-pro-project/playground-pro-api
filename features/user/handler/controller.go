@@ -154,8 +154,19 @@ func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 		}
 
 		user, err := uh.userService.GetByID(req.UserID)
+		if err != nil {
+			log.Error(err.Error())
+		}
 
-		resp, token, _ := uh.userService.Login(user)
+		loginReq := LoginRequest{
+			Email:    user.Email,
+			Password: user.Password,
+		}
+
+		resp, token, err := uh.userService.Login(RequestToCore(loginReq))
+		if err != nil {
+			log.Error(err.Error())
+		}
 
 		loginResp := UserCoreToLoginResponse(resp)
 		loginResp.Token = token
