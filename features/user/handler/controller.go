@@ -269,7 +269,8 @@ func (uh *userHandler) UploadProfilePicture() echo.HandlerFunc {
 
 		file, err := c.FormFile("profile_picture")
 		if err != nil {
-			return err
+			log.Error(err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 		}
 
 		// Check file size before opening it
@@ -284,13 +285,15 @@ func (uh *userHandler) UploadProfilePicture() echo.HandlerFunc {
 		path := "profile-picture/" + file.Filename
 		fileContent, err := file.Open()
 		if err != nil {
-			return err
+			log.Error(err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
 		}
 		defer fileContent.Close()
 
 		err = awsService.UploadFile(path, fileType, fileContent)
 		if err != nil {
-			return err
+			log.Error(err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
 		}
 
 		var updatedUser user.UserCore
@@ -299,8 +302,10 @@ func (uh *userHandler) UploadProfilePicture() echo.HandlerFunc {
 		err = uh.userService.UpdateByID(userId, updatedUser)
 		if err != nil {
 			if strings.Contains(err.Error(), "user not found") {
+				log.Error(err.Error())
 				return c.JSON(http.StatusNotFound, helper.ErrorResponse(err.Error()))
 			}
+			log.Error(err.Error())
 			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
 		}
 
@@ -322,10 +327,12 @@ func (uh *userHandler) RemoveProfilePicture() echo.HandlerFunc {
 		err := uh.userService.UpdateByID(userId, updatedUser)
 		if err != nil {
 			if strings.Contains(err.Error(), "user not found") {
+				log.Error(err.Error())
 				return c.JSON(http.StatusNotFound, map[string]interface{}{
 					"error": err.Error(),
 				})
 			}
+			log.Error(err.Error())
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 				"error": err.Error(),
 			})
@@ -336,6 +343,7 @@ func (uh *userHandler) RemoveProfilePicture() echo.HandlerFunc {
 		})
 	}
 }
+
 func (uh *userHandler) UploadOwnerFile() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, errToken := middlewares.ExtractToken(c)
