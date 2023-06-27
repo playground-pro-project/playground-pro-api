@@ -146,26 +146,26 @@ func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 			})
 		}
 
-		err = uh.userService.UpdateByID(req.UserID, user.UserCore{
-			AccountStatus: "verified",
-		})
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error, please try again later"))
-		}
-
-		user, err := uh.userService.GetByID(req.UserID)
+		usr, err := uh.userService.GetByID(req.UserID)
 		if err != nil {
 			log.Error(err.Error())
 		}
 
 		loginReq := LoginRequest{
-			Email:    user.Email,
-			Password: user.Password,
+			Email:    usr.Email,
+			Password: usr.Password,
 		}
 
 		resp, token, err := uh.userService.Login(RequestToCore(loginReq))
 		if err != nil {
 			log.Error(err.Error())
+		}
+
+		err = uh.userService.UpdateByID(req.UserID, user.UserCore{
+			AccountStatus: "verified",
+		})
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error, please try again later"))
 		}
 
 		loginResp := UserCoreToLoginResponse(resp)
