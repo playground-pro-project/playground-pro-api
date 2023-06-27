@@ -1,0 +1,1427 @@
+openapi: "3.0.2"
+info:
+    title: Playground Pro API
+    version: "1.0"
+servers:
+    - url: https://api.server.test/v1
+tags:
+    - name: Authentication
+      description: User Authentication
+    - name: Users
+      description: Endpoints for user management
+    - name: Venues
+      description: Endpoints for venue management
+    - name: Reviews
+      description: Endpoints for review management
+paths:
+    /register:
+        post:
+            summary: Register a new user
+            operationId: registerUser
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/Auth"
+            responses:
+                "200":
+                    description: User registration successful
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RegistrationResponse"
+                "400":
+                    description: Invalid request payload
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                "409":
+                    description: User already exists
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+            tags:
+                - Authentication
+    /login:
+        post:
+            summary: User login
+            operationId: userLogin
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/LoginRequest"
+            responses:
+                "200":
+                    description: OK - User login successful
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/LoginResponse"
+                "401":
+                    description: Unauthorized - Invalid credentials
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorLoginResponse"
+            tags:
+                - Authentication
+    /users:
+        get:
+            summary: Get user profile
+            operationId: getUserProfile
+            security:
+                - JWTAuth: []
+            responses:
+                "200":
+                    description: OK - User profile retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserProfileResponse"
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorProfileResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+                "404":
+                    description: User profile not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorProfileResponse"
+                            examples:
+                                NotFound:
+                                    $ref: "#/components/examples/NotFound"
+            tags:
+                - Users
+        put:
+            summary: Update user profile
+            operationId: updateUserProfile
+            security:
+                - JWTAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/EditUserProfileRequest"
+            responses:
+                "200":
+                    description: User profile updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessResponse"
+                "400":
+                    description: Bad request - Invalid request body
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateResponse"
+                            examples:
+                                BadRequestError:
+                                    $ref: "#/components/examples/BadRequestError"
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+            tags:
+                - Users
+        delete:
+            summary: Delete user account
+            operationId: deleteUserAccount
+            security:
+                - JWTAuth: []
+            responses:
+                "200":
+                    description: User account deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/DeleteUserAccountResponse"
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDeleteResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDeleteResponse"
+                            examples:
+                                InternalServerError:
+                                    $ref: "#/components/examples/InternalServerError"
+            tags:
+                - Users
+    /users/profile/picture:
+        put:
+            summary: Change user profile picture
+            operationId: changeProfilePicture
+            security:
+                - JWTAuth: []
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            $ref: "#/components/schemas/ChangeProfilePictureRequest"
+            responses:
+                "200":
+                    description: User profile picture changed successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ChangeProfilePictureResponse"
+                "400":
+                    description: Bad request - Invalid request body
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
+                            examples:
+                                BadRequestError:
+                                    $ref: "#/components/examples/BadRequestError"
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
+                            examples:
+                                InternalServerError:
+                                    $ref: "#/components/examples/InternalServerError"
+            tags:
+                - Users
+    /users/upgrade:
+        post:
+            summary: Upgrade user role from 'user' to 'owner'
+            operationId: upgradeUserRole
+            security:
+                - JWTAuth: []
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            $ref: "#/components/schemas/UpgradeUserRoleRequest"
+            responses:
+                "200":
+                    description: User role upgraded successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UpgradeUserRoleResponse"
+                "400":
+                    description: Bad request - Invalid request body
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpgradeUserRoleResponse"
+                            examples:
+                                BadRequestError:
+                                    $ref: "#/components/examples/BadRequestError"
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpgradeUserRoleResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpgradeUserRoleResponse"
+                            examples:
+                                InternalServerError:
+                                    $ref: "#/components/examples/InternalServerError"
+            tags:
+                - Users
+    /users/password:
+        put:
+            summary: Change user password
+            operationId: changeUserPassword
+            security:
+                - JWTAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/ChangePasswordRequest"
+            responses:
+                "200":
+                    description: User password changed successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ChangePasswordResponse"
+                "400":
+                    description: Bad request - Invalid request body
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorChangePasswordResponse"
+                            example:
+                                error: Wrong password
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorChangePasswordResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorChangePasswordResponse"
+                            examples:
+                                InternalServerError:
+                                    $ref: "#/components/examples/InternalServerError"
+            tags:
+                - Users
+    /venues:
+        post:
+            summary: Add new venue
+            operationId: addNewVenue
+            security:
+                - JWTAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/NewVenueRequest"
+                        example:
+                            name: Example Venue
+                            description: This is an example venue
+                            location: 123 Main Street, City
+                            price: 100.0
+                            category: Football
+
+            responses:
+                "201":
+                    description: Venue added successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NewVenueResponse"
+                            examples:
+                                VenueAdded:
+                                    value:
+                                        data:
+                                            name: Example Venue
+                                            description: This is an example venue
+                                            location: 123 Main Street, City
+                                            price: 100.0
+                                            category: Football
+                                        message: Venue added successfully
+                "400":
+                    description: Bad request - Invalid request body or parameters
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddVenueResponse"
+                            examples:
+                                BadRequestError:
+                                    value:
+                                        error: Bad request. Invalid request body or parameters
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddVenueResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+    /venues/{venue_id}:
+        get:
+            summary: Get venue by ID
+            operationId: getVenueById
+            security:
+                - JWTAuth: []
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue to retrieve
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Venue retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetVenueResponse"
+                            examples:
+                                VenueRetrieved:
+                                    value:
+                                        data:
+                                            venue_id: ABC123
+                                            name: Example Venue
+                                            description: This is an example venue
+                                            location: 123 Main Street, City
+                                            price: 100.0
+                                            category: Football
+                                            distance: 5.5
+                                            reviews:
+                                                - user:
+                                                      user_id: USR-HY16SH
+                                                      full_name: John Doe
+                                                  review: Great venue!
+                                                  rating: 4.5
+                                                - user:
+                                                      user_id: USR-UA6HS1
+                                                      full_name: Jane Smith
+                                                  review: Excellent facilities
+                                                  rating: 5.0
+                                            venue_images:
+                                                - image_url: https://example.com/image1.jpg
+                                                - image_url: https://example.com/image2.jpg
+                                        message: Venue retrieved successfully
+                "404":
+                    description: Venue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorGetVenueByIDResponse"
+                            examples:
+                                VenueNotFoundError:
+                                    value:
+                                        error: Venue not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorGetVenueByIDResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+        put:
+            summary: Update venue
+            operationId: updateVenue
+            security:
+                - JWTAuth: []
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue to update
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UpdateVenueRequest"
+                        example:
+                            value:
+                                name: ABC123
+                                description: This is an updated venue
+                                location: 456 Elm Street, City
+                                price: 150.0
+                                category: Futsal
+            responses:
+                "200":
+                    description: Venue updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UpdateVenueResponse"
+                            examples:
+                                VenueUpdated:
+                                    value:
+                                        data:
+                                            venue_id: ABC123
+                                            name: Updated Venue
+                                            description: This is an updated venue
+                                            location: 456 Elm Street, City
+                                            price: 150.0
+                                            category: Futsal
+                                        message: Venue updated successfully
+                "400":
+                    description: Bad request - Invalid request body or parameters
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                BadRequestError:
+                                    value:
+                                        error: Bad request. Invalid request body or parameters
+                "404":
+                    description: Venue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                VenueNotFoundError:
+                                    value:
+                                        error: Venue not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+        delete:
+            summary: Delete venue
+            operationId: deleteVenue
+            security:
+                - JWTAuth: []
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue to delete
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Venue deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/DeleteVenueResponse"
+                            examples:
+                                VenueDeleted:
+                                    value:
+                                        message: Venue deleted successfully
+                "404":
+                    description: Venue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDeleteVenueResponse"
+                            examples:
+                                VenueNotFoundError:
+                                    value:
+                                        error: Venue not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDeleteVenueResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+    /venues/{venue_id}/images:
+        post:
+            summary: Add venue images
+            operationId: addVenueImages
+            security:
+                - JWTAuth: []
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue to add images to
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            type: object
+                            properties:
+                                images:
+                                    type: array
+                                    items:
+                                        type: string
+                                        format: binary
+                                    maxItems: 5
+            responses:
+                "200":
+                    description: Venue images added successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AddVenueImagesResponse"
+                            examples:
+                                VenueImagesAdded:
+                                    value:
+                                        data:
+                                            - image_id: IMG-HY17XHA
+                                              image_urls: https://example.com/image1.jpg
+                                            - image_id: IMG-HS81HS
+                                              image_urls: https://example.com/image2.jpg
+                                            - image_id: IMG-QRF53Z
+                                              image_urls: https://example.com/image3.jpg
+                                            - image_id: IMG-JDI90A
+                                              image_urls: https://example.com/image4.jpg
+                                            - image_id: IMG-NVA71G
+                                              image_urls: https://example.com/image5.jpg
+                                        message: Venue images added successfully
+                "400":
+                    description: Invalid request payload
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddVenueImageResponse"
+                            examples:
+                                InvalidRequestPayload:
+                                    value:
+                                        error: Invalid request payload
+                "404":
+                    description: Venue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddVenueImageResponse"
+                            examples:
+                                VenueNotFoundError:
+                                    value:
+                                        error: Venue not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddVenueImageResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+        get:
+            summary: Get all images for a venue
+            operationId: getAllImagesForVenue
+            security:
+                - JWTAuth: []
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue to retrieve images for
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Images retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ImageListResponse"
+                            examples:
+                                ImagesRetrieved:
+                                    value:
+                                        message: Images retrieved successfully
+                                        data:
+                                            - image_id: "image1"
+                                              image_link: "https://example.com/image1.jpg"
+                                            - image_id: "image2"
+                                              image_link: "https://example.com/image2.jpg"
+                "400":
+                    description: Invalid request parameters
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InvalidRequestParams:
+                                    value:
+                                        error: Invalid request parameters
+                "404":
+                    description: Venue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                VenueNotFoundError:
+                                    value:
+                                        error: Venue not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+    /venues/{venue_id}/images/{image_id}:
+        delete:
+            summary: Delete venue image
+            operationId: deleteVenueImage
+            security:
+                - JWTAuth: []
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue containing the image
+                  required: true
+                  schema:
+                      type: string
+                - name: image_id
+                  in: path
+                  description: ID of the image to delete
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Venue image deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessResponse"
+                            examples:
+                                VenueImageDeleted:
+                                    value:
+                                        message: Venue image deleted successfully
+                "400":
+                    description: Invalid request parameters
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InvalidRequestParams:
+                                    value:
+                                        error: Invalid request parameters
+                "404":
+                    description: Venue or image not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                VenueOrImageNotFoundError:
+                                    value:
+                                        error: Venue or image not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+    /venues/{venue_id}/reviews:
+        get:
+            summary: Get all reviews for a venue
+            operationId: getAllReviews
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue to retrieve reviews for
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Reviews retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ReviewListResponse"
+                            examples:
+                                ReviewsRetrieved:
+                                    value:
+                                        message: Reviews retrieved successfully
+                                        data:
+                                            - review_id: "review1"
+                                              review: "Great place to visit!"
+                                              rating: 4.5
+                                              user:
+                                                  user_id: "user1"
+                                                  full_name: "John Doe"
+                                            - review_id: "review2"
+                                              review: "Average experience."
+                                              rating: 3.0
+                                              user:
+                                                  user_id: "user2"
+                                                  full_name: "Jane Smith"
+                "400":
+                    description: Invalid request parameters
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InvalidRequestParams:
+                                    value:
+                                        error: Invalid request parameters
+                "404":
+                    description: Venue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                VenueNotFoundError:
+                                    value:
+                                        error: Venue not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+    /reviews:
+        post:
+            summary: Add a review
+            operationId: addReview
+            security:
+                - JWTAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AddReviewRequest"
+                        example:
+                            venue_id: "VEN-H7IA90"
+                            review: "some review"
+                            rating: 4.5
+            responses:
+                "200":
+                    description: Review added successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessAddReviewResponse"
+                            examples:
+                                ReviewAdded:
+                                    value:
+                                        message: Review added successfully
+                "400":
+                    description: Invalid request payload
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddReviewResponse"
+                            examples:
+                                InvalidRequestPayload:
+                                    value:
+                                        error: Invalid request payload
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddReviewResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Reviews
+    /reviews/{review_id}:
+        delete:
+            summary: Delete a review
+            operationId: deleteReview
+            security:
+                - JWTAuth: []
+            parameters:
+                - name: review_id
+                  in: path
+                  description: ID of the review to delete
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Review deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessResponse"
+                            examples:
+                                ReviewDeleted:
+                                    value:
+                                        message: Review deleted successfully
+                "400":
+                    description: Invalid request parameters
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InvalidRequestParams:
+                                    value:
+                                        error: Invalid request parameters
+                "404":
+                    description: Review not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                ReviewNotFoundError:
+                                    value:
+                                        error: Review not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Reviews
+components:
+    securitySchemes:
+        JWTAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+            description: "Json Web Token"
+    schemas:
+        Auth:
+            type: object
+            properties:
+                email:
+                    type: string
+                    format: email
+                    example: johndoe@example.com
+                password:
+                    type: string
+                    format: password
+                    example: password123
+        RegistrationResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: User registered successfully
+        ErrorResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+                    example: Invalid username format
+        LoginRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                    format: email
+                    example: johndoe@example.com
+                password:
+                    type: string
+                    format: password
+                    example: password123
+        LoginResponse:
+            type: object
+            properties:
+                data:
+                    type: object
+                    properties:
+                        user_id:
+                            type: string
+                            example: usr-4g6yhu
+                        role:
+                            type: string
+                            example: user
+                        token:
+                            type: string
+                            example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFiYzEyMyIsInJvbGUiOiJ1c2VyIiwidG9rZW4iOiJmZWVkZWQtc29tZS10b2tlbiJ9.8iEyFnFqvc5GT5Ht7YjCz0rCmI6tr6eR6x2YwN0Z5Ec
+                message:
+                    type: string
+                    example: Login successful
+        ErrorLoginResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+                    example: Invalid credentials
+        UserProfileResponse:
+            type: object
+            properties:
+                data:
+                    type: object
+                    properties:
+                        user_id:
+                            type: string
+                            example: abc123
+                        full_name:
+                            type: string
+                            example: John Doe
+                        email:
+                            type: string
+                            format: email
+                            example: johndoe@example.com
+                        phone:
+                            type: string
+                            example: "+1 123456789"
+                        role:
+                            type: string
+                            example: user
+                        bio:
+                            type: string
+                            example: Software Developer
+                        address:
+                            type: string
+                            example: 123 Main St, City
+                        profile_picture:
+                            type: string
+                            format: uri
+                            example: https://example.com/profile-picture.jpg
+                message:
+                    type: string
+                    example: User profile retrieved successfully
+        ErrorProfileResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+                    example: Invalid or missing token
+        EditUserProfileRequest:
+            type: object
+            properties:
+                full_name:
+                    type: string
+                    example: John Doe
+                email:
+                    type: string
+                    format: email
+                    example: johndoe@example.com
+                phone:
+                    type: string
+                    example: "+1 123456789"
+                address:
+                    type: string
+                    example: 123 Main St, City
+                bio:
+                    type: string
+                    example: Software Developer
+        SuccessResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: User profile updated successfully
+        ErrorUpdateResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+                    example: Invalid or missing token
+        ChangeProfilePictureRequest:
+            type: object
+            properties:
+                profile_picture:
+                    type: string
+                    format: binary
+        ChangeProfilePictureResponse:
+            type: object
+            properties:
+                data:
+                    type: object
+                    properties:
+                        profile_picture:
+                            type: string
+                            format: uri
+                            example: https://example.com/new-profile-picture.jpg
+                message:
+                    type: string
+                    example: User profile picture changed successfully
+        ErrorUpdateProfilePictureResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+                    example: Invalid or missing token
+            required:
+                - error
+        UpgradeUserRoleRequest:
+            type: object
+            properties:
+                file:
+                    type: string
+                    format: binary
+        UpgradeUserRoleResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: File added successfully
+        ErrorUpgradeUserRoleResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        ChangePasswordRequest:
+            type: object
+            properties:
+                old_password:
+                    type: string
+                    example: oldpass
+                new_password:
+                    type: string
+                    example: newpass
+        ChangePasswordResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: Password updated successfully
+        ErrorChangePasswordResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        DeleteUserAccountResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: User account deleted successfully
+        ErrorDeleteResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        NewVenueRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                location:
+                    type: string
+                price:
+                    type: number
+                category:
+                    type: string
+        NewVenueResponse:
+            type: object
+            properties:
+                data:
+                    $ref: "#/components/schemas/NewVenueData"
+                message:
+                    type: string
+            required:
+                - data
+                - message
+        NewVenueData:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                location:
+                    type: string
+                price:
+                    type: number
+                category:
+                    type: string
+        ErrorAddVenueResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        UpdateVenueRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                location:
+                    type: string
+                price:
+                    type: number
+                category:
+                    type: string
+        UpdateVenueResponse:
+            type: object
+            properties:
+                data:
+                    $ref: "#/components/schemas/UpdateVenueData"
+                message:
+                    type: string
+            required:
+                - data
+                - message
+        UpdateVenueData:
+            type: object
+            properties:
+                venue_id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                location:
+                    type: string
+                price:
+                    type: number
+                category:
+                    type: string
+        GetVenueResponse:
+            type: object
+            properties:
+                data:
+                    $ref: "#/components/schemas/VenueData"
+                message:
+                    type: string
+            required:
+                - data
+                - message
+        VenueData:
+            type: object
+            properties:
+                venue_id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                location:
+                    type: string
+                price:
+                    type: number
+                category:
+                    type: string
+                distance:
+                    type: number
+                reviews:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/ReviewData"
+                venue_images:
+                    type: array
+                    items:
+                        type: string
+        ReviewData:
+            type: object
+            properties:
+                user:
+                    $ref: "#/components/schemas/UserData"
+                review:
+                    type: string
+                rating:
+                    type: number
+        UserData:
+            type: object
+            properties:
+                user_id:
+                    type: string
+                full_name:
+                    type: string
+        ErrorGetVenueByIDResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        DeleteVenueResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        ErrorDeleteVenueResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        AddVenueImagesResponse:
+            type: object
+            properties:
+                data:
+                    $ref: "#/components/schemas/VenueImagesData"
+                message:
+                    type: string
+            required:
+                - data
+                - message
+        VenueImagesData:
+            type: object
+            properties:
+                image_id:
+                    type: string
+                image_urls:
+                    type: string
+        ErrorAddVenueImageResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        AddReviewRequest:
+            type: object
+            properties:
+                venue_id:
+                    type: string
+                review:
+                    type: string
+                rating:
+                    type: number
+            required:
+                - venue_id
+                - review
+                - rating
+        SuccessAddReviewResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        ErrorAddReviewResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        ReviewListResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                data:
+                    type: array
+                items:
+                    $ref: "#/components/schemas/Review"
+            required:
+                - message
+                - data
+        Review:
+            type: object
+            properties:
+                review_id:
+                    type: string
+                review:
+                    type: string
+                rating:
+                    type: number
+                user:
+                    type: object
+                    properties:
+                        user_id:
+                            type: string
+                        full_name:
+                            type: string
+                    required:
+                        - user_id
+                        - full_name
+        ImageListResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                data:
+                    type: array
+                items:
+                    $ref: "#/components/schemas/Image"
+            required:
+                - message
+                - data
+        Image:
+            type: object
+            properties:
+                image_id:
+                    type: string
+                image_link:
+                    type: string
+            required:
+                - image_id
+                - image_link
+    examples:
+        InvalidTokenError:
+            value:
+                error: Unauthorized. Invalid token provided
+        BadRequestError:
+            value:
+                error: Bad request. Invalid request body or parameters
+        InternalServerError:
+            value:
+                error: Internal server error. Please try again later.
+        NotFound:
+            value:
+                error: Data not found
