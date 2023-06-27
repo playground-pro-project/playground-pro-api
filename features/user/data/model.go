@@ -20,7 +20,7 @@ type User struct {
 	Address        string                    `gorm:"type:text"`
 	Role           string                    `gorm:"type:enum('user', 'owner', 'admin');default:'user'"`
 	AccountStatus  string                    `gorm:"type:enum('verified', 'unverified');default:'unverified'"`
-	ProfilePicture string                    `gorm:"type:text"`
+	ProfilePicture string                    `gorm:"type:text;default:'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'"`
 	OwnerFile      string                    `gorm:"type:text"`
 	CreatedAt      time.Time                 `gorm:"type:datetime"`
 	UpdatedAt      time.Time                 `gorm:"type:datetime"`
