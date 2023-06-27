@@ -21,16 +21,10 @@ func NewRedisClient() *RedisClient {
 	ctx := context.Background()
 
 	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     "172.31.3.99:6379",
 		Password: "",
 		DB:       0,
 	})
-
-	// client := redis.NewClient(&redis.Options{
-	// 	Addr:     "172.31.3.99:6379",
-	// 	Password: "",
-	// 	DB:       0,
-	// })
 
 	return &RedisClient{
 		client: client,
