@@ -76,15 +76,6 @@ type VenuePictureCore struct {
 	DeletedAt      time.Time
 }
 
-// type UserHandler interface {
-// 	Register() echo.HandlerFunc
-// 	Login() echo.HandlerFunc
-// 	ValidateOTP() echo.HandlerFunc
-// 	DeleteUser() echo.HandlerFunc
-// 	GetUser() echo.HandlerFunc
-// 	UpdateUser() echo.HandlerFunc
-// }
-
 type UserService interface {
 	Register(req UserCore) (UserCore, error)
 	Login(req UserCore) (UserCore, string, error)

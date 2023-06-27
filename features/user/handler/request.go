@@ -24,7 +24,11 @@ type LoginRequest struct {
 	Password string `json:"password" form:"password"`
 }
 
-type OTPInputReq struct {
+type ResendOtpReq struct {
+	Email string `json:"email" form:"email"`
+}
+
+type VerifyReq struct {
 	UserID string `json:"user_id" form:"user_id"`
 	OTP    string `json:"otp_code" form:"otp_code"`
 }

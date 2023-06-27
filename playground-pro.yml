@@ -173,7 +173,7 @@ paths:
                                     $ref: "#/components/examples/InternalServerError"
             tags:
                 - Users
-    /users/profile/picture:
+    /users/profile-picture:
         put:
             summary: Change user profile picture
             operationId: changeProfilePicture
@@ -936,6 +936,7 @@ paths:
                                         error: Internal server error. Please try again later.
             tags:
                 - Reviews
+
 components:
     securitySchemes:
         JWTAuth:
