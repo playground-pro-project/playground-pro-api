@@ -66,10 +66,6 @@ func (s *userService) Login(req user.UserCore) (user.UserCore, string, error) {
 		return user.UserCore{}, "", errors.New(message)
 	}
 
-	// if result.AccountStatus != "verified" {
-	// 	return result, token, errors.New("otp validation is required")
-	// }
-
 	log.Sugar().Infof("user has been logged in: %s", result.UserID)
 	return result, token, nil
 }

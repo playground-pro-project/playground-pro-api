@@ -45,7 +45,9 @@ func initUserRouter(db *gorm.DB, e *echo.Echo) {
 	e.PUT("/users", userHandler.UpdateUserProfile(), middlewares.JWTMiddleware())
 	e.PUT("/users/password", userHandler.UpdatePassword(), middlewares.JWTMiddleware())
 	e.DELETE("/users", userHandler.DeleteUser(), middlewares.JWTMiddleware())
-	e.PUT("/users", userHandler.UploadProfilePicture(), middlewares.JWTMiddleware())
+	e.POST("/users/file", userHandler.UploadOwnerFile(), middlewares.JWTMiddleware())
+	e.PUT("/users/profile-picture", userHandler.UploadProfilePicture(), middlewares.JWTMiddleware())
+	e.DELETE("/users/profile-picture", userHandler.RemoveProfilePicture(), middlewares.JWTMiddleware())
 }
 
 func initVenueRouter(db *gorm.DB, e *echo.Echo) {

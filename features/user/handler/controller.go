@@ -349,8 +349,8 @@ func (uh *userHandler) UploadOwnerFile() echo.HandlerFunc {
 
 		// Check file size before opening it
 		fileSize := file.Size
-		if fileSize > maxFileSize {
-			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Please upload file smaller than 1 MB."))
+		if fileSize > maxOwnerFileSize {
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Please upload file smaller than 5 MB."))
 		}
 
 		// Get the file type from the Content-Type header
