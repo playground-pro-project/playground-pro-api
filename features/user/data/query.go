@@ -92,6 +92,17 @@ func (uq *userQuery) DeleteByID(userID string) error {
 	return nil
 }
 
+func (uq *userQuery) GetUserID(email string) (string, error) {
+	result := User{}
+	query := uq.db.Table("users").Where("email = ?", email).First(&result)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("user record not found, invalid email")
+		return "", errors.New("invalid email")
+	}
+
+	return result.UserID, nil
+}
+
 // GetByID implements user.UserData.
 func (uq *userQuery) GetByID(userID string) (user.UserCore, error) {
 	var userModel User
