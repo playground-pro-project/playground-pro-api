@@ -25,8 +25,8 @@ type LoginRequest struct {
 }
 
 type OTPInputReq struct {
-	UserID string `json:"user_id"`
-	OTP    string `json:"otp_code"`
+	UserID string `json:"user_id" form:"user_id"`
+	OTP    string `json:"otp_code" form:"otp_code"`
 }
 
 type EditProfileRequest struct {

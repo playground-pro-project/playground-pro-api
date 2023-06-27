@@ -18,7 +18,8 @@ import (
 
 const (
 	otpExpiration   = 5 * 60 * time.Second
-	defaultEmail    = "default@mail.com"
+	defaultEmail1   = "user1@default.com"
+	defaultEmail2   = "user2@default.com"
 	defaultOTP      = "123456"
 	emailSenderName = "Playground Pro"
 	emailSenderAddr = "dmsprd11@gmail.com"
@@ -97,7 +98,7 @@ func (s *userService) Register(req user.UserCore) (user.UserCore, error) {
 		return user.UserCore{}, errors.New("phone is required")
 	}
 
-	if req.Email != defaultEmail {
+	if (req.Email != defaultEmail1) && (req.Email != defaultEmail2) {
 		client := redis.NewRedisClient()
 		defer client.Close()
 
