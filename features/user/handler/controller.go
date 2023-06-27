@@ -153,7 +153,10 @@ func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error, please try again later"))
 		}
 
-		resp, token, _ := uh.userService.Login(RequestToCore(req))
+		user, err := uh.userService.GetByID(req.UserID)
+
+		resp, token, _ := uh.userService.Login(user)
+
 		loginResp := UserCoreToLoginResponse(resp)
 		loginResp.Token = token
 
