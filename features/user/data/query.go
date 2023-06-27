@@ -25,14 +25,12 @@ func New(db *gorm.DB) user.UserData {
 
 // Register implements user.UserData
 func (uq *userQuery) Register(request user.UserCore) (user.UserCore, error) {
-	userID := helper.GenerateUserID()
 	hashedPass, err := helper.HashPassword(request.Password)
 	if err != nil {
 		log.Error("error while hashing password")
 		return user.UserCore{}, errors.New("error while hashing password")
 	}
 
-	request.UserID = userID
 	request.Password = hashedPass
 	req := UserCoreToModel(request)
 	query := uq.db.Table("users").Create(&req)
