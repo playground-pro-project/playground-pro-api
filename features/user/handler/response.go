@@ -5,16 +5,16 @@ import (
 )
 
 type RegisterResponse struct {
-	UserID string `json:"user_id"`
-	Email  string `json:"email"`
+	UserID string `json:"user_id,omitempty"`
+	Email  string `json:"email,omitempty"`
 }
 
 type LoginResponse struct {
-	UserID        string `json:"user_id"`
-	Email         string `json:"email"`
-	Token         string `json:"token"`
-	Role          string `json:"role"`
-	AccountStatus string `json:"account_status"`
+	UserID        string `json:"user_id,omitempty"`
+	Email         string `json:"email,omitempty"`
+	Token         string `json:"token,omitempty"`
+	Role          string `json:"role,omitempty"`
+	AccountStatus string `json:"account_status,omitempty"`
 }
 
 type GetUserResponse struct {
@@ -26,6 +26,15 @@ type GetUserResponse struct {
 	Bio            string `json:"bio,omitempty"`
 	Address        string `json:"address,omitempty"`
 	ProfilePicture string `json:"profile_picture,omitempty"`
+}
+
+func UserCoreToLoginResponse(u user.UserCore) LoginResponse {
+	return LoginResponse{
+		UserID:        u.UserID,
+		Email:         u.Email,
+		Role:          u.Role,
+		AccountStatus: u.AccountStatus,
+	}
 }
 
 func UserCoreToGetUserResponse(u user.UserCore) GetUserResponse {

@@ -40,6 +40,7 @@ func initUserRouter(db *gorm.DB, e *echo.Echo) {
 
 	e.POST("/register", userHandler.Register())
 	e.POST("/login", userHandler.Login())
+	e.POST("/resend-otp", userHandler.ReSendOTP())
 	e.POST("/validation", userHandler.ValidateOTP())
 	e.GET("/users", userHandler.GetUserProfile(), middlewares.JWTMiddleware())
 	e.PUT("/users", userHandler.UpdateUserProfile(), middlewares.JWTMiddleware())

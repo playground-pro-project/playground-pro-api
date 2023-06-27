@@ -78,15 +78,11 @@ func (uh *userHandler) Login() echo.HandlerFunc {
 			}
 		}
 
-		loginResp := LoginResponse{
-			UserID:        resp.UserID,
-			Email:         resp.Email,
-			Role:          resp.Role,
-			AccountStatus: resp.AccountStatus,
-			Token:         token,
-		}
+		loginResp := UserCoreToLoginResponse(resp)
+		loginResp.Token = token
 
 		if loginResp.AccountStatus == "unverified" {
+			loginResp.Token = ""
 			return c.JSON(http.StatusOK, helper.SuccessResponse(loginResp, "OTP validation is required"))
 		}
 
@@ -94,15 +90,35 @@ func (uh *userHandler) Login() echo.HandlerFunc {
 	}
 }
 
-// func (uh *userHandler) ReSendOTP() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		req := LoginRequest{}
-// 		errBind := c.Bind(&req)
-// 		if errBind != nil {
-// 			log.Error("controller - error on bind request")
-// 			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
-// 		}
-// }
+func (uh *userHandler) ReSendOTP() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		req := LoginRequest{}
+		errBind := c.Bind(&req)
+		if errBind != nil {
+			log.Error("controller - error on bind request")
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
+		}
+
+		userID, _ := uh.userService.GetUserID(req.Email)
+		user, err := uh.userService.GetByID(userID)
+		if err != nil {
+			if strings.Contains(err.Error(), "user not found") {
+				log.Error(err.Error())
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse(err.Error()))
+			}
+			log.Error(err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error"))
+		}
+
+		err = uh.userService.StoreToRedis(user)
+		if err != nil {
+			log.Error(err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error"))
+		}
+
+		return c.JSON(http.StatusCreated, helper.SuccessResponse(nil, "Check OTP number sent to your email"))
+	}
+}
 
 func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -118,7 +134,7 @@ func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 		isValid, err := uh.userService.VerifyOTP(req.UserID, req.OTP)
 		if !isValid {
 			log.Error("OTP has been expired")
-			return c.JSON(http.StatusOK, map[string]interface{}{
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
 				"message": "OTP has been expired",
 			})
 		}
@@ -137,7 +153,12 @@ func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error, please try again later"))
 		}
 
+		resp, token, _ := uh.userService.Login(RequestToCore(req))
+		loginResp := UserCoreToLoginResponse(resp)
+		loginResp.Token = token
+
 		return c.JSON(http.StatusOK, map[string]interface{}{
+			"data":    loginResp,
 			"message": "Verification success",
 		})
 	}

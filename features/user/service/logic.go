@@ -125,6 +125,27 @@ func (s *userService) Register(req user.UserCore) (user.UserCore, error) {
 	return newUser, nil
 }
 
+func (s *userService) StoreToRedis(req user.UserCore) error {
+	client := redis.NewRedisClient()
+	defer client.Close()
+
+	// Send OTP to user
+	otp, err := s.SendOTP(req.Fullname, req.Email)
+	if err != nil {
+		log.Error(err.Error())
+		return errors.New(err.Error())
+	}
+
+	// Store OTP in Redis with expiration
+	err = client.SetOTP(req.UserID, otp, otpExpiration)
+	if err != nil {
+		log.Error(err.Error())
+		return errors.New("failed to store OTP in Redis:" + err.Error())
+	}
+
+	return nil
+}
+
 // SendOTP implements user.UserService.
 func (s *userService) SendOTP(recipientName string, toEmailAddr string) (string, error) {
 	otp := helper.GenerateOTP(6)
@@ -157,15 +178,6 @@ func (s *userService) SendOTP(recipientName string, toEmailAddr string) (string,
 	if err != nil {
 		log.Error(err.Error())
 		return "", err
-	}
-
-	return otp, nil
-}
-
-func (s *userService) ReSendOTP(recipientName string, toEmailAddr string) (string, error) {
-	otp, err := s.SendOTP(recipientName, toEmailAddr)
-	if err != nil {
-		log.Error(err.Error())
 	}
 
 	return otp, nil
@@ -214,6 +226,16 @@ func (s *userService) GetByID(userID string) (user.UserCore, error) {
 	}
 
 	return userEntity, nil
+}
+
+func (s *userService) GetUserID(email string) (string, error) {
+	userID, err := s.userData.GetUserID(email)
+	if err != nil {
+		log.Error(err.Error())
+		return "", fmt.Errorf("error: %w", err)
+	}
+
+	return userID, nil
 }
 
 // UpdateUserByID implements user.UserService.
