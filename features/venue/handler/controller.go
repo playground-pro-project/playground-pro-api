@@ -70,8 +70,8 @@ func (vh *venueHandler) SearchVenues() echo.HandlerFunc {
 
 		venues, rows, pages, err := vh.service.SearchVenues(keyword, page)
 		if err != nil {
-			if strings.Contains(err.Error(), "not found") {
-				log.Error("list venues not found")
+			if strings.Contains(err.Error(), "venues not found") {
+				log.Error("venues not found")
 				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
 			} else {
 				log.Error("internal server error")
@@ -90,6 +90,11 @@ func (vh *venueHandler) SearchVenues() echo.HandlerFunc {
 			Page:       page.Page,
 			TotalRows:  rows,
 			TotalPages: pages,
+		}
+
+		if len(result) == 0 {
+			log.Error("venues not found")
+			return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
 		}
 
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful Operation", result, pagination))

@@ -7,16 +7,12 @@ import (
 
 type SearchVenueResponse struct {
 	VenueID       string  `json:"venue_id,omitempty"`
-	OwnerID       string  `json:"owner_id,omitempty"`
 	Category      string  `json:"category,omitempty"`
 	Name          string  `json:"name,omitempty"`
-	Description   string  `json:"description,omitempty"`
 	Username      string  `json:"username,omitempty"`
-	ServiceTime   string  `json:"service_time,omitempty"`
 	Location      string  `json:"location,omitempty"`
 	Distance      uint    `json:"distance,omitempty"`
 	Price         float64 `json:"price,omitempty"`
-	TotalReviews  uint    `json:"total_reviews,omitempty"`
 	AverageRating float64 `json:"average_rating,omitempty"`
 	VenuePicture  string  `json:"venue_picture,omitempty"`
 }
@@ -58,16 +54,12 @@ type Reservation struct {
 func SearchVenue(v venue.VenueCore) SearchVenueResponse {
 	response := SearchVenueResponse{
 		VenueID:       v.VenueID,
-		OwnerID:       v.OwnerID,
 		Category:      v.Category,
 		Name:          v.Name,
-		Description:   v.Description,
 		Username:      v.Username,
-		ServiceTime:   v.ServiceTime,
 		Location:      v.Location,
 		Distance:      v.Distance,
 		Price:         v.Price,
-		TotalReviews:  v.TotalReviews,
 		AverageRating: v.AverageRating,
 	}
 
@@ -103,11 +95,10 @@ func SelectVenue(v venue.VenueCore) SelectVenueResponse {
 
 	response := SelectVenueResponse{
 		VenueID:       v.VenueID,
-		OwnerID:       v.OwnerID,
 		Category:      v.Category,
 		Name:          v.Name,
-		Description:   v.Description,
 		Username:      v.Username,
+		Description:   v.Description,
 		ServiceTime:   v.ServiceTime,
 		Location:      v.Location,
 		Distance:      v.Distance,

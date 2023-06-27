@@ -30,64 +30,6 @@ tags:
     description: Review untuk venue yang telah disewa oleh peminjam
 
 paths:
-  /register:
-    post:
-      tags:
-        - Authentication
-      summary: Register a new user
-      description: Endpoint create a new user to the web-application
-      deprecated: true
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/users"
-            example:
-              fullname: "peterzalai"
-              email: "peterzalai@gmail.com"
-              phone: "081235288543"
-              password: "@Secret123"
-      responses:
-        "201":
-          $ref: "#/components/responses/Response201"
-        "400":
-          $ref: "#/components/responses/Response400"
-        "500":
-          $ref: "#/components/responses/Response500"
-
-  /login:
-    post:
-      tags:
-        - Authentication
-      summary: Login to system
-      description: Endpoint login user to the web-application
-      deprecated: true
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/users"
-            examples:
-              example1:
-                summary: Example login user id 1
-                value:
-                  email: "peterzalai@gmail.com"
-                  password: "@Secret123"
-              example2:
-                summary: Example login user id 2
-                value:
-                  email: "peterzalai@gmail.com"
-                  password: "@Secret123"
-      responses:
-        "200":
-          $ref: "#/components/responses/Response200Login"
-        "400":
-          $ref: "#/components/responses/Response400Login"
-        "500":
-          $ref: "#/components/responses/Response500"
-
   "/users/reservation":
     get:
       tags:
@@ -418,25 +360,6 @@ components:
                 type: string
                 example: "Internal server error"
 
-    Response200Login:
-      description: Successful login
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              code:
-                type: integer
-              message:
-                type: string
-              token:
-                type: string
-            example:
-              code: 200
-              message: "Successful login"
-              data:
-                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBldGVyemFsYWlAZ21haWwuY29tIiwicGFzc3dvcmQiOiJAU2VjcmV0MTIzIn0.BZq48TAx5wci2LH48KW5geslrGR2ybr0-5Wol-HyDkI"
-
     Response200ListVenues:
       description: Get list of events with pagination
       content:
@@ -463,24 +386,20 @@ components:
               - venue_id: "string-uuid"
                 category: "basketball"
                 name: "Venue 1"
-                owner: "User 1"
-                address: "Jakarta"
+                username: "User 1"
+                location: "Jakarta"
                 distance: 1
-                unit: km
-                price: 100
-                average_rating: 5
-                count_review: 100
+                price: 100.50
+                average_rating: 4.55
                 venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
               - venue_id: "string-uuid"
                 category: "football"
                 name: "Venue 2"
-                owner: "User 2"
-                address: "Jakarta"
+                username: "User 2"
+                location: "Jakarta"
                 distance: 1.3
-                unit: km
-                price: 200
-                average_rating: 4.7
-                count_review: 250
+                price: 200.75
+                average_rating: 4.75
                 venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
             pagination:
               limit: 5
@@ -771,20 +690,6 @@ components:
                 fullname: "Petrik"
                 review: "Ini bagian review untuk venue yang bersangkutan"
                 rating: 5
-
-    Response400Login:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              code:
-                type: integer
-                example: 400
-              message:
-                type: string
-                example: "Bad request, Incorrect email or password"
 
   schemas:
     users:

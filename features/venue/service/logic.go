@@ -72,9 +72,9 @@ func (vs *venueService) SearchVenues(keyword string, page pagination.Pagination)
 
 	venues, rows, pages, err := vs.query.SearchVenues(keyword, page)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if strings.Contains(err.Error(), "venues not found") {
 			log.Error("list venues record not found")
-			return []venue.VenueCore{}, 0, 0, errors.New("list venues record not found")
+			return []venue.VenueCore{}, 0, 0, errors.New("venues not found")
 		} else {
 			log.Error("internal server error")
 			return []venue.VenueCore{}, 0, 0, errors.New("internal server error")
