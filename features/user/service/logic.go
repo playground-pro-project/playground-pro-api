@@ -162,6 +162,15 @@ func (s *userService) SendOTP(recipientName string, toEmailAddr string) (string,
 	return otp, nil
 }
 
+func (s *userService) ReSendOTP(recipientName string, toEmailAddr string) (string, error) {
+	otp, err := s.SendOTP(recipientName, toEmailAddr)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	return otp, nil
+}
+
 // VerifyOTP implements user.UserService.
 func (s *userService) VerifyOTP(key string, otp string) (bool, error) {
 	client := redis.NewRedisClient()
