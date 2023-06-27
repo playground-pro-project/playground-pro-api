@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
@@ -40,8 +41,8 @@ func (r *RedisClient) Close() error {
 func (r *RedisClient) SetOTP(key string, value interface{}, expiration time.Duration) error {
 	err := r.client.Set(r.ctx, key, value, expiration).Err()
 	if err != nil {
-		r.log.Error(err.Error())
-		return err
+		r.log.Error("Failed to set OTP in Redis", zap.Error(err))
+		return fmt.Errorf("failed to set OTP in Redis: %w", err)
 	}
 
 	return nil
@@ -49,9 +50,11 @@ func (r *RedisClient) SetOTP(key string, value interface{}, expiration time.Dura
 
 func (r *RedisClient) GetOTP(key string) (string, error) {
 	val, err := r.client.Get(r.ctx, key).Result()
-	if err != nil {
-		r.log.Error(err.Error())
-		return "", err
+	if err == redis.Nil {
+		return "", fmt.Errorf("OTP not found for key: %s", key)
+	} else if err != nil {
+		r.log.Error("Failed to get OTP from Redis", zap.Error(err))
+		return "", fmt.Errorf("failed to get OTP from Redis: %w", err)
 	}
 
 	return val, nil

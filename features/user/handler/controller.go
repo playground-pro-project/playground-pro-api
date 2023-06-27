@@ -135,6 +135,7 @@ func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 		if !isValid {
 			log.Error("OTP has been expired")
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"status":  "Fail",
 				"message": "OTP has been expired",
 			})
 		}
@@ -142,7 +143,8 @@ func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 		if err != nil {
 			log.Error(err.Error())
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"error": err.Error(),
+				"status": "Fail",
+				"error":  err.Error(),
 			})
 		}
 
@@ -154,6 +156,7 @@ func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
+			"status":  "Success",
 			"message": "Verification success",
 		})
 	}
