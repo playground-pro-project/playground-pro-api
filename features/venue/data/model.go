@@ -1,6 +1,7 @@
 package data
 
 import (
+	"math"
 	"time"
 
 	image "github.com/playground-pro-project/playground-pro-api/features/image/data"
@@ -85,16 +86,10 @@ type Reservation struct {
 }
 
 func searchVenueModels(v Venue) venue.VenueCore {
-	var reviews []venue.ReviewCore
 	var totalRating float64
 	var averageRating float64 = 0.0
 	var picture string
 	for _, r := range v.Reviews {
-		tmp := venue.ReviewCore{
-			Review: r.Review,
-			Rating: r.Rating,
-		}
-		reviews = append(reviews, tmp)
 		totalRating += r.Rating
 	}
 
@@ -102,26 +97,19 @@ func searchVenueModels(v Venue) venue.VenueCore {
 		averageRating = totalRating / float64(len(v.Reviews))
 	}
 
+	averageRating = math.Round(averageRating*100) / 100
+
 	if len(v.VenuePictures) > 0 {
 		picture = v.VenuePictures[0].URL
 	}
 
 	result := venue.VenueCore{
 		VenueID:       v.VenueID,
-		OwnerID:       v.OwnerID,
 		Category:      v.Category,
 		Name:          v.Name,
-		Description:   v.Description,
 		Username:      v.User.Fullname,
-		ServiceTime:   v.ServiceTime,
 		Location:      v.Location,
 		Price:         v.Price,
-		Longitude:     v.Longitude,
-		Latitude:      v.Latitude,
-		CreatedAt:     v.CreatedAt,
-		UpdatedAt:     v.UpdatedAt,
-		DeletedAt:     v.DeletedAt.Time,
-		TotalReviews:  uint(len(v.Reviews)),
 		AverageRating: averageRating,
 		VenuePictures: []venue.VenuePictureCore{
 			{

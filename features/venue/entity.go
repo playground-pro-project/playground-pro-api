@@ -20,6 +20,8 @@ type VenueCore struct {
 	Price         float64 `validate:"required"`
 	Longitude     float64
 	Latitude      float64
+	TotalRows     int64
+	TotalPages    int
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     time.Time
