@@ -94,11 +94,15 @@ func (uh *userHandler) Login() echo.HandlerFunc {
 	}
 }
 
-func (uh *userHandler) SendOTP() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return nil
-	}
-}
+// func (uh *userHandler) ReSendOTP() echo.HandlerFunc {
+// 	return func(c echo.Context) error {
+// 		req := LoginRequest{}
+// 		errBind := c.Bind(&req)
+// 		if errBind != nil {
+// 			log.Error("controller - error on bind request")
+// 			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
+// 		}
+// }
 
 func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -344,7 +348,8 @@ func (uh *userHandler) UploadOwnerFile() echo.HandlerFunc {
 
 		file, err := c.FormFile("owner_docs")
 		if err != nil {
-			return err
+			log.Error(err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 		}
 
 		// Check file size before opening it
@@ -359,25 +364,28 @@ func (uh *userHandler) UploadOwnerFile() echo.HandlerFunc {
 		path := "owner-docs/" + file.Filename
 		fileContent, err := file.Open()
 		if err != nil {
+			log.Error(err.Error())
 			return err
 		}
 		defer fileContent.Close()
 
 		err = awsService.UploadFile(path, fileType, fileContent)
 		if err != nil {
-			return err
+			log.Error(err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 		}
 
 		var updatedUser user.UserCore
 		updatedUser.OwnerFile = fmt.Sprintf("%s%s", ownerFileBaseURL, filepath.Base(file.Filename))
-
-		// updatedUser.Role = "owner"
+		updatedUser.Role = "owner"
 
 		err = uh.userService.UpdateByID(userId, updatedUser)
 		if err != nil {
 			if strings.Contains(err.Error(), "user not found") {
+				log.Error(err.Error())
 				return c.JSON(http.StatusNotFound, helper.ErrorResponse(err.Error()))
 			}
+			log.Error(err.Error())
 			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
 		}
 

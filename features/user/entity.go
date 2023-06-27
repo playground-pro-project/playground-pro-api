@@ -89,6 +89,7 @@ type UserService interface {
 	Register(req UserCore) (UserCore, error)
 	Login(req UserCore) (UserCore, string, error)
 	SendOTP(recipientName, toEmailAddr string) (string, error)
+	ReSendOTP(recipientName, toEmailAddr string) (string, error)
 	VerifyOTP(key, otp string) (bool, error)
 	DeleteByID(userID string) error
 	GetByID(userID string) (UserCore, error)
