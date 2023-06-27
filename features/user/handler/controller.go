@@ -34,14 +34,14 @@ func (uh *userHandler) Register() echo.HandlerFunc {
 		}
 
 		userCore := RegisterRequestToCore(req)
-		_, err = uh.userService.Register(userCore)
+		newUser, err := uh.userService.Register(userCore)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 		}
 
-		userResp := UserCoreToRegisterResponse(userCore)
+		userResp := UserCoreToRegisterResponse(newUser)
 
-		return c.JSON(http.StatusCreated, helper.SuccessResponse(userResp, "User registered successfully"))
+		return c.JSON(http.StatusCreated, helper.SuccessResponse(userResp, "Check OTP number sent to your email"))
 	}
 }
 
@@ -120,6 +120,13 @@ func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{
 				"error": err.Error(),
 			})
+		}
+
+		err = uh.userService.UpdateByID(req.UserID, user.UserCore{
+			AccountStatus: "verified",
+		})
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error, please try again later"))
 		}
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
