@@ -92,7 +92,7 @@ func (uh *userHandler) Login() echo.HandlerFunc {
 
 func (uh *userHandler) ReSendOTP() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		req := LoginRequest{}
+		req := ResendOtpReq{}
 		errBind := c.Bind(&req)
 		if errBind != nil {
 			log.Error("controller - error on bind request")
@@ -122,7 +122,7 @@ func (uh *userHandler) ReSendOTP() echo.HandlerFunc {
 
 func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		req := OTPInputReq{}
+		req := VerifyReq{}
 		err := c.Bind(&req)
 		if err != nil {
 			log.Error("error binding request")
