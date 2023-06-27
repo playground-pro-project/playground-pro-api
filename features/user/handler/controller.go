@@ -146,21 +146,6 @@ func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 			})
 		}
 
-		usr, err := uh.userService.GetByID(req.UserID)
-		if err != nil {
-			log.Error(err.Error())
-		}
-
-		loginReq := LoginRequest{
-			Email:    usr.Email,
-			Password: usr.Password,
-		}
-
-		resp, token, err := uh.userService.Login(RequestToCore(loginReq))
-		if err != nil {
-			log.Error(err.Error())
-		}
-
 		err = uh.userService.UpdateByID(req.UserID, user.UserCore{
 			AccountStatus: "verified",
 		})
@@ -168,11 +153,7 @@ func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error, please try again later"))
 		}
 
-		loginResp := UserCoreToLoginResponse(resp)
-		loginResp.Token = token
-
 		return c.JSON(http.StatusOK, map[string]interface{}{
-			"data":    loginResp,
 			"message": "Verification success",
 		})
 	}
