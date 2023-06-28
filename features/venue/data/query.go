@@ -38,8 +38,8 @@ func (vq *venueQuery) RegisterVenue(userId string, request venue.VenueCore) (ven
 		return venue.VenueCore{}, errors.New("venues not found")
 	}
 	if query.Error != nil {
-		log.Error("error executing query")
-		return venue.VenueCore{}, errors.New("error executing query")
+		log.Error("error executing query, duplicated")
+		return venue.VenueCore{}, errors.New("error executing query, duplicated")
 	}
 	if query.RowsAffected == 0 {
 		log.Warn("no venue has been created")
