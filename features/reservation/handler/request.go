@@ -15,7 +15,6 @@ type makeReservationRequest struct {
 
 type createPaymentRequest struct {
 	PaymentType string `json:"payment_type"  form:"payment_type"`
-	GrandTotal  string `json:"grand_total"  form:"grand_total"`
 }
 
 type editReservationRequest struct {
@@ -103,7 +102,6 @@ func requestReservation(data interface{}) reservation.ReservationCore {
 func (p createPaymentRequest) requestPayment() reservation.PaymentCore {
 	return reservation.PaymentCore{
 		PaymentType: p.PaymentType,
-		GrandTotal:  p.GrandTotal,
 	}
 }
 

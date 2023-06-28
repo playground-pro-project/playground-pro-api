@@ -78,10 +78,13 @@ func (rh *reservationHandler) ReservationStatus() echo.HandlerFunc {
 		_, err := rh.service.ReservationStatus(reservationStatusRequest(midtransResponse))
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
+				log.Error("payment not found")
 				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
 			} else if strings.Contains(err.Error(), "no payment record has been updated") {
-				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "No payment record has been updated", nil, nil))
+				log.Error("no payment record has been updated")
+				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "No payment record has been updated", nil, nil))
 			}
+			log.Error("internal server error")
 			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
 		}
 

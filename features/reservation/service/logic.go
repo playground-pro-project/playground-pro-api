@@ -59,9 +59,6 @@ func (rs *reservationService) MakeReservation(userId string, r reservation.Reser
 		case strings.Contains(err.Error(), "user does not exist"):
 			log.Error("failed to insert data, user does not exist")
 			message = "user does not exist"
-		case strings.Contains(err.Error(), "error insert data, duplicate entry"):
-			log.Error("error insert data, duplicate entry")
-			message = "error insert data, duplicate entry"
 		default:
 			log.Error("internal server error")
 			message = "internal server error"
@@ -80,22 +77,26 @@ func (rs *reservationService) ReservationStatus(request reservation.PaymentCore)
 		request.Status = "success"
 		res, err := rs.query.ReservationStatus(request)
 		if err != nil {
+			log.Error("failed to update reservation status")
 			return res, err
 		}
 
 		if !paymentgateway.IsRefundable(request.PaymentMethod) {
 			grandTotal, errConv := strconv.ParseInt(request.GrandTotal, 10, 64)
 			if errConv != nil {
-				return res, errors.New("failed to parse GrandTotal")
+				log.Error("failed to parse grand total")
+				return res, errors.New("failed to parse grand total")
 			}
 			err := rs.refund.RefundTransaction(request.Reservation.ReservationID, grandTotal, "reason")
 			if err != nil {
+				log.Error("failed to refund transaction")
 				return res, err
 			}
 
 			request.Status = "refund"
 			res, err = rs.query.ReservationStatus(request)
 			if err != nil {
+				log.Error("failed to update refund status")
 				return res, err
 			}
 		}
