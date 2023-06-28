@@ -6,7 +6,7 @@ RUN mkdir /app
 # set working directory
 WORKDIR /app
 
-COPY ./ /app
+COPY . .
 
 RUN go mod tidy
 
