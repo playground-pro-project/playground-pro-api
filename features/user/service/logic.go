@@ -72,58 +72,61 @@ func (s *userService) Login(req user.UserCore) (user.UserCore, string, error) {
 }
 
 // Register implements user.UserService.
-func (s *userService) Register(req user.UserCore) (user.UserCore, error) {
+func (s *userService) Register(req user.UserCore) (user.UserCore, string, error) {
 	userID := helper.GenerateUserID()
 	req.UserID = userID
 
 	err := helper.ValidatePassword(req.Password)
 	if err != nil {
 		log.Error(err.Error())
-		return user.UserCore{}, err
+		return user.UserCore{}, "", err
 	}
 
 	_, isValid := helper.ValidateMailAddress(req.Email)
 	if !isValid {
 		log.Error("wrong email format")
-		return user.UserCore{}, errors.New("wrong email format")
+		return user.UserCore{}, "", errors.New("wrong email format")
 	}
 
 	if req.Fullname == "" {
 		log.Error("fullname is required")
-		return user.UserCore{}, errors.New("fullname is required")
+		return user.UserCore{}, "", errors.New("fullname is required")
 	}
 
 	if req.Phone == "" {
 		log.Error("phone is required")
-		return user.UserCore{}, errors.New("phone is required")
+		return user.UserCore{}, "", errors.New("phone is required")
 	}
 
-	if (req.Email != defaultEmail1) && (req.Email != defaultEmail2) {
-		client := redis.NewRedisClient()
-		defer client.Close()
-
-		// Send OTP to user
-		otp, err := s.SendOTP(req.Fullname, req.Email)
-		if err != nil {
-			log.Error(err.Error())
-			return user.UserCore{}, errors.New(err.Error())
-		}
-
-		// Store OTP in Redis with expiration
-		err = client.SetOTP(userID, otp, otpExpiration)
-		if err != nil {
-			log.Error(err.Error())
-			return user.UserCore{}, errors.New("failed to store OTP in Redis:" + err.Error())
-		}
-	}
-
+	// Insert data to database
 	newUser, err := s.userData.Register(req)
 	if err != nil {
 		log.Error(err.Error())
-		return user.UserCore{}, err
+		return user.UserCore{}, "", err
 	}
 
-	return newUser, nil
+	if (req.Email == defaultEmail1) || (req.Email == defaultEmail2) {
+		return newUser, defaultOTP, nil
+	}
+
+	// Send OTP to user
+	otp, err := s.SendOTP(req.Fullname, req.Email)
+	if err != nil {
+		log.Error(err.Error())
+		return user.UserCore{}, "", errors.New(err.Error())
+	}
+
+	client := redis.NewRedisClient()
+	defer client.Close()
+
+	// Store OTP in Redis with expiration
+	err = client.SetOTP(userID, otp, otpExpiration)
+	if err != nil {
+		log.Error(err.Error())
+		return user.UserCore{}, "", errors.New("failed to store OTP in Redis:" + err.Error())
+	}
+
+	return newUser, otp, nil
 }
 
 func (s *userService) StoreToRedis(req user.UserCore) error {

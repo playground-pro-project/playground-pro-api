@@ -7,6 +7,7 @@ import (
 type RegisterResponse struct {
 	UserID string `json:"user_id,omitempty"`
 	Email  string `json:"email,omitempty"`
+	OTP    string `json:"otp,omitempty"`
 }
 
 type LoginResponse struct {
