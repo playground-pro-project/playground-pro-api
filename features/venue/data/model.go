@@ -27,7 +27,7 @@ type Venue struct {
 	DeletedAt     gorm.DeletedAt       `gorm:"index"`
 	User          User                 `gorm:"references:OwnerID;foreignKey:UserID"`
 	VenuePictures []image.VenuePicture `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
-	Reservations  []Reservation        `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Reservations  []Reservation        `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	Reviews       []review.Review      `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 

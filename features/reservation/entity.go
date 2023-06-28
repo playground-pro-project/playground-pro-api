@@ -33,6 +33,12 @@ type PaymentCore struct {
 	Reservation   ReservationCore
 }
 
+type VenueCore struct {
+	VenueID      string
+	Price        float64
+	Reservations []ReservationCore
+}
+
 type ReservationHandler interface {
 	MakeReservation() echo.HandlerFunc
 	ReservationStatus() echo.HandlerFunc
