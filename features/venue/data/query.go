@@ -244,7 +244,7 @@ func (vq *venueQuery) GetAllVenueImage(venueID string) ([]venue.VenuePictureCore
 }
 
 func (vq *venueQuery) DeleteVenueImage(venueImageID string) error {
-	query := vq.db.Table("venue_pictures").Delete(&VenuePicture{}, venueImageID)
+	query := vq.db.Table("venue_pictures").Where("venue_picture_id = ?", venueImageID).Delete(&VenuePicture{})
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
 		log.Error("venue image record not found")
 		return errors.New("venue image record not found")
@@ -258,7 +258,7 @@ func (vq *venueQuery) DeleteVenueImage(venueImageID string) error {
 	return nil
 }
 
-func (vq *venueQuery) GetByVenueImageID(venueImageID string) (venue.VenuePictureCore, error) {
+func (vq *venueQuery) GetVenueByImageID(venueImageID string) (venue.VenuePictureCore, error) {
 	var image VenuePicture
 	query := vq.db.Table("venue_pictures").Where("venue_picture_id = ?", venueImageID).First(&image)
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {

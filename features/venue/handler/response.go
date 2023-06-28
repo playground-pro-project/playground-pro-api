@@ -6,6 +6,7 @@ import (
 )
 
 type SearchVenueResponse struct {
+	UserID        string  `json:"user_id,omitempty"`
 	VenueID       string  `json:"venue_id,omitempty"`
 	Category      string  `json:"category,omitempty"`
 	Name          string  `json:"name,omitempty"`

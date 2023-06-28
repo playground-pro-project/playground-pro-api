@@ -294,7 +294,7 @@ func (vh *venueHandler) DeleteVenueImage() echo.HandlerFunc {
 		}
 
 		venueImageID := c.Param("image_id")
-		vn, err := vh.service.GetByVenueImageID(venueImageID)
+		vn, err := vh.service.GetVenueByImageID(venueImageID)
 		if err != nil {
 			log.Error(err.Error())
 			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
@@ -304,7 +304,7 @@ func (vh *venueHandler) DeleteVenueImage() echo.HandlerFunc {
 		awsService := aws.InitS3()
 
 		prevFilename := filepath.Base(vn.URL)
-		prevPath := "profile-picture/" + prevFilename
+		prevPath := "venue-images/" + prevFilename
 
 		err = awsService.DeleteFile(prevPath)
 		if err != nil {
@@ -324,7 +324,7 @@ func (vh *venueHandler) DeleteVenueImage() echo.HandlerFunc {
 		}
 
 		log.Sugar().Infof(venueImageID + " venue image deleted successfully")
-		return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "venue image added successfully"))
+		return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "venue image deleted successfully"))
 	}
 }
 
