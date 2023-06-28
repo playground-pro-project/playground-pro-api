@@ -35,6 +35,18 @@ func (awsSvc AWSService) UploadFile(key string, fileType string, file multipart.
 	return err
 }
 
+func (awsSvc AWSService) DeleteFile(key string) error {
+	_, err := awsSvc.S3Client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+		Bucket: aws.String(AWS_S3_BUCKET),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		log.Println("Error while deleting the file", err)
+	}
+
+	return err
+}
+
 func ConfigS3(cfg *appConfig.AppConfig) AWSService {
 	creds := credentials.NewStaticCredentialsProvider(
 		cfg.AWS_ACCESS_KEY_ID, cfg.AWS_SECRET_ACCESS_KEY, "",

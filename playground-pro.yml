@@ -70,6 +70,105 @@ paths:
                                 $ref: "#/components/schemas/ErrorLoginResponse"
             tags:
                 - Authentication
+    /validation:
+        post:
+            summary: OTP validation
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                user_id:
+                                    type: string
+                                    example: USR-HAY7A8QU
+                                otp_code:
+                                    type: string
+                                    example: 239076
+            responses:
+                "200":
+                    description: Verification successful
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: Success
+                                    message:
+                                        type: string
+                                        example: Verification success
+                "400":
+                    description: Invalid request payload
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: Fail
+                                    message:
+                                        type: string
+                                        example: "Bad request. Invalid request body or parameters"
+                "404":
+                    description: OTP has been expired
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: Fail
+                                    message:
+                                        type: string
+                                        example: "OTP has been expired"
+            tags:
+                - Authentication
+    /resend-otp:
+        post:
+            summary: Resend OTP
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                    example: user@mail.com
+            responses:
+                "200":
+                    description: Resend OTP
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: Check OTP sent to your email
+                "400":
+                    description: Invalid request payload
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: Fail
+                                    message:
+                                        type: string
+                                        example: "Bad request. Invalid request body or parameters"
+            tags:
+                - Authentication
+
     /users:
         get:
             summary: Get user profile
@@ -192,6 +291,51 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/ChangeProfilePictureResponse"
+                "400":
+                    description: Bad request - Invalid request body
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
+                            examples:
+                                BadRequestError:
+                                    $ref: "#/components/examples/BadRequestError"
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
+                            examples:
+                                InternalServerError:
+                                    $ref: "#/components/examples/InternalServerError"
+            tags:
+                - Users
+        delete:
+            summary: Remove user profile picture
+            operationId: removeProfilePicture
+            security:
+                - JWTAuth: []
+            responses:
+                "200":
+                    description: User profile picture changed successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: Profile picture removed successfully
                 "400":
                     description: Bad request - Invalid request body
                     content:
@@ -948,6 +1092,9 @@ components:
         Auth:
             type: object
             properties:
+                full_name:
+                    type: string
+                    example: John Doe
                 email:
                     type: string
                     format: email
@@ -956,6 +1103,10 @@ components:
                     type: string
                     format: password
                     example: password123
+                phone:
+                    type: string
+                    format: phone
+                    example: 082945161823
         RegistrationResponse:
             type: object
             properties:
@@ -1093,7 +1244,7 @@ components:
                             example: https://example.com/new-profile-picture.jpg
                 message:
                     type: string
-                    example: User profile picture changed successfully
+                    example: Profile picture updated successfully
         ErrorUpdateProfilePictureResponse:
             type: object
             properties:
@@ -1367,8 +1518,8 @@ components:
                     type: string
                 data:
                     type: array
-                items:
-                    $ref: "#/components/schemas/Review"
+                    items:
+                        $ref: "#/components/schemas/Review"
             required:
                 - message
                 - data
@@ -1398,8 +1549,8 @@ components:
                     type: string
                 data:
                     type: array
-                items:
-                    $ref: "#/components/schemas/Image"
+                    items:
+                        $ref: "#/components/schemas/Image"
             required:
                 - message
                 - data

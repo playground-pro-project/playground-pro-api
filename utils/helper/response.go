@@ -2,7 +2,7 @@ package helper
 
 type RequestResponse struct {
 	Code       int         `json:"code,omitempty"`
-	Message    string      `json:"message"`
+	Message    string      `json:"message,omitempty"`
 	Error      string      `json:"error,omitempty"`
 	Data       interface{} `json:"data,omitempty"`
 	Pagination interface{} `json:"pagination,omitempty"`
