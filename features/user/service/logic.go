@@ -152,7 +152,7 @@ func (s *userService) StoreToRedis(req user.UserCore) error {
 // SendOTP implements user.UserService.
 func (s *userService) SendOTP(recipientName string, toEmailAddr string) (string, error) {
 	otp := helper.GenerateOTP(6)
-	sender := mail.NewGmailSender(emailSenderName, config.EMAIL_SENDER_ADDRESS, config.EMAIL_SENDER_PASSWORD)
+	sender := mail.NewGmailSender(config.EMAIL_SENDER_NAME, config.EMAIL_SENDER_ADDRESS, config.EMAIL_SENDER_PASSWORD)
 
 	subject := "Account Verification - One-Time Password (OTP) Required"
 
