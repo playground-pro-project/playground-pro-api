@@ -51,6 +51,18 @@ type Reservation struct {
 	CheckOutDate  helper.LocalTime `json:"check_out_date,omitempty"`
 }
 
+type GetAllVenueImageResponse struct {
+	VenuePictureID string `json:"venue_picture_id"`
+	URL            string `json:"url"`
+}
+
+func GetAllVenueImageToResponse(v venue.VenuePictureCore) GetAllVenueImageResponse {
+	return GetAllVenueImageResponse{
+		VenuePictureID: v.VenuePictureID,
+		URL:            v.URL,
+	}
+}
+
 func SearchVenue(v venue.VenueCore) SearchVenueResponse {
 	response := SearchVenueResponse{
 		VenueID:       v.VenueID,

@@ -1,13 +1,16 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	echo "github.com/labstack/echo/v4"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/venue"
+	"github.com/playground-pro-project/playground-pro-api/utils/aws"
 	"github.com/playground-pro-project/playground-pro-api/utils/helper"
 	"github.com/playground-pro-project/playground-pro-api/utils/pagination"
 )
@@ -202,5 +205,143 @@ func (vh *venueHandler) VenueAvailability() echo.HandlerFunc {
 		resp := Availability(availables)
 		log.Sugar().Infoln(resp)
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successfully operation.", resp, nil))
+	}
+}
+
+func (vh *venueHandler) CreateVenueImage() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		_, err := middlewares.ExtractToken(c)
+		if err != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
+
+		venueID := c.Param("venue_id")
+		form, err := c.MultipartForm()
+		if err != nil {
+			log.Error("Failed to retrieve file: " + err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Failed to retrieve file: "+err.Error()))
+		}
+
+		files := form.File["files"]
+		for _, file := range files {
+			// Get the file type from the Content-Type header
+			fileType := file.Header.Get("Content-Type")
+			fileExtension := filepath.Ext(file.Filename)
+			fileExtension = strings.ToLower(fileExtension)
+
+			allowedExtensions := []string{".jpg", ".jpeg", ".png"}
+			extensionAllowed := false
+			for _, ext := range allowedExtensions {
+				if ext == fileExtension {
+					extensionAllowed = true
+					break
+				}
+			}
+			if !extensionAllowed {
+				log.Error(fileExtension + " is not allowed")
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(fileExtension+" is not allowed. Only JPG, JPEG, and PNG files are allowed."))
+			}
+
+			fileSize := file.Size
+			if fileSize > maxVenueFileSize {
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Please upload a file smaller than 2 MB."))
+			}
+
+			id := helper.GenerateIdentifier()
+			filename := id + "-" + file.Filename
+			path := "venue-images/" + filename
+
+			fileContent, err := file.Open()
+			if err != nil {
+				log.Error("Failed to open file: " + err.Error())
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to open file: "+err.Error()))
+			}
+			defer fileContent.Close()
+
+			awsService := aws.InitS3()
+
+			// Upload profile picture file to cloud
+			err = awsService.UploadFile(path, fileType, fileContent)
+			if err != nil {
+				log.Error("Failed to upload file to cloud service: " + err.Error())
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to upload file to cloud service: "+err.Error()))
+			}
+
+			image := venue.VenuePictureCore{
+				VenueID: venueID,
+				URL:     fmt.Sprintf("%s%s", venueFileBaseURL, filepath.Base(filename)),
+			}
+
+			_, err = vh.service.CreateVenueImage(image)
+			if err != nil {
+				log.Error("Failed to insert image. " + err.Error())
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to insert image"))
+			}
+		}
+
+		log.Sugar().Infof(venueID + " venue image added successfully")
+		return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "venue image added successfully"))
+	}
+}
+
+func (vh *venueHandler) DeleteVenueImage() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		_, err := middlewares.ExtractToken(c)
+		if err != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
+
+		venueImageID := c.Param("image_id")
+		vn, err := vh.service.GetByVenueImageID(venueImageID)
+		if err != nil {
+			log.Error(err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
+		}
+
+		// Delete profile picture in the cloud before updated
+		awsService := aws.InitS3()
+
+		prevFilename := filepath.Base(vn.URL)
+		prevPath := "profile-picture/" + prevFilename
+
+		err = awsService.DeleteFile(prevPath)
+		if err != nil {
+			log.Error("Failed to delete file from cloud service: " + err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to delete file from cloud service: "+err.Error()))
+		}
+
+		err = vh.service.DeleteVenueImage(venueImageID)
+		if err != nil {
+			if strings.Contains(err.Error(), "failed to delete") {
+				log.Error("failed to delete image")
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("failed to delete image"))
+			} else {
+				log.Error("Internal server error")
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error"))
+			}
+		}
+
+		log.Sugar().Infof(venueImageID + " venue image deleted successfully")
+		return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "venue image added successfully"))
+	}
+}
+
+func (vh *venueHandler) GetAllVenueImage() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		venueID := c.Param("venue_id")
+		images, err := vh.service.GetAllVenueImage(venueID)
+		if err != nil {
+			log.Error(err.Error())
+			return err
+		}
+
+		var resp []GetAllVenueImageResponse
+		for _, image := range images {
+			resp = append(resp, GetAllVenueImageToResponse(image))
+		}
+
+		return c.JSON(http.StatusOK, helper.SuccessResponse(resp, "venue image retrieved successfully"))
 	}
 }

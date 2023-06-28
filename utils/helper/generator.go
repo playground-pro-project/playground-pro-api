@@ -53,10 +53,6 @@ func GenerateOTP(length int) string {
 	return string(otp)
 }
 
-func GenerateIdentifierImage() string {
-	return uuid.New().String()
-}
-
-func GenerateIdentifierDocs() string {
+func GenerateIdentifier() string {
 	return uuid.New().String()
 }
