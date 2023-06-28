@@ -93,10 +93,10 @@ func (uh *userHandler) Login() echo.HandlerFunc {
 func (uh *userHandler) ReSendOTP() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		req := ResendOtpReq{}
-		errBind := c.Bind(&req)
-		if errBind != nil {
+		err := c.Bind(&req)
+		if err != nil {
 			log.Error("controller - error on bind request")
-			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("controller - error on bind request"+err.Error()))
 		}
 
 		userID, _ := uh.userService.GetUserID(req.Email)
@@ -278,18 +278,36 @@ func (uh *userHandler) DeleteUser() echo.HandlerFunc {
 
 func (uh *userHandler) UploadProfilePicture() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userId, errToken := middlewares.ExtractToken(c)
+		userID, errToken := middlewares.ExtractToken(c)
 		if errToken != nil {
 			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+			return c.JSON(http.StatusUnauthorized, helper.ErrorResponse("Missing or Malformed JWT"))
 		}
 
 		awsService := aws.InitS3()
 
 		file, err := c.FormFile("profile_picture")
 		if err != nil {
-			log.Error(err.Error())
-			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
+			log.Error("Failed to retrieve profile picture: " + err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Failed to retrieve profile picture: "+err.Error()))
+		}
+
+		// Get the file type from the Content-Type header
+		fileType := file.Header.Get("Content-Type")
+		fileExtension := filepath.Ext(file.Filename)
+		fileExtension = strings.ToLower(fileExtension)
+
+		allowedExtensions := []string{".jpg", ".jpeg", ".png"}
+		extensionAllowed := false
+		for _, ext := range allowedExtensions {
+			if ext == fileExtension {
+				extensionAllowed = true
+				break
+			}
+		}
+		if !extensionAllowed {
+			log.Error(fileExtension + " is not allowed")
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(fileExtension+" is not allowed. Only JPG, JPEG, and PNG files are allowed."))
 		}
 
 		// Check file size before opening it
@@ -298,101 +316,155 @@ func (uh *userHandler) UploadProfilePicture() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Please upload a picture smaller than 1 MB."))
 		}
 
-		// Get the file type from the Content-Type header
-		fileType := file.Header.Get("Content-Type")
+		id := helper.GenerateIdentifierImage()
+		filename := id + "-" + file.Filename
+		path := "profile-picture/" + filename
 
-		path := "profile-picture/" + file.Filename
 		fileContent, err := file.Open()
 		if err != nil {
-			log.Error(err.Error())
-			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
+			log.Error("Failed to open file: " + err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to open file: "+err.Error()))
 		}
 		defer fileContent.Close()
 
+		// Upload profile picture file to cloud
 		err = awsService.UploadFile(path, fileType, fileContent)
 		if err != nil {
-			log.Error(err.Error())
-			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
+			log.Error("Failed to upload file to cloud service: " + err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to upload file to cloud service: "+err.Error()))
 		}
 
-		var updatedUser user.UserCore
-		updatedUser.ProfilePicture = fmt.Sprintf("%s%s", profilePictureBaseURL, filepath.Base(file.Filename))
+		usr, err := uh.userService.GetByID(userID)
+		if err != nil {
+			log.Error(err.Error())
+			return c.JSON(http.StatusNotFound, helper.ErrorResponse("User not found: "+err.Error()))
+		}
 
-		err = uh.userService.UpdateByID(userId, updatedUser)
+		// Delete profile picture in the cloud before updated
+		prevFilename := filepath.Base(usr.ProfilePicture)
+		prevPath := "profile-picture/" + prevFilename
+
+		err = awsService.DeleteFile(prevPath)
+		if err != nil {
+			log.Error("Failed to delete file from cloud service: " + err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to delete file from cloud service: "+err.Error()))
+		}
+
+		// Update user profile picture in database
+		var updatedUser user.UserCore
+		updatedUser.ProfilePicture = fmt.Sprintf("%s%s", profilePictureBaseURL, filepath.Base(filename))
+
+		err = uh.userService.UpdateByID(userID, updatedUser)
+		if err != nil {
+			if strings.Contains(err.Error(), "user not found") {
+				log.Error("User not found: " + err.Error())
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("User not found: "+err.Error()))
+			}
+			log.Error("Failed to update user: " + err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to update user: "+err.Error()))
+		}
+
+		resp := map[string]interface{}{
+			"profile_picture": updatedUser.ProfilePicture,
+		}
+
+		log.Sugar().Infof(userID + " updated profile picture successfully")
+		return c.JSON(http.StatusOK, helper.SuccessResponse(resp, "Profile picture updated successfully"))
+	}
+}
+
+func (uh *userHandler) RemoveProfilePicture() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userID, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ErrorResponse("Missing or Malformed JWT"))
+		}
+
+		awsService := aws.InitS3()
+
+		usr, err := uh.userService.GetByID(userID)
+		if err != nil {
+			log.Error(err.Error())
+			return c.JSON(http.StatusNotFound, helper.ErrorResponse("User not found: "+err.Error()))
+		}
+
+		// Delete profile picture in the cloud before updated
+		prevFilename := filepath.Base(usr.ProfilePicture)
+		prevPath := "profile-picture/" + prevFilename
+
+		err = awsService.DeleteFile(prevPath)
+		if err != nil {
+			log.Error("Failed to delete file from cloud service: " + err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to delete file from cloud service: "+err.Error()))
+		}
+
+		updatedUser := user.UserCore{
+			ProfilePicture: defaultProfilePictureURL,
+		}
+		err = uh.userService.UpdateByID(userID, updatedUser)
 		if err != nil {
 			if strings.Contains(err.Error(), "user not found") {
 				log.Error(err.Error())
 				return c.JSON(http.StatusNotFound, helper.ErrorResponse(err.Error()))
 			}
 			log.Error(err.Error())
-			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error"))
 		}
 
-		return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "Profile picture updated successfully"))
-	}
-}
-
-func (uh *userHandler) RemoveProfilePicture() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		userId, errToken := middlewares.ExtractToken(c)
-		if errToken != nil {
-			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
-		}
-
-		updatedUser := user.UserCore{
-			ProfilePicture: defaultProfilePictureURL,
-		}
-		err := uh.userService.UpdateByID(userId, updatedUser)
-		if err != nil {
-			if strings.Contains(err.Error(), "user not found") {
-				log.Error(err.Error())
-				return c.JSON(http.StatusNotFound, map[string]interface{}{
-					"error": err.Error(),
-				})
-			}
-			log.Error(err.Error())
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"message": "Profile picture removed successfully",
-		})
+		log.Sugar().Infof(userID + " removed profile picture successfully")
+		return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "Profile picture removed successfully"))
 	}
 }
 
 func (uh *userHandler) UploadOwnerFile() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userId, errToken := middlewares.ExtractToken(c)
+		userID, errToken := middlewares.ExtractToken(c)
 		if errToken != nil {
 			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+			return c.JSON(http.StatusUnauthorized, helper.ErrorResponse("Missing or Malformed JWT"))
 		}
 
 		awsService := aws.InitS3()
 
 		file, err := c.FormFile("owner_docs")
 		if err != nil {
-			log.Error(err.Error())
-			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
+			log.Error("Failed to retrieve file: " + err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Failed to retrieve file: "+err.Error()))
+		}
+
+		// Get the file type from the Content-Type header
+		fileType := file.Header.Get("Content-Type")
+		fileExtension := filepath.Ext(file.Filename)
+		fileExtension = strings.ToLower(fileExtension)
+
+		allowedExtensions := []string{".jpg", ".jpeg", ".png", ".pdf"}
+		extensionAllowed := false
+		for _, ext := range allowedExtensions {
+			if ext == fileExtension {
+				extensionAllowed = true
+				break
+			}
+		}
+		if !extensionAllowed {
+			log.Error(fileExtension + " is not allowed")
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(fileExtension+" is not allowed. Only JPG, JPEG, PNG and PDF files are allowed."))
 		}
 
 		// Check file size before opening it
 		fileSize := file.Size
 		if fileSize > maxOwnerFileSize {
-			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Please upload file smaller than 5 MB."))
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Please upload a file smaller than 5 MB."))
 		}
 
-		// Get the file type from the Content-Type header
-		fileType := file.Header.Get("Content-Type")
+		id := helper.GenerateIdentifierDocs()
+		filename := id + "-" + file.Filename
+		path := "owner-docs/" + filename
 
-		path := "owner-docs/" + file.Filename
 		fileContent, err := file.Open()
 		if err != nil {
-			log.Error(err.Error())
-			return err
+			log.Error("Failed to open file: " + err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to open file: "+err.Error()))
 		}
 		defer fileContent.Close()
 
@@ -406,14 +478,14 @@ func (uh *userHandler) UploadOwnerFile() echo.HandlerFunc {
 		updatedUser.OwnerFile = fmt.Sprintf("%s%s", ownerFileBaseURL, filepath.Base(file.Filename))
 		updatedUser.Role = "owner"
 
-		err = uh.userService.UpdateByID(userId, updatedUser)
+		err = uh.userService.UpdateByID(userID, updatedUser)
 		if err != nil {
 			if strings.Contains(err.Error(), "user not found") {
-				log.Error(err.Error())
-				return c.JSON(http.StatusNotFound, helper.ErrorResponse(err.Error()))
+				log.Error("User not found: " + err.Error())
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("User not found: "+err.Error()))
 			}
-			log.Error(err.Error())
-			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
+			log.Error("Failed to update user: " + err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to update user: "+err.Error()))
 		}
 
 		return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "File added successfully"))

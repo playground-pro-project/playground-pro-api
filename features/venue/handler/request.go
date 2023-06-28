@@ -4,6 +4,11 @@ import (
 	"github.com/playground-pro-project/playground-pro-api/features/venue"
 )
 
+const (
+	maxVenueFileSize = 2 * 1 << 20 // 2 MB
+	venueFileBaseURL = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/venue-images/"
+)
+
 type RegisterVenueRequest struct {
 	Category    string  `json:"category" form:"category"`
 	Name        string  `json:"name" form:"name"`
