@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/playground-pro-project/playground-pro-api/features/reservation"
+	"github.com/playground-pro-project/playground-pro-api/utils/helper"
 )
 
 type makeReservationResponse struct {
@@ -20,4 +21,32 @@ func makeReservation(p reservation.PaymentCore) makeReservationResponse {
 		PaymentType:   p.PaymentType,
 		PaymentCode:   p.PaymentCode,
 	}
+}
+
+type reservationHistoryResponse struct {
+	Name         string           `json:"venue_name"`
+	CheckInDate  helper.LocalTime `json:"check_in_date,omitempty"`
+	CheckOutDate helper.LocalTime `json:"check_out_date,omitempty"`
+	Duration     float64          `json:"duration,omitempty"`
+	Price        float64          `json:"price"`
+	GrandTotal   string           `json:"total_price,omitempty"`
+	PaymentType  string           `json:"payment_type,omitempty"`
+	PaymentCode  string           `json:"payment_code,omitempty"`
+	Status       string           `json:"status,omitempty"`
+}
+
+func reservationHistory(payment reservation.PaymentCore) reservationHistoryResponse {
+	response := reservationHistoryResponse{
+		Name:         payment.Reservation.Venue.Name,
+		CheckInDate:  helper.LocalTime(payment.Reservation.CheckInDate),
+		CheckOutDate: helper.LocalTime(payment.Reservation.CheckOutDate),
+		Duration:     payment.Reservation.Duration,
+		Price:        payment.Reservation.Venue.Price,
+		GrandTotal:   payment.GrandTotal,
+		PaymentType:  payment.PaymentType,
+		PaymentCode:  payment.PaymentCode,
+		Status:       payment.Status,
+	}
+
+	return response
 }

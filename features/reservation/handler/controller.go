@@ -95,3 +95,37 @@ func (rh *reservationHandler) ReservationStatus() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful updated payment status", nil, nil))
 	}
 }
+
+// ReservationHistory implements reservation.ReservationHandler.
+func (rh *reservationHandler) ReservationHistory() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId, err := middlewares.ExtractToken(c)
+		if err != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
+
+		payments, err := rh.service.ReservationHistory(userId)
+		if err != nil {
+			if strings.Contains(err.Error(), "list reservations not found") {
+				log.Error("reservations not found")
+				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+			} else {
+				log.Error("internal server error")
+				return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+			}
+		}
+
+		if len(payments) == 0 {
+			log.Error("reservation history not found")
+			return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+		}
+
+		result := make([]reservationHistoryResponse, len(payments))
+		for i, payment := range payments {
+			result[i] = reservationHistory(payment)
+		}
+
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful Operation", result, nil))
+	}
+}
