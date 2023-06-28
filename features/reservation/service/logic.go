@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
@@ -107,24 +108,38 @@ func (rs *reservationService) ReservationStatus(request reservation.PaymentCore)
 			return res, err
 		}
 
+	case "cancel":
+		request.Status = "cancel"
 		if !paymentgateway.IsRefundable(request.PaymentMethod) {
-			grandTotal, errConv := strconv.ParseInt(request.GrandTotal, 10, 64)
+			grandTotal, errConv := strconv.ParseFloat(request.GrandTotal, 64)
 			if errConv != nil {
 				log.Error("failed to parse grand total")
-				return res, errors.New("failed to parse grand total")
-			}
-			err := rs.refund.RefundTransaction(request.Reservation.ReservationID, grandTotal, "reason")
-			if err != nil {
-				log.Error("failed to refund transaction")
-				return res, err
+				return request, errors.New("failed to parse grand total")
 			}
 
-			request.Status = "refund"
-			res, err = rs.query.ReservationStatus(request)
-			if err != nil {
-				log.Error("failed to update refund status")
-				return res, err
+			checkInTime, errQuery := rs.query.ReservationCheckOutDate(request.Reservation.ReservationID)
+			if errQuery != nil {
+				log.Sugar().Errorf("failed to get checkout date %v", checkInTime)
+				return reservation.PaymentCore{}, errQuery
 			}
+
+			timeDiff := time.Until(checkInTime)
+			if timeDiff < time.Hour {
+				log.Error("refund cannot be processed at least 1 hour away")
+				return request, errors.New("refund cannot be processed at least 1 hour away")
+			}
+
+			err := rs.refund.RefundTransaction(request.Reservation.ReservationID, int64(grandTotal), "reason")
+			if err != nil {
+				log.Error("failed to refund transaction")
+				return request, err
+			}
+		}
+
+		res, err := rs.query.ReservationStatus(request)
+		if err != nil {
+			log.Error("failed to update status to cancel")
+			return res, err
 		}
 
 	case "expire":
