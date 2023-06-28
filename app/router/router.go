@@ -74,7 +74,7 @@ func initVenueRouter(db *gorm.DB, e *echo.Echo) {
 
 func initReservationRouter(db *gorm.DB, e *echo.Echo) {
 	reservationData := rsd.New(db)
-	refund := paymentgateway.Refund.RefundTransaction(paymentgateway.Refund, string, int64, string)
+	refund := &paymentgateway.MyRefund{}
 	reservationService := rss.New(reservationData, refund)
 	reservationHandler := rsh.New(reservationService)
 
