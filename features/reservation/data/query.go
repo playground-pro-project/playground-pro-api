@@ -2,6 +2,7 @@ package data
 
 import (
 	"errors"
+	"time"
 
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/reservation"
@@ -103,11 +104,11 @@ func (rq *reservationQuery) ReservationStatus(request reservation.PaymentCore) (
 }
 
 // PriceVenue retrieves the price of a venue by its ID
-func (rq *reservationQuery) PriceVenue(venueID string) (float64, error) {
+func (rq *reservationQuery) PriceVenue(venue_id string) (float64, error) {
 	venue := Venue{}
 	query := rq.db.Table("venues").
 		Select("venues.price").
-		Where("venue_id = ?", venueID).
+		Where("venue_id = ?", venue_id).
 		First(&venue)
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
 		log.Error("venue not found")
@@ -118,4 +119,22 @@ func (rq *reservationQuery) PriceVenue(venueID string) (float64, error) {
 	}
 	log.Sugar().Infof("venue data found in the database %f", venue.Price)
 	return venue.Price, nil
+}
+
+// ReservationCheckOutDate retrieves check out time of a reservation by its ID
+func (rq *reservationQuery) ReservationCheckOutDate(reservation_id string) (time.Time, error) {
+	reservation := Reservation{}
+	query := rq.db.Table("reservations").
+		Select("reservations.check_out_date").
+		Where("reservation_id = ?", reservation_id).
+		First(&reservation)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("venue not found")
+		return time.Time{}, errors.New("venue not found")
+	} else if query.Error != nil {
+		log.Sugar().Error("error executing venue query:", query.Error)
+		return time.Time{}, query.Error
+	}
+	log.Sugar().Infof("checkout date found in the database %v", reservation.CheckOutDate)
+	return reservation.CheckOutDate, nil
 }

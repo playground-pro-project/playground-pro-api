@@ -83,6 +83,9 @@ func (rh *reservationHandler) ReservationStatus() echo.HandlerFunc {
 			} else if strings.Contains(err.Error(), "no payment record has been updated") {
 				log.Error("no payment record has been updated")
 				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "No payment record has been updated", nil, nil))
+			} else if strings.Contains(err.Error(), "refund cannot be processed at least 1 hour away") {
+				log.Error("refund cannot be processed at least 1 hour away")
+				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, refund cannot be processed at least 1 hour away", nil, nil))
 			}
 			log.Error("internal server error")
 			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))

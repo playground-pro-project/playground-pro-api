@@ -53,4 +53,5 @@ type ReservationData interface {
 	MakeReservation(userId string, r ReservationCore, p PaymentCore) (ReservationCore, PaymentCore, error)
 	ReservationStatus(request PaymentCore) (PaymentCore, error)
 	PriceVenue(venueID string) (float64, error)
+	ReservationCheckOutDate(reservation_id string) (time.Time, error)
 }
