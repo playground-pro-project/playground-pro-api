@@ -28,7 +28,7 @@ type Payment struct {
 	PaymentCode   string `gorm:"type:varchar(225);not null"`
 	GrandTotal    string
 	ServiceFee    float64
-	Status        string         `gorm:"type:enum('pending','success','cancelled','expired');default:'pending'"`
+	Status        string         `gorm:"type:enum('pending','success','cancel','expire');default:'pending'"`
 	CreatedAt     time.Time      `gorm:"type:datetime"`
 	UpdatedAt     time.Time      `gorm:"type:datetime"`
 	DeletedAt     gorm.DeletedAt `gorm:"index"`

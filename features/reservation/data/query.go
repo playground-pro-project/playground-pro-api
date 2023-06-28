@@ -76,3 +76,28 @@ func (rq *reservationQuery) MakeReservation(userID string, r reservation.Reserva
 
 // TODO 5: Callback Midtrans for updated payment status during reservation validation
 // IF status: settlement then success, ELIF status: expired/cancel(refund) then failed.
+// ReservationStatus implements reservation.ReservationData.
+func (rq *reservationQuery) ReservationStatus(request reservation.PaymentCore) (reservation.PaymentCore, error) {
+	req := paymentEntities(request)
+	query := rq.db.Table("payments").
+		Where("payment_id = ?", request.PaymentID).
+		Updates(map[string]interface{}{
+			"status": request.Status,
+		})
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("user profile record not found")
+		return reservation.PaymentCore{}, errors.New("user profile record not found")
+	}
+
+	if query.RowsAffected == 0 {
+		log.Warn("no payment record has been updated")
+		return reservation.PaymentCore{}, errors.New("no payment record has been updated")
+	}
+
+	if query.Error != nil {
+		log.Error("error while updating payment status")
+		return reservation.PaymentCore{}, errors.New("internal server error")
+	}
+
+	return paymentModels(*req), nil
+}

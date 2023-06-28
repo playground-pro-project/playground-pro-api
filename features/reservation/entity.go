@@ -35,12 +35,15 @@ type PaymentCore struct {
 
 type ReservationHandler interface {
 	MakeReservation() echo.HandlerFunc
+	ReservationStatus() echo.HandlerFunc
 }
 
 type ReservationService interface {
 	MakeReservation(userId string, r ReservationCore, p PaymentCore) (ReservationCore, PaymentCore, error)
+	ReservationStatus(request PaymentCore) (PaymentCore, error)
 }
 
 type ReservationData interface {
 	MakeReservation(userId string, r ReservationCore, p PaymentCore) (ReservationCore, PaymentCore, error)
+	ReservationStatus(request PaymentCore) (PaymentCore, error)
 }

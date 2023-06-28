@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/reservation"
+	paymentgateway "github.com/playground-pro-project/playground-pro-api/utils/payment_gateway"
 )
 
 var log = middlewares.Log()
@@ -67,4 +68,37 @@ func (rs *reservationService) MakeReservation(userId string, r reservation.Reser
 
 	log.Sugar().Infof("new reservation has been created: %s", result.ReservationID)
 	return result, paymentResult, nil
+}
+
+// ReservationStatus implements reservation.ReservationService.
+func (rs *reservationService) ReservationStatus(request reservation.PaymentCore) (reservation.PaymentCore, error) {
+	switch request.Status {
+	case "settlement":
+		request.Status = "success"
+		res, err := rs.query.ReservationStatus(request)
+		if err != nil {
+			return res, err
+		}
+
+		if !paymentgateway.IsRefundable(request.PaymentMethod) {
+			// err := paymentgateway.Refund(request.Reservation.ReservationID)
+			// if err != nil {
+			// 	return res, err
+			// }
+
+			request.Status = "refund"
+			res, err = rs.query.ReservationStatus(request)
+			if err != nil {
+				return res, err
+			}
+		}
+	case "expire":
+		res, err := rs.query.ReservationStatus(request)
+		if err != nil {
+			log.Error("error on updating status to expire")
+			return res, err
+		}
+	}
+
+	return request, nil
 }

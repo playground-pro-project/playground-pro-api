@@ -25,6 +25,10 @@ type PaymentMethod interface {
 	Charge(*PaymetGateway) (*ChargeResponse, error)
 }
 
+type Refund interface {
+	RefundTransaction(request *coreapi.RefundReq, reservationID string) error
+}
+
 func ChargeMidtrans(reservationID string, request reservation.PaymentCore) (*ChargeResponse, error) {
 	client := coreapi.Client{}
 	client.New(config.MIDTRANS_SERVERKEY, midtrans.Sandbox)
@@ -100,10 +104,27 @@ func (pg *PaymetGateway) CustomCharge(request *coreapi.ChargeReq) (*ChargeRespon
 func (pg *PaymetGateway) Refund(request *coreapi.RefundReq, invoice string) error {
 	client := coreapi.Client{}
 	client.New(config.MIDTRANS_SERVERKEY, midtrans.Sandbox)
+
+	// request := &coreapi.RefundReq{
+	// 	RefundKey: config.MerchantID
+	// 	Amount: amount,
+	// 	Reason: reason,
+	// }
+
 	_, err := client.RefundTransaction(invoice, request)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func IsRefundable(paymentMethod string) bool {
+	refundableMethods := []string{"bank_transfer", "cstore", "echannel"}
+	for _, method := range refundableMethods {
+		if method == paymentMethod {
+			return true
+		}
+	}
+	return false
 }

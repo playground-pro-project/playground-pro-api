@@ -23,9 +23,7 @@ tags:
   - name: Vanue
     description: Product yang akan disewakan penyewa
   - name: Reservation
-    description: Proses menyewa vanue
-  - name: Payment
-    description: Proses pembayaran setelah membuat pemesanan vanue oleh peminjam
+    description: Proses menyewa vanue dan pembayaran setelah membuat pemesanan vanue oleh peminjam
   - name: Review
     description: Review untuk venue yang telah disewa oleh peminjam
 
@@ -148,9 +146,12 @@ paths:
             schema:
               $ref: "#/components/schemas/reservations"
             example:
-              venue_id: "string-uuid"
-              check-in_date: "2023/06/05 08:05"
-              check-out_date: "2023/08/05 08:05"
+              reservation:
+                venue_id: "string-uuid"
+                check-in_date: "2023/06/05 08:05"
+                check-out_date: "2023/08/05 08:05"
+              payment:
+                payment_type: "bri/bca/bni/mandiri/permata/indomaret/alfamart/gopay/shopeepay/qris"
       responses:
         "201":
           $ref: "#/components/responses/Response201MakeReservation"
@@ -217,35 +218,10 @@ paths:
       security:
         - bearerAuth: []
 
-  /payments:
-    post:
-      tags:
-        - Payment
-      summary: Submit Payment
-      description: Submit Payment
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/reservations"
-            example:
-              reservation_id: "string-uuid"
-              bank_account: "bca/bri/bni/mandiri/permata"
-      responses:
-        "201":
-          $ref: "#/components/responses/Response201SubmitPayment"
-        "400":
-          $ref: "#/components/responses/Response400"
-        "500":
-          $ref: "#/components/responses/Response500"
-      security:
-        - bearerAuth: []
-
   "/payments/callback":
     post:
       tags:
-        - Payment
+        - Reservation
       summary: Retrive payment notification update
       description: Retrive payment notification to update status on database
       responses:
@@ -630,29 +606,26 @@ components:
                 items:
                   type: object
                   properties:
+                    payment_id:
+                      type: string
                     reservation_id:
                       type: string
-                    category:
+                    payment_method:
                       type: string
-                    name:
+                    payment_type:
                       type: string
-                    subtotal:
-                      type: integer
-                    duration:
-                      type: integer
-                    gross_amount:
-                      type: integer
-                    check-in_date:
+                    payment_code:
                       type: string
-                      format: date-time
-                    check-out_date:
-                      type: string
-                      format: date-time
+                    
           example:
             code: 200
             message: "Successful operation"
             data:
-                reservation_id: "string-uuid"
+              payment_id: "85ef6565-eb95-4be2-a4c0-a6425b27dae7"
+              reservation_id: "271b7e12-6936-47e3-a1de-c8fdbfee250f"
+              payment_method: "cstore"
+              payment_type: "alfamart"
+              payment_code: "43863390217"
 
     Response201SubmitPayment:
       description: Successful Operation
