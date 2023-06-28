@@ -83,4 +83,5 @@ func initReservationRouter(db *gorm.DB, e *echo.Echo) {
 
 	e.POST("/reservations", reservationHandler.MakeReservation(), middlewares.JWTMiddleware())
 	e.POST("/reservations/status", reservationHandler.ReservationStatus())
+	e.GET("/users/reservations", reservationHandler.ReservationHistory(), middlewares.JWTMiddleware())
 }

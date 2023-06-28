@@ -154,6 +154,106 @@ paths:
       security:
         - bearerAuth: []
 
+  "/venues/{venue_id}":
+    get:
+      tags:
+        - Venue
+      summary: Find specific venue, venue's reviews and rating (pagination)
+      description: Select specific venue, venue's average reviews and rating accumulation
+      parameters:
+        - name: venue_id
+          in: path
+          description: Venue ID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/Response200SelectVenues"
+        "400":
+          $ref: "#/components/responses/Response400"
+        "404":
+          $ref: "#/components/responses/Response404"
+        "500":
+          $ref: "#/components/responses/Response500"
+
+    put:
+        tags:
+          - Venue
+        summary: Edit venue by venue_id
+        description: User can edit a their venue by venue_id
+        parameters:
+        - name: venue_id
+          in: path
+          description: Venue ID
+          required: true
+          schema:
+            type: string
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  category:
+                    type: string
+                  name:
+                    type: string
+                    uniqueItems: true
+                    description: Nama unik tempat olahraga
+                  description:
+                    type: string
+                    description: Deskripsi tempat olahraga
+                  service_time:
+                    type: string
+                  location:
+                    type: string
+                    description: Alamat tempat olahraga
+                  price:
+                    type: number
+                    description: Harga sewa tempat olahraga
+                    format: float
+              example:
+                category: "football"
+                name: "Bola Bolaan"
+                description: "Deskripsi Bola Bolaan"
+                service_time: "07:45 - 23:00"
+                location: "Jalan Utama No. 123, Kota Anywhere"
+                price: 29.99
+        responses:
+          "200":
+            $ref: "#/components/responses/Response200EditVenues"
+          "400":
+            $ref: "#/components/responses/Response400"
+          "404":
+            $ref: "#/components/responses/Response404"
+          "500":
+            $ref: "#/components/responses/Response500"
+        security:
+          - bearerAuth: []
+
+    delete:
+      tags:
+        - Venue
+      summary: Deactive venue by venue_id
+      description: Deactive specific venue by venue_id
+      parameters:
+        - name: venue_id
+          in: path
+          description: Venue ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Response200DeactiveVenues'
+        '404':
+          $ref: '#/components/responses/Response404'
+        '500':
+          $ref: '#/components/responses/Response500'
+      security:
+        - bearerAuth: []
 
   "/vanues/{vanue_id}/availability":
     get:
@@ -210,62 +310,6 @@ paths:
       security:
         - bearerAuth: []
 
-  "/reservations/{reservation_id}":
-    put:
-      tags:
-        - Reservation
-      summary: Edit an existing reservation
-      description: Endpoint edit a reservation at least 1 hour before check-in
-      parameters:
-        - name: reservation_id
-          in: path
-          description: Reservation ID
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/reservations"
-            example:
-              check-in_date: "2023/06/05 08:05"
-              check-out_date: "2023/08/05 08:05"
-      responses:
-        "201":
-          $ref: "#/components/responses/Response201"
-        "400":
-          $ref: "#/components/responses/Response400"
-        "500":
-          $ref: "#/components/responses/Response500"
-      security:
-        - bearerAuth: []
-
-    delete:
-      tags:
-        - Reservation
-      summary: User can cancel a reservation
-      description: User can cancel a reservation at least 1 hour before check-in and cancel payment instead then get refund 75% of grand_total. None of these conditions means normal delete reservation.
-      parameters:
-        - name: reservation_id
-          in: path
-          description: Reservation ID
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          $ref: "#/components/responses/Response200"
-        "404":
-          $ref: "#/components/responses/Response404"
-        "500":
-          $ref: "#/components/responses/Response500"
-      security:
-        - bearerAuth: []
-
   "/reservations/status":
     post:
       tags:
@@ -278,6 +322,32 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/midtrans_callback"
+      responses:
+        "200":
+          $ref: "#/components/responses/Response200"
+        "400":
+          $ref: "#/components/responses/Response400"
+        "404":
+          $ref: "#/components/responses/Response404"
+        "500":
+          $ref: "#/components/responses/Response500"
+      security:
+        - bearerAuth: []
+
+  "/reservations/{reservation_id}":
+    get:
+      tags:
+        - Reservation
+      summary: Detail transaction by reservation_id
+      description: _
+      parameters:
+        - name: reservation_id
+          in: path
+          description: Reservation ID
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
           $ref: "#/components/responses/Response200"
@@ -438,6 +508,67 @@ components:
               total_rows: 15
               total_pages: 3
 
+    Response200SelectVenues:
+      description: Get specific venue
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 200
+              message:
+                type: string
+                example: "Successful Operation"
+              data:
+                type: array
+                items:
+                  $ref: "#/components/schemas/venues"
+              pagination:
+                $ref: "#/components/schemas/pagination"
+          example:
+            code: 200
+            message: "Successful Operation"
+            data:
+              venue_name: "venue_name"
+              category: "basketball"
+              address: "address"
+              booking_date: "2023-04-05"
+              start: "07:00"
+              end: "23:00"
+              payment_code: "Jakarta"
+              payment_type: "Mandiri"
+              status: "success"
+
+    Response200EditVenues:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 201
+              message:
+                type: string
+                example: "Successfully updated a venue"
+
+    Response200DeactiveVenues:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 201
+              message:
+                type: string
+                example: "Successfully deleted a venue"
+                  
     Response200CheckAvailability:
       description: Successful Operation
       content:
@@ -476,13 +607,21 @@ components:
             code: 200
             message: "Successful operation"
             data:
-              - name: "Tono Haha"
+              venue_id: "string-venue-id"
+              owner_id: "string-user-id"
+              category: "basketball"
+              venue_name: "lapangan basket"
+              reservations:
+              - reservation_id: "string-reservation-id"
+                username: "Tono Haha"
                 check-in_date: "Saturday,2023-06-05 08:05"
                 check-out_date: "Saturday,2023-06-06 08:05"
-              - name: "Trim"
+              - reservation_id: "string-reservation-id"
+                username: "Trim"
                 check-in_date: "Saturday,2023-06-05 10:05"
                 check-out_date: "Saturday,2023-06-07 10:05"
-              - name: "Concate"
+              - reservation_id: "string-reservation-id"
+                username: "Concate"
                 check-in_date: "Saturday,2023-06-07 14:05"
                 check-out_date: "Saturday,2023-08-08 14:05"
 
@@ -562,55 +701,26 @@ components:
               code: 200
               message: "Successful operation"
               data:
-                - reservation_id: "string-uuid"
-                  venue_name: "tidar basket"
-                  category: "basketball"
-                  average_rating: 4.7
-                  owner: "User 2"
-                  address: "Jakarta"
-                  check-in_date: "2023/06/05 08:05"
-                  check-out_date: "2023/08/05 08:05"
+                - venue_name: "tidar basket"
+                  location: "Jakarta"
+                  check_in_date: "2023/06/05 08:05:00"
+                  check_out_date: "2023/08/05 08:05:00"
+                  duration: 2
                   price: 100
-                  total_hours: 2
-                  gross_amount: 200
-                  bank_account: "bca"
-                  va_number: VA4nUmber
+                  total_price: 200
+                  payment_type: "bca"
+                  payment_code: VA4nUmber
                   status: "success"
-                - reservation_id: "string-uuid"
-                  venue_name: "tidar futsal"
-                  category: "futsal"
-                  average_rating: 4.7
-                  owner: "User 2"
-                  address: "Jakarta"
-                  check-in_date: "2023/07/10 14:30"
-                  check-out_date: "2023/07/15 11:00"
-                  price: 150
-                  total_hours: 1
-                  gross_amount: 150
-                  bank_account: "bri"
-                  va_number: VA4nUmber
-                  status: "pending"
-
-    Response200Review:
-      description: Successful operation
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              code:
-                type: integer
-              message:
-                type: string
-            example:
-              code: 200
-              message: "Successful add feedback"
-              data:
-                review_id: 1
-                fullname: "Petrik"
-                profile_picture: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
-                review: "Ini bagian review untuk venue yang bersangkutan"
-                rating: 5
+                - venue_name: "tidar basket"
+                  location: "Jakarta"
+                  check_in_date: "2023/06/05 08:05:00"
+                  check_out_date: "2023/08/05 08:05:00"
+                  duration: 2
+                  price: 100
+                  total_price: 200
+                  payment_type: "bca"
+                  payment_code: VA4nUmber
+                  status: "success"
 
     Response201MakeReservation:
       description: Successful Operation
@@ -648,43 +758,6 @@ components:
               payment_method: "cstore"
               payment_type: "alfamart"
               payment_code: "43863390217"
-
-    Response201SubmitPayment:
-      description: Successful Operation
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              code:
-                type: integer
-              message:
-                type: string
-              token:
-                type: string
-            example:
-              code: 201
-              message: "Success, Bank Transfer transaction is created"
-
-    Response201RegisterReview:
-      description: Successful operation
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              code:
-                type: integer
-              message:
-                type: string
-            example:
-              code: 200
-              message: "Successful add feedback"
-              data:
-                review_id: 1
-                fullname: "Petrik"
-                review: "Ini bagian review untuk venue yang bersangkutan"
-                rating: 5
 
   schemas:
     users:

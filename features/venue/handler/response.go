@@ -22,7 +22,7 @@ type SelectVenueResponse struct {
 	VenueID       string         `json:"venue_id,omitempty"`
 	OwnerID       string         `json:"owner_id,omitempty"`
 	Category      string         `json:"category,omitempty"`
-	Name          string         `json:"name,omitempty"`
+	Name          string         `json:"venue_name,omitempty"`
 	Description   string         `json:"description,omitempty"`
 	Username      string         `json:"username,omitempty"`
 	ServiceTime   string         `json:"service_time,omitempty"`

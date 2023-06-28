@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
 type ReservationCore struct {
@@ -17,6 +16,7 @@ type ReservationCore struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     time.Time
+	Venue         VenueCore
 }
 
 type PaymentCore struct {
@@ -29,12 +29,12 @@ type PaymentCore struct {
 	Status        string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	DeletedAt     gorm.DeletedAt
 	Reservation   ReservationCore
 }
 
 type VenueCore struct {
 	VenueID      string
+	Name         string
 	Price        float64
 	Reservations []ReservationCore
 }
@@ -42,11 +42,13 @@ type VenueCore struct {
 type ReservationHandler interface {
 	MakeReservation() echo.HandlerFunc
 	ReservationStatus() echo.HandlerFunc
+	ReservationHistory() echo.HandlerFunc
 }
 
 type ReservationService interface {
 	MakeReservation(userId string, r ReservationCore, p PaymentCore) (ReservationCore, PaymentCore, error)
 	ReservationStatus(request PaymentCore) (PaymentCore, error)
+	ReservationHistory(userId string) ([]PaymentCore, error)
 }
 
 type ReservationData interface {
@@ -54,4 +56,5 @@ type ReservationData interface {
 	ReservationStatus(request PaymentCore) (PaymentCore, error)
 	PriceVenue(venueID string) (float64, error)
 	ReservationCheckOutDate(reservation_id string) (time.Time, error)
+	ReservationHistory(userId string) ([]PaymentCore, error)
 }
