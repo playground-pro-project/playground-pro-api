@@ -19,6 +19,7 @@ type Reservation struct {
 	CreatedAt     time.Time      `gorm:"type:datetime"`
 	UpdatedAt     time.Time      `gorm:"type:datetime"`
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
+	Venue         Venue          `gorm:"foreignKey:VenueID"`
 }
 
 type Payment struct {
@@ -38,7 +39,7 @@ type Payment struct {
 
 type Venue struct {
 	VenueID      string         `gorm:"primaryKey;type:varchar(45)"`
-	OwnerID      string         `gorm:"type:varchar(45)"`
+	UserID       string         `gorm:"type:varchar(45)"`
 	Category     string         `gorm:"type:enum('basketball','football','futsal','badminton');default:'basketball'"`
 	Name         string         `gorm:"type:varchar(225);not null;unique"`
 	Description  string         `gorm:"type:text"`
@@ -51,31 +52,6 @@ type Venue struct {
 	UpdatedAt    time.Time      `gorm:"type:datetime"`
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
 	Reservations []Reservation  `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
-}
-
-func reservationToCore(r Reservation) reservation.ReservationCore {
-	return reservation.ReservationCore{
-		ReservationID: r.ReservationID,
-		UserID:        r.UserID,
-		VenueID:       r.VenueID,
-		CheckInDate:   r.CheckInDate,
-		CheckOutDate:  r.CheckOutDate,
-		Duration:      r.Duration,
-		CreatedAt:     r.CreatedAt,
-		UpdatedAt:     r.UpdatedAt,
-		DeletedAt:     r.DeletedAt.Time,
-		// Payment: reservation.Payment{
-		// 	PaymentID:     *r.PaymentID,
-		// 	PaymentMethod: r.Payment.PaymentMethod,
-		// 	PaymentType:   r.Payment.PaymentType,
-		// 	PaymentCode:   r.Payment.PaymentCode,
-		// 	GrandTotal:    r.Payment.GrandTotal,
-		// 	ServiceFee:    r.Payment.ServiceFee,
-		// 	Status:        r.Payment.Status,
-		// 	CreatedAt:     r.Payment.CreatedAt,
-		// 	UpdatedAt:     r.Payment.UpdatedAt,
-		// },
-	}
 }
 
 // Reservation-Model to reservation-core
@@ -152,6 +128,31 @@ func PaymentCoreFromChargeResponse(res *paymentgateway.ChargeResponse) reservati
 		UpdatedAt:     time.Now(),
 		Reservation:   reservation.ReservationCore{},
 	}
+}
+
+func paymentToCore(p Payment) reservation.PaymentCore {
+	reservationCore := reservation.ReservationCore{
+		CheckInDate:  p.Reservation.CheckInDate,
+		CheckOutDate: p.Reservation.CheckOutDate,
+		Duration:     p.Reservation.Duration,
+	}
+
+	paymentCore := reservation.PaymentCore{
+		PaymentType: p.PaymentType,
+		PaymentCode: p.PaymentCode,
+		GrandTotal:  p.GrandTotal,
+		ServiceFee:  p.ServiceFee,
+		Status:      p.Status,
+		Reservation: reservationCore,
+	}
+
+	if p.Reservation.VenueID != "" {
+		paymentCore.Reservation.Venue = reservation.VenueCore{
+			Name:  p.Reservation.Venue.Name,
+			Price: p.Reservation.Venue.Price,
+		}
+	}
+	return paymentCore
 }
 
 // `gorm:"type:enum('none','card','bca','bri','bni','mandiri','qris','gopay','shopeepay');default:'none'"`

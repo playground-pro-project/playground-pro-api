@@ -16,6 +16,7 @@ type ReservationCore struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     time.Time
+	Venue         VenueCore
 }
 
 type PaymentCore struct {
@@ -33,6 +34,7 @@ type PaymentCore struct {
 
 type VenueCore struct {
 	VenueID      string
+	Name         string
 	Price        float64
 	Reservations []ReservationCore
 }
@@ -46,12 +48,12 @@ type ReservationHandler interface {
 type ReservationService interface {
 	MakeReservation(userId string, r ReservationCore, p PaymentCore) (ReservationCore, PaymentCore, error)
 	ReservationStatus(request PaymentCore) (PaymentCore, error)
-	ReservationHistory(userId string) ([]ReservationCore, error)
+	ReservationHistory(userId string) ([]PaymentCore, error)
 }
 
 type ReservationData interface {
 	MakeReservation(userId string, r ReservationCore, p PaymentCore) (ReservationCore, PaymentCore, error)
 	ReservationStatus(request PaymentCore) (PaymentCore, error)
 	PriceVenue(venueID string) (float64, error)
-	ReservationHistory(userId string) ([]ReservationCore, error)
+	ReservationHistory(userId string) ([]PaymentCore, error)
 }

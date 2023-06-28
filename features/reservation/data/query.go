@@ -121,14 +121,9 @@ func (rq *reservationQuery) PriceVenue(venueID string) (float64, error) {
 }
 
 // ReservationHistory implements reservation.ReservationData.
-func (rq *reservationQuery) ReservationHistory(userId string) ([]reservation.ReservationCore, error) {
-	reservations := []Reservation{}
-	query := rq.db.
-		Table("reservations").
-		Select("reservations.*, payments.*").
-		Joins("LEFT JOIN payments ON payments.payment_id = reservations.payment_id").
-		Where("reservations.user_id = ? AND reservations.deleted_at IS NULL", userId).
-		Scan(&reservations)
+func (rq *reservationQuery) ReservationHistory(userId string) ([]reservation.PaymentCore, error) {
+	paymentData := []Payment{}
+	query := rq.db.Preload("Reservation", "user_id = ?", userId).Find(&paymentData)
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
 		log.Error("list reservations not found")
 		return nil, errors.New("list reservations not found")
@@ -139,10 +134,34 @@ func (rq *reservationQuery) ReservationHistory(userId string) ([]reservation.Res
 		log.Sugar().Info("list reservations data found in the database")
 	}
 
-	result := make([]reservation.ReservationCore, len(reservations))
-	for i, reservation := range reservations {
-		result[i] = reservationToCore(reservation)
+	result := make([]reservation.PaymentCore, len(paymentData))
+	for i, payment := range paymentData {
+		result[i] = paymentToCore(payment)
+		if payment.Reservation.VenueID != "" {
+			venueName, venuePrice, err := rq.GetVenueNameAndPrice(payment.Reservation.VenueID)
+			if err != nil {
+				log.Sugar().Error("error retrieving venue name and price:", err)
+				return nil, err
+			}
+			result[i].Reservation.Venue.Name = venueName
+			result[i].Reservation.Venue.Price = venuePrice
+		}
 	}
 
 	return result, nil
+}
+
+// GetVenueNameAndPrice retrieves the name and price of a venue by its ID
+func (rq *reservationQuery) GetVenueNameAndPrice(venueID string) (string, float64, error) {
+	venue := Venue{}
+	query := rq.db.Raw("SELECT name, price FROM venues WHERE venue_id = ?", venueID).Scan(&venue)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("venue not found")
+		return "", 0, errors.New("venue not found")
+	} else if query.Error != nil {
+		log.Sugar().Error("error executing venue query:", query.Error)
+		return "", 0, query.Error
+	}
+	log.Sugar().Infof("venue data found in the database: Name=%s, Price=%f", venue.Name, venue.Price)
+	return venue.Name, venue.Price, nil
 }

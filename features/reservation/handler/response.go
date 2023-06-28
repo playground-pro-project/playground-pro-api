@@ -24,28 +24,28 @@ func makeReservation(p reservation.PaymentCore) makeReservationResponse {
 }
 
 type reservationHistoryResponse struct {
-	Name         string           `json:"name,omitempty"`
+	Name         string           `json:"venue_name"`
 	CheckInDate  helper.LocalTime `json:"check_in_date,omitempty"`
 	CheckOutDate helper.LocalTime `json:"check_out_date,omitempty"`
 	Duration     float64          `json:"duration,omitempty"`
-	Price        float64          `json:"price,omitempty"`
+	Price        float64          `json:"price"`
 	GrandTotal   string           `json:"total_price,omitempty"`
 	PaymentType  string           `json:"payment_type,omitempty"`
 	PaymentCode  string           `json:"payment_code,omitempty"`
 	Status       string           `json:"status,omitempty"`
 }
 
-func reservationHistory(r reservation.ReservationCore) reservationHistoryResponse {
+func reservationHistory(payment reservation.PaymentCore) reservationHistoryResponse {
 	response := reservationHistoryResponse{
-		// Name:         r.Venues.Name,
-		CheckInDate:  helper.LocalTime(r.CheckInDate),
-		CheckOutDate: helper.LocalTime(r.CheckOutDate),
-		Duration:     r.Duration,
-		// Price:        r.Venues.Price,
-		// GrandTotal:  r.Payment.GrandTotal,
-		// PaymentType: r.Payment.PaymentType,
-		// PaymentCode: r.Payment.PaymentCode,
-		// Status:      r.Payment.Status,
+		Name:         payment.Reservation.Venue.Name,
+		CheckInDate:  helper.LocalTime(payment.Reservation.CheckInDate),
+		CheckOutDate: helper.LocalTime(payment.Reservation.CheckOutDate),
+		Duration:     payment.Reservation.Duration,
+		Price:        payment.Reservation.Venue.Price,
+		GrandTotal:   payment.GrandTotal,
+		PaymentType:  payment.PaymentType,
+		PaymentCode:  payment.PaymentCode,
+		Status:       payment.Status,
 	}
 
 	return response

@@ -175,7 +175,7 @@ func (vh *venueHandler) UnregisterVenue() echo.HandlerFunc {
 			log.Error("internal server error")
 			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
 		}
-		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Venue deleted successfully", nil, nil))
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successfully deleted a venue", nil, nil))
 	}
 }
 
