@@ -77,7 +77,7 @@ type VenuePictureCore struct {
 }
 
 type UserService interface {
-	Register(req UserCore) (UserCore, error)
+	Register(req UserCore) (UserCore, string, error)
 	Login(req UserCore) (UserCore, string, error)
 	SendOTP(recipientName, toEmailAddr string) (string, error)
 	StoreToRedis(req UserCore) error

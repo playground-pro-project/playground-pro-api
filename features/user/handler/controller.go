@@ -34,12 +34,13 @@ func (uh *userHandler) Register() echo.HandlerFunc {
 		}
 
 		userCore := RegisterRequestToCore(req)
-		newUser, err := uh.userService.Register(userCore)
+		newUser, otp, err := uh.userService.Register(userCore)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 		}
 
 		userResp := UserCoreToRegisterResponse(newUser)
+		userResp.OTP = otp
 
 		return c.JSON(http.StatusCreated, helper.SuccessResponse(userResp, "Check OTP number sent to your email"))
 	}
@@ -81,10 +82,10 @@ func (uh *userHandler) Login() echo.HandlerFunc {
 		loginResp := UserCoreToLoginResponse(resp)
 		loginResp.Token = token
 
-		// if loginResp.AccountStatus == "unverified" {
-		// 	loginResp.Token = ""
-		// 	return c.JSON(http.StatusOK, helper.SuccessResponse(loginResp, "OTP validation is required"))
-		// }
+		if loginResp.AccountStatus == "unverified" {
+			loginResp.Token = ""
+			return c.JSON(http.StatusOK, helper.SuccessResponse(loginResp, "OTP validation is required"))
+		}
 
 		return c.JSON(http.StatusOK, helper.SuccessResponse(loginResp, "Login success"))
 	}
