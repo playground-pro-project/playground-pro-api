@@ -53,6 +53,7 @@ jobs:
                         -e DBHOST=${{ secrets.DBHOST }} \
                         -e DBPORT=${{ secrets.DBPORT }} \
                         -e DBNAME=${{ secrets.DBNAME }} \
+                        -e EMAIL_SENDER_PASSWORD=${{ secrets.EMAIL_SENDER_PASSWORD }} \
                         -e MIDTRANS_SERVERKEY=${{ secrets.MIDTRANS_SERVERKEY }} \
                         -e MIDTRANS_MERCHANT_ID=${{ secrets.MIDTRANS_MERCHANT_ID }} \
                         --name playgroundpro-api-v1 \
