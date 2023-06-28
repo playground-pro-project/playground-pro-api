@@ -69,6 +69,7 @@ func (rh *reservationHandler) MakeReservation() echo.HandlerFunc {
 func (rh *reservationHandler) ReservationStatus() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		midtransResponse := midtransCallback{}
+		log.Sugar().Info(midtransResponse)
 		errBind := c.Bind(&midtransResponse)
 		if errBind != nil {
 			log.Sugar().Errorf("error on binding notification input", errBind)
