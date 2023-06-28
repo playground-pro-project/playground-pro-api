@@ -137,6 +137,8 @@ func (rq *reservationQuery) ReservationCheckOutDate(reservation_id string) (time
 	}
 	log.Sugar().Infof("checkout date found in the database %v", reservation.CheckOutDate)
 	return reservation.CheckOutDate, nil
+}
+
 // ReservationHistory implements reservation.ReservationData.
 func (rq *reservationQuery) ReservationHistory(userId string) ([]reservation.PaymentCore, error) {
 	paymentData := []Payment{}
