@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -15,12 +16,14 @@ var log = middlewares.Log()
 type reservationService struct {
 	query    reservation.ReservationData
 	validate *validator.Validate
+	refund   paymentgateway.Refund
 }
 
-func New(rd reservation.ReservationData) reservation.ReservationService {
+func New(rd reservation.ReservationData, refund paymentgateway.Refund) reservation.ReservationService {
 	return &reservationService{
 		query:    rd,
 		validate: validator.New(),
+		refund:   refund,
 	}
 }
 
@@ -81,10 +84,14 @@ func (rs *reservationService) ReservationStatus(request reservation.PaymentCore)
 		}
 
 		if !paymentgateway.IsRefundable(request.PaymentMethod) {
-			// err := paymentgateway.Refund(request.Reservation.ReservationID)
-			// if err != nil {
-			// 	return res, err
-			// }
+			grandTotal, errConv := strconv.ParseInt(request.GrandTotal, 10, 64)
+			if errConv != nil {
+				return res, errors.New("failed to parse GrandTotal")
+			}
+			err := rs.refund.RefundTransaction(request.Reservation.ReservationID, grandTotal, "reason")
+			if err != nil {
+				return res, err
+			}
 
 			request.Status = "refund"
 			res, err = rs.query.ReservationStatus(request)
@@ -92,6 +99,7 @@ func (rs *reservationService) ReservationStatus(request reservation.PaymentCore)
 				return res, err
 			}
 		}
+
 	case "expire":
 		res, err := rs.query.ReservationStatus(request)
 		if err != nil {

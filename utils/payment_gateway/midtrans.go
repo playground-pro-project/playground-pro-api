@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/coreapi"
 	"github.com/playground-pro-project/playground-pro-api/app/config"
@@ -25,8 +26,31 @@ type PaymentMethod interface {
 	Charge(*PaymetGateway) (*ChargeResponse, error)
 }
 
+type MyRefund struct{}
+
 type Refund interface {
-	RefundTransaction(request *coreapi.RefundReq, reservationID string) error
+	RefundTransaction(invoice string, amount int64, reason string) error
+}
+
+func (r *MyRefund) RefundTransaction(invoice string, amount int64, reason string) error {
+	client := coreapi.Client{}
+	client.New(config.MIDTRANS_SERVERKEY, midtrans.Sandbox)
+
+	suffix := uuid.New().String()
+	refundKey := config.MIDTRANS_MERCHANT_ID + suffix
+
+	refundRequest := &coreapi.RefundReq{
+		RefundKey: refundKey,
+		Amount:    amount,
+		Reason:    reason,
+	}
+
+	_, err := client.RefundTransaction(invoice, refundRequest)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ChargeMidtrans(reservationID string, request reservation.PaymentCore) (*ChargeResponse, error) {
@@ -99,24 +123,6 @@ func (pg *PaymetGateway) CustomCharge(request *coreapi.ChargeReq) (*ChargeRespon
 	}
 
 	return &result, nil
-}
-
-func (pg *PaymetGateway) Refund(request *coreapi.RefundReq, invoice string) error {
-	client := coreapi.Client{}
-	client.New(config.MIDTRANS_SERVERKEY, midtrans.Sandbox)
-
-	// request := &coreapi.RefundReq{
-	// 	RefundKey: config.MerchantID
-	// 	Amount: amount,
-	// 	Reason: reason,
-	// }
-
-	_, err := client.RefundTransaction(invoice, request)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func IsRefundable(paymentMethod string) bool {

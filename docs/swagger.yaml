@@ -218,15 +218,21 @@ paths:
       security:
         - bearerAuth: []
 
-  "/payments/callback":
+  "/reservations/status":
     post:
       tags:
         - Reservation
       summary: Retrive payment notification update
       description: Retrive payment notification to update status on database
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/midtrans_callback"
       responses:
         "200":
-          $ref: "#/components/responses/Response200GetPayment"
+          $ref: "#/components/responses/Response200"
         "400":
           $ref: "#/components/responses/Response400"
         "404":
@@ -537,38 +543,6 @@ components:
                   va_number: VA4nUmber
                   status: "pending"
 
-    Response200GetPayment:
-      description: Successful Operation
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              code:
-                type: integer
-              message:
-                type: string
-              token:
-                type: string
-            example:
-              code: 200
-              message: "Successful operation"
-              data:
-                reservation_id: "string-uuid"
-                user_booking: "Tono Haha"
-                user_hosting: "Tini Hihi"
-                category: "Villa Premium A3"
-                price: 100
-                quantity: 2
-                gross_amount: 200
-                check-in_date: "2023/06/05 08:05"
-                check-out_date: "2023/08/05 08:05"
-                payment_type: "bank_transfer"
-                payment_time: "2019-10-23 16:33:49"
-                payment_status: "pending"
-                bank_transfer: "bca"
-                va_number: "812785002530231"
-
     Response200Review:
       description: Successful operation
       content:
@@ -865,6 +839,47 @@ components:
         deleted_at:
           type: string
           format: date-time
+    midtrans_callback:
+      type: object
+      properties:
+        transaction_time:
+          type: string
+        transaction_status:
+          type: string
+        transaction_id:
+          type: string
+        status_message:
+          type: string
+        status_code:
+          type: string
+        signature_key:
+          type: string
+        payment_type:
+          type: string
+        order_id:
+          type: string
+        merchant_id:
+          type: string
+        masked_card:
+          type: string
+        gross_amount:
+          type: string
+        fraud_status:
+          type: string
+        eci:
+          type: string
+        currency:
+          type: string
+        channel_response_message:
+          type: string
+        channel_response_code:
+          type: string
+        card_type:
+          type: string
+        bank:
+          type: string
+        approval_code:
+          type: string
     api_response:
       type: object
       properties:

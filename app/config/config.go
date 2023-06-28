@@ -16,6 +16,7 @@ var (
 	REDIS_PASSWORD        string
 	REDIS_DATABASE        int
 	MIDTRANS_SERVERKEY    string
+	MIDTRANS_MERCHANT_ID  string
 	EMAIL_SENDER_NAME     string
 	EMAIL_SENDER_ADDRESS  string
 	EMAIL_SENDER_PASSWORD string
@@ -113,6 +114,11 @@ func readEnv() *AppConfig {
 		isRead = false
 	}
 
+	if val, found := os.LookupEnv("MIDTRANS_MERCHANT_ID"); found {
+		MIDTRANS_MERCHANT_ID = val
+		isRead = false
+	}
+
 	if val, found := os.LookupEnv("EMAIL_SENDER_NAME"); found {
 		EMAIL_SENDER_NAME = val
 		isRead = true
@@ -153,6 +159,7 @@ func readEnv() *AppConfig {
 		REDIS_PASSWORD = viper.GetString("REDIS_PASSWORD")
 		REDIS_DATABASE = viper.GetInt("REDIS_DATABASE")
 		MIDTRANS_SERVERKEY = viper.GetString("MIDTRANS_SERVERKEY")
+		MIDTRANS_MERCHANT_ID = viper.GetString("MIDTRANS_MERCHANT_ID")
 		EMAIL_SENDER_ADDRESS = viper.GetString("EMAIL_SENDER_ADDRESS")
 		EMAIL_SENDER_NAME = viper.GetString("EMAIL_SENDER_NAME")
 		EMAIL_SENDER_PASSWORD = viper.GetString("EMAIL_SENDER_PASSWORD")

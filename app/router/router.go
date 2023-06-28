@@ -17,6 +17,7 @@ import (
 	vd "github.com/playground-pro-project/playground-pro-api/features/venue/data"
 	vh "github.com/playground-pro-project/playground-pro-api/features/venue/handler"
 	vs "github.com/playground-pro-project/playground-pro-api/features/venue/service"
+	paymentgateway "github.com/playground-pro-project/playground-pro-api/utils/payment_gateway"
 	"gorm.io/gorm"
 )
 
@@ -73,7 +74,8 @@ func initVenueRouter(db *gorm.DB, e *echo.Echo) {
 
 func initReservationRouter(db *gorm.DB, e *echo.Echo) {
 	reservationData := rsd.New(db)
-	reservationService := rss.New(reservationData)
+	refund := paymentgateway.Refund.RefundTransaction(paymentgateway.Refund, string, int64, string)
+	reservationService := rss.New(reservationData, refund)
 	reservationHandler := rsh.New(reservationService)
 
 	e.POST("/reservations", reservationHandler.MakeReservation(), middlewares.JWTMiddleware())
