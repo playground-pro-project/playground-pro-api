@@ -83,9 +83,11 @@ func (uq *userQuery) Login(request user.UserCore) (user.UserCore, string, error)
 func (uq *userQuery) DeleteByID(userID string) error {
 	deleteResult := uq.db.Where("user_id = ?", userID).Delete(&User{})
 	if deleteResult.Error != nil {
+		log.Sugar().Errorf("failed to delete user: %w", deleteResult.Error)
 		return fmt.Errorf("failed to delete user: %w", deleteResult.Error)
 	}
 	if deleteResult.RowsAffected == 0 {
+		log.Sugar().Errorf("no user found with ID: %s", userID)
 		return fmt.Errorf("no user found with ID: %s", userID)
 	}
 
@@ -110,8 +112,10 @@ func (uq *userQuery) GetByID(userID string) (user.UserCore, error) {
 	query := uq.db.Preload("Venues").Preload("Reservations").Preload("Reviews").Where("user_id = ?", userID).First(&userModel)
 	if query.Error != nil {
 		if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+			log.Sugar().Errorf("no user found with ID: %s", userID)
 			return user.UserCore{}, fmt.Errorf("user not found with ID: %s", userID)
 		}
+		log.Sugar().Errorf("failed to query user: %w", query.Error)
 		return user.UserCore{}, fmt.Errorf("failed to query user: %w", query.Error)
 	}
 
@@ -127,8 +131,10 @@ func (uq *userQuery) UpdateByID(userID string, updatedUser user.UserCore) error 
 	query := uq.db.Where("user_id = ?", userID).First(&userModel)
 	if query.Error != nil {
 		if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+			log.Sugar().Errorf("no user found with ID: %s", userID)
 			return fmt.Errorf("user not found with ID: %s", userID)
 		}
+		log.Sugar().Errorf("failed to query user: %w", query.Error)
 		return fmt.Errorf("failed to query user: %w", query.Error)
 	}
 
@@ -144,10 +150,13 @@ func (uq *userQuery) UpdateByID(userID string, updatedUser user.UserCore) error 
 	update := uq.db.Model(&userModel).Updates(userToUpdate)
 	if update.Error != nil {
 		if strings.Contains(update.Error.Error(), "user not found") {
+			log.Sugar().Errorf("failed to update user: %w", update.Error)
 			return fmt.Errorf("failed to update user: %w", update.Error)
 		} else if strings.Contains(update.Error.Error(), "'users.email'") {
+			log.Error("email already in use")
 			return errors.New("email already in use")
 		} else if strings.Contains(update.Error.Error(), "'users.phone'") {
+			log.Error("phone already in use")
 			return errors.New("phone already in use")
 		}
 	}

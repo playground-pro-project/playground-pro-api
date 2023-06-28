@@ -6,6 +6,7 @@ import (
 )
 
 type SearchVenueResponse struct {
+	UserID        string  `json:"user_id,omitempty"`
 	VenueID       string  `json:"venue_id,omitempty"`
 	Category      string  `json:"category,omitempty"`
 	Name          string  `json:"name,omitempty"`
@@ -49,6 +50,18 @@ type Reservation struct {
 	Username      string           `json:"username,omitempty"`
 	CheckInDate   helper.LocalTime `json:"check_in_date,omitempty"`
 	CheckOutDate  helper.LocalTime `json:"check_out_date,omitempty"`
+}
+
+type GetAllVenueImageResponse struct {
+	VenuePictureID string `json:"venue_picture_id"`
+	URL            string `json:"url"`
+}
+
+func GetAllVenueImageToResponse(v venue.VenuePictureCore) GetAllVenueImageResponse {
+	return GetAllVenueImageResponse{
+		VenuePictureID: v.VenuePictureID,
+		URL:            v.URL,
+	}
 }
 
 func SearchVenue(v venue.VenueCore) SearchVenueResponse {

@@ -231,3 +231,22 @@ func venueEntities(v venue.VenueCore) Venue {
 		Reviews:       []review.Review{},
 	}
 }
+
+func VenuePictureCoreToModel(v venue.VenuePictureCore) VenuePicture {
+	return VenuePicture{
+		VenuePictureID: v.VenuePictureID,
+		VenueID:        v.VenueID,
+		URL:            v.URL,
+	}
+}
+
+func VenuePictureModelToCore(v VenuePicture) venue.VenuePictureCore {
+	return venue.VenuePictureCore{
+		VenuePictureID: v.VenuePictureID,
+		VenueID:        v.VenueID,
+		URL:            v.URL,
+		CreatedAt:      v.CreatedAt,
+		UpdatedAt:      v.UpdatedAt,
+		DeletedAt:      v.DeletedAt.Time,
+	}
+}
