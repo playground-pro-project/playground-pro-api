@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/playground-pro-project/playground-pro-api/app/config"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/user"
 	mail "github.com/playground-pro-project/playground-pro-api/utils/email"
@@ -21,8 +20,10 @@ const (
 	otpExpiration   = 5 * 60 * time.Second
 	defaultEmail1   = "user1@default.com"
 	defaultEmail2   = "user2@default.com"
-	emailSenderName = "Playground Pro"
 	defaultOTP      = "123456"
+	emailSenderName = "Playground Pro"
+	emailSenderAddr = "dmsprd11@gmail.com"
+	emailSenderPass = "aphhfhxbtgwdpmys"
 )
 
 var log = middlewares.Log()
@@ -152,7 +153,7 @@ func (s *userService) StoreToRedis(req user.UserCore) error {
 // SendOTP implements user.UserService.
 func (s *userService) SendOTP(recipientName string, toEmailAddr string) (string, error) {
 	otp := helper.GenerateOTP(6)
-	sender := mail.NewGmailSender(config.EMAIL_SENDER_NAME, config.EMAIL_SENDER_ADDRESS, config.EMAIL_SENDER_PASSWORD)
+	sender := mail.NewGmailSender(emailSenderName, emailSenderAddr, emailSenderPass)
 
 	subject := "Account Verification - One-Time Password (OTP) Required"
 

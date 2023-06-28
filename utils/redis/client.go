@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/playground-pro-project/playground-pro-api/app/config"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/redis/go-redis/v9"
 
@@ -23,9 +22,9 @@ func NewRedisClient() *RedisClient {
 	ctx := context.Background()
 
 	client := redis.NewClient(&redis.Options{
-		Addr:     config.REDIS_HOST + ":" + config.REDIS_PORT,
+		Addr:     "172.31.3.99:6379",
 		Password: "",
-		DB:       config.REDIS_DATABASE,
+		DB:       0,
 	})
 
 	return &RedisClient{
