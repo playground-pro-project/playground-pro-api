@@ -64,3 +64,27 @@ func (rh *reservationHandler) MakeReservation() echo.HandlerFunc {
 		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully operation", response, nil))
 	}
 }
+
+// ReservationStatus implements reservation.ReservationHandler.
+func (rh *reservationHandler) ReservationStatus() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		midtransResponse := midtransCallback{}
+		errBind := c.Bind(&midtransResponse)
+		if errBind != nil {
+			log.Sugar().Errorf("error on binding notification input", errBind)
+			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request: "+errBind.Error(), nil, nil))
+		}
+
+		_, err := rh.service.ReservationStatus(reservationStatusRequest(midtransResponse))
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+			} else if strings.Contains(err.Error(), "no payment record has been updated") {
+				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "No payment record has been updated", nil, nil))
+			}
+			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+		}
+
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful updated payment status", nil, nil))
+	}
+}
