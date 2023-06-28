@@ -18,10 +18,11 @@ import (
 )
 
 const (
-	otpExpiration = 5 * 60 * time.Second
-	defaultEmail1 = "user1@default.com"
-	defaultEmail2 = "user2@default.com"
-	defaultOTP    = "123456"
+	otpExpiration   = 5 * 60 * time.Second
+	defaultEmail1   = "user1@default.com"
+	defaultEmail2   = "user2@default.com"
+	emailSenderName = "Playground Pro"
+	defaultOTP      = "123456"
 )
 
 var log = middlewares.Log()
@@ -151,7 +152,7 @@ func (s *userService) StoreToRedis(req user.UserCore) error {
 // SendOTP implements user.UserService.
 func (s *userService) SendOTP(recipientName string, toEmailAddr string) (string, error) {
 	otp := helper.GenerateOTP(6)
-	sender := mail.NewGmailSender(config.EMAIL_SENDER_NAME, config.EMAIL_SENDER_ADDRESS, config.EMAIL_SENDER_PASSWORD)
+	sender := mail.NewGmailSender(emailSenderName, config.EMAIL_SENDER_ADDRESS, config.EMAIL_SENDER_PASSWORD)
 
 	subject := "Account Verification - One-Time Password (OTP) Required"
 
