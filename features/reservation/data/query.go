@@ -119,3 +119,30 @@ func (rq *reservationQuery) PriceVenue(venueID string) (float64, error) {
 	log.Sugar().Infof("venue data found in the database %f", venue.Price)
 	return venue.Price, nil
 }
+
+// ReservationHistory implements reservation.ReservationData.
+func (rq *reservationQuery) ReservationHistory(userId string) ([]reservation.ReservationCore, error) {
+	reservations := []Reservation{}
+	query := rq.db.
+		Table("reservations").
+		Select("reservations.*, payments.*").
+		Joins("LEFT JOIN payments ON payments.payment_id = reservations.payment_id").
+		Where("reservations.user_id = ? AND reservations.deleted_at IS NULL", userId).
+		Scan(&reservations)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("list reservations not found")
+		return nil, errors.New("list reservations not found")
+	} else if query.Error != nil {
+		log.Sugar().Error("error executing list reservations query:", query.Error)
+		return nil, query.Error
+	} else {
+		log.Sugar().Info("list reservations data found in the database")
+	}
+
+	result := make([]reservation.ReservationCore, len(reservations))
+	for i, reservation := range reservations {
+		result[i] = reservationToCore(reservation)
+	}
+
+	return result, nil
+}
