@@ -102,7 +102,7 @@ func (rq *reservationQuery) ReservationStatus(request reservation.PaymentCore) (
 	return paymentModels(*req), nil
 }
 
-// PriceVenue retrieves the price of a venue by its ID.
+// PriceVenue retrieves the price of a venue by its ID
 func (rq *reservationQuery) PriceVenue(venueID string) (float64, error) {
 	venue := Venue{}
 	query := rq.db.Table("venues").
