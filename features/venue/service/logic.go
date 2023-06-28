@@ -50,7 +50,7 @@ func (vs *venueService) RegisterVenue(userId string, request venue.VenueCore) (v
 	result, err := vs.query.RegisterVenue(userId, request)
 	if err != nil {
 		message := ""
-		if strings.Contains(err.Error(), "error insert data, duplicated") {
+		if strings.Contains(err.Error(), "duplicated") {
 			log.Error("error insert data, duplicated")
 			message = "error insert data, duplicated"
 		} else {

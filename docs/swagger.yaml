@@ -20,10 +20,10 @@ tags:
     description: Identifikasi data pengguna
   - name: User
     description: Pengguna aplikasi yang dibangun
-  - name: Vanue
+  - name: Venue
     description: Product yang akan disewakan penyewa
   - name: Reservation
-    description: Proses menyewa vanue dan pembayaran setelah membuat pemesanan vanue oleh peminjam
+    description: Proses menyewa venue dan pembayaran setelah membuat pemesanan vanue oleh peminjam
   - name: Review
     description: Review untuk venue yang telah disewa oleh peminjam
 
@@ -43,10 +43,10 @@ paths:
       security:
         - bearerAuth: []
 
-  "/vanues":
+  "/venues":
     get:
       tags:
-        - Vanue
+        - Venue
       summary: Find list venue, venue's reviews and rating (pagination)
       description: Find list venue, venue's average reviews and rating accumulation
       parameters:
@@ -107,10 +107,58 @@ paths:
         "500":
           $ref: "#/components/responses/Response500"
 
+    post:
+      tags:
+        - Venue
+      summary: Register venue
+      description: User can register a venue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category:
+                  type: string
+                name:
+                  type: string
+                  uniqueItems: true
+                  description: Nama unik tempat olahraga
+                description:
+                  type: string
+                  description: Deskripsi tempat olahraga
+                service_time:
+                  type: string
+                location:
+                  type: string
+                  description: Alamat tempat olahraga
+                price:
+                  type: number
+                  description: Harga sewa tempat olahraga
+                  format: float
+            example:
+              category: "football"
+              name: "Bola Bolaan"
+              description: "Deskripsi Bola Bolaan"
+              service_time: "07:45 - 23:00"
+              location: "Jalan Utama No. 123, Kota Anywhere"
+              price: 29.99
+      responses:
+        "201":
+          $ref: "#/components/responses/Response201"
+        "400":
+          $ref: "#/components/responses/Response400"
+        "500":
+          $ref: "#/components/responses/Response500"
+      security:
+        - bearerAuth: []
+
+
   "/vanues/{vanue_id}/availability":
     get:
       tags:
-        - Vanue
+        - Venue
       summary: Check availability
       description: _
       parameters:
