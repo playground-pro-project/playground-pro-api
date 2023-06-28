@@ -62,7 +62,7 @@ func ChargeMidtrans(reservationID string, request reservation.PaymentCore) (*Cha
 		return nil, errors.New("invalid reservationID")
 	}
 
-	grandTotal, err := strconv.ParseInt(request.GrandTotal, 10, 64)
+	grandTotal, err := strconv.ParseFloat(request.GrandTotal, 64)
 	if err != nil {
 		log.Error("error parsing grand_total")
 		return nil, err
@@ -72,7 +72,7 @@ func ChargeMidtrans(reservationID string, request reservation.PaymentCore) (*Cha
 		Request: &coreapi.ChargeReq{
 			TransactionDetails: midtrans.TransactionDetails{
 				OrderID:  reservationID,
-				GrossAmt: grandTotal,
+				GrossAmt: int64(grandTotal),
 			},
 		},
 	}

@@ -35,6 +35,23 @@ type Payment struct {
 	Reservation   Reservation    `gorm:"foreignKey:PaymentID;references:PaymentID"`
 }
 
+type Venue struct {
+	VenueID      string         `gorm:"primaryKey;type:varchar(45)"`
+	OwnerID      string         `gorm:"type:varchar(45)"`
+	Category     string         `gorm:"type:enum('basketball','football','futsal','badminton');default:'basketball'"`
+	Name         string         `gorm:"type:varchar(225);not null;unique"`
+	Description  string         `gorm:"type:text"`
+	ServiceTime  string         `gorm:"type:varchar(100)"`
+	Location     string         `gorm:"type:text"`
+	Price        float64        `gorm:"type:double"`
+	Longitude    float64        `gorm:"type:double"`
+	Latitude     float64        `gorm:"type:double"`
+	CreatedAt    time.Time      `gorm:"type:datetime"`
+	UpdatedAt    time.Time      `gorm:"type:datetime"`
+	DeletedAt    gorm.DeletedAt `gorm:"index"`
+	Reservations []Reservation  `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+}
+
 // Reservation-Model to reservation-core
 func reservationModels(r Reservation) reservation.ReservationCore {
 	return reservation.ReservationCore{
