@@ -24,7 +24,7 @@ func NewRedisClient() *RedisClient {
 
 	client := redis.NewClient(&redis.Options{
 		Addr:     config.REDIS_HOST + ":" + config.REDIS_PORT,
-		Password: config.REDIS_PASSWORD,
+		Password: "",
 		DB:       config.REDIS_DATABASE,
 	})
 
