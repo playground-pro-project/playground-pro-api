@@ -317,7 +317,7 @@ func (uh *userHandler) UploadProfilePicture() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Please upload a picture smaller than 1 MB."))
 		}
 
-		id := helper.GenerateIdentifierImage()
+		id := helper.GenerateIdentifier()
 		filename := id + "-" + file.Filename
 		path := "profile-picture/" + filename
 
@@ -458,7 +458,7 @@ func (uh *userHandler) UploadOwnerFile() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Please upload a file smaller than 5 MB."))
 		}
 
-		id := helper.GenerateIdentifierDocs()
+		id := helper.GenerateIdentifier()
 		filename := id + "-" + file.Filename
 		path := "owner-docs/" + filename
 

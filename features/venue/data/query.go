@@ -204,3 +204,74 @@ func (vq *venueQuery) VenueAvailability(venueId string) (venue.VenueCore, error)
 	log.Sugar().Info(result)
 	return result, nil
 }
+
+func (vq *venueQuery) InsertVenueImage(req venue.VenuePictureCore) (venue.VenuePictureCore, error) {
+	venueImageID := helper.GenerateImageID()
+	req.VenuePictureID = venueImageID
+
+	model := VenuePictureCoreToModel(req)
+
+	query := vq.db.Table("venue_pictures").Create(&model)
+	if query.Error != nil {
+		log.Error("error insert data, duplicated" + query.Error.Error())
+		return venue.VenuePictureCore{}, errors.New("error insert data, duplicated")
+	}
+
+	rowAffect := query.RowsAffected
+	if rowAffect == 0 {
+		log.Warn("no venue image has been created")
+		return venue.VenuePictureCore{}, errors.New("row affected : 0")
+	}
+
+	log.Sugar().Infof("new venue image has been created: %s", venueImageID)
+	return VenuePictureModelToCore(model), nil
+}
+
+func (vq *venueQuery) GetAllVenueImage(venueID string) ([]venue.VenuePictureCore, error) {
+	var venueImages []VenuePicture
+	query := vq.db.Table("venue_pictures").Where("venue_id = ?", venueID).Find(&venueImages)
+	if query.Error != nil {
+		log.Error("error retrieve all images venue" + query.Error.Error())
+		return nil, errors.New("error retrieve all images venue")
+	}
+
+	var venueImagesCore []venue.VenuePictureCore
+	for _, img := range venueImages {
+		venueImagesCore = append(venueImagesCore, VenuePictureModelToCore(img))
+	}
+
+	return venueImagesCore, nil
+}
+
+func (vq *venueQuery) DeleteVenueImage(venueImageID string) error {
+	query := vq.db.Table("venue_pictures").Where("venue_picture_id = ?", venueImageID).Delete(&VenuePicture{})
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("venue image record not found")
+		return errors.New("venue image record not found")
+	}
+
+	if query.Error != nil {
+		log.Error("failed to delete image: " + query.Error.Error())
+		return errors.New("failed to delete image")
+	}
+
+	return nil
+}
+
+func (vq *venueQuery) GetVenueByImageID(venueImageID string) (venue.VenuePictureCore, error) {
+	var image VenuePicture
+	query := vq.db.Table("venue_pictures").Where("venue_picture_id = ?", venueImageID).First(&image)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("venue image record not found")
+		return venue.VenuePictureCore{}, errors.New("venue image record not found")
+	}
+
+	if query.Error != nil {
+		log.Error("error retrieve image venue" + query.Error.Error())
+		return venue.VenuePictureCore{}, errors.New("error retrieve image venue")
+	}
+
+	imageCore := VenuePictureModelToCore(image)
+
+	return imageCore, nil
+}

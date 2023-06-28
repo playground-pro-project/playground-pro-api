@@ -726,7 +726,7 @@ paths:
                         schema:
                             type: object
                             properties:
-                                images:
+                                files:
                                     type: array
                                     items:
                                         type: string
@@ -742,17 +742,6 @@ paths:
                             examples:
                                 VenueImagesAdded:
                                     value:
-                                        data:
-                                            - image_id: IMG-HY17XHA
-                                              image_urls: https://example.com/image1.jpg
-                                            - image_id: IMG-HS81HS
-                                              image_urls: https://example.com/image2.jpg
-                                            - image_id: IMG-QRF53Z
-                                              image_urls: https://example.com/image3.jpg
-                                            - image_id: IMG-JDI90A
-                                              image_urls: https://example.com/image4.jpg
-                                            - image_id: IMG-NVA71G
-                                              image_urls: https://example.com/image5.jpg
                                         message: Venue images added successfully
                 "400":
                     description: Invalid request payload
@@ -1080,7 +1069,6 @@ paths:
                                         error: Internal server error. Please try again later.
             tags:
                 - Reviews
-
 components:
     securitySchemes:
         JWTAuth:
