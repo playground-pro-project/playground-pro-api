@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/playground-pro-project/playground-pro-api/app/config"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/venue"
 )
@@ -18,9 +17,17 @@ var (
 
 func InitRedis(ctx context.Context) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr:     config.REDIS_HOST + ":" + config.REDIS_PORT,
+		// Addr:     config.REDIS_HOST + ":" + config.REDIS_PORT,
+		// Password: config.REDIS_PASSWORD,
+		// DB:       config.REDIS_DATABASE,
+
+		Addr:     "172.31.3.99:6379",
 		Password: "",
-		DB:       config.REDIS_DATABASE,
+		DB:       0,
+
+		// Addr:     "localhost:6379",
+		// Password: "",
+		// DB:       0,
 	})
 
 	pong, err := client.Ping(ctx).Result()
