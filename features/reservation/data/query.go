@@ -2,7 +2,6 @@ package data
 
 import (
 	"errors"
-	"strconv"
 
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/reservation"
@@ -43,30 +42,6 @@ func (rq *reservationQuery) MakeReservation(userID string, r reservation.Reserva
 	}
 
 	log.Sugar().Info(reservationModel)
-
-	// TODO 1.5 : Get venue price
-	venuePrice, err := func() (float64, error) {
-		venue := Venue{}
-		query := rq.db.Table("venues").
-			Select("venues.price").
-			Where("venue_id = ?", r.VenueID).
-			First(&venue)
-		if errors.Is(query.Error, gorm.ErrRecordNotFound) {
-			log.Error("venue not found")
-			return 0, errors.New("venue not found")
-		} else if query.Error != nil {
-			log.Sugar().Error("error executing venue query:", query.Error)
-			return 0, query.Error
-		}
-		log.Sugar().Infof("venue data found in the database %f", venue.Price)
-		return venue.Price, nil
-	}()
-	if err != nil {
-		tx.Rollback()
-		log.Error("error while getting venue price")
-		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New("internal server error while getting venue price")
-	}
-	p.GrandTotal = strconv.FormatFloat(venuePrice, 'f', 2, 64)
 
 	// TODO 2 : Charge payment using Midtrans
 	paymentModel, err := paymentgateway.ChargeMidtrans(reservationModel.ReservationID, p)
@@ -127,20 +102,20 @@ func (rq *reservationQuery) ReservationStatus(request reservation.PaymentCore) (
 	return paymentModels(*req), nil
 }
 
-// // PriceVenue retrieves the price of a venue by its ID.
-// func (rq *reservationQuery) PriceVenue(venueID string) (float64, error) {
-// 	venue := Venue{}
-// 	query := rq.db.Table("venues").
-// 		Select("venues.price").
-// 		Where("venue_id = ?", venueID).
-// 		First(&venue)
-// 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
-// 		log.Error("venue not found")
-// 		return 0, errors.New("venue not found")
-// 	} else if query.Error != nil {
-// 		log.Sugar().Error("error executing venue query:", query.Error)
-// 		return 0, query.Error
-// 	}
-// 	log.Sugar().Infof("venue data found in the database %f", venue.Price)
-// 	return venue.Price, nil
-// }
+// PriceVenue retrieves the price of a venue by its ID.
+func (rq *reservationQuery) PriceVenue(venueID string) (float64, error) {
+	venue := Venue{}
+	query := rq.db.Table("venues").
+		Select("venues.price").
+		Where("venue_id = ?", venueID).
+		First(&venue)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("venue not found")
+		return 0, errors.New("venue not found")
+	} else if query.Error != nil {
+		log.Sugar().Error("error executing venue query:", query.Error)
+		return 0, query.Error
+	}
+	log.Sugar().Infof("venue data found in the database %f", venue.Price)
+	return venue.Price, nil
+}

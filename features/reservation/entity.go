@@ -13,7 +13,7 @@ type ReservationCore struct {
 	VenueID       string    `validate:"required"`
 	CheckInDate   time.Time `validate:"required"`
 	CheckOutDate  time.Time `validate:"required"`
-	Duration      uint
+	Duration      float64
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     time.Time
@@ -52,4 +52,5 @@ type ReservationService interface {
 type ReservationData interface {
 	MakeReservation(userId string, r ReservationCore, p PaymentCore) (ReservationCore, PaymentCore, error)
 	ReservationStatus(request PaymentCore) (PaymentCore, error)
+	PriceVenue(venueID string) (float64, error)
 }

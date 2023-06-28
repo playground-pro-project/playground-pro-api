@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -51,6 +52,31 @@ func (rs *reservationService) MakeReservation(userId string, r reservation.Reser
 		}
 		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New(message)
 	}
+
+	// TODO 1 : Get price of spesific venue
+	res1, err := rs.query.PriceVenue(r.VenueID)
+	if err != nil {
+		log.Sugar().Errorf("failed to get venue price %s", r.VenueID)
+		return reservation.ReservationCore{}, reservation.PaymentCore{}, err
+	}
+
+	price, err := strconv.ParseFloat(fmt.Sprintf("%.2f", res1), 64)
+	if err != nil {
+		log.Sugar().Errorf("failed to parse grand_total: %s", err.Error())
+		return reservation.ReservationCore{}, reservation.PaymentCore{}, err
+	}
+
+	log.Sugar().Infof("%.2f", price)
+
+	// TODO 2: Get accumulative duration of specific venue
+	duration := r.CheckOutDate.Sub(r.CheckInDate).Hours()
+	r.Duration = duration
+	log.Sugar().Infof("%.2f", r.Duration)
+
+	// TODO 3: Multiply duration and price
+	p.GrandTotal = strconv.FormatFloat(duration*price, 'f', 2, 64)
+
+	log.Sugar().Infof(p.GrandTotal)
 
 	result, paymentResult, err := rs.query.MakeReservation(userId, r, p)
 	if err != nil {

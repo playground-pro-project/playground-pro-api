@@ -15,7 +15,7 @@ type Reservation struct {
 	PaymentID     *string
 	CheckInDate   time.Time `gorm:"type:datetime"`
 	CheckOutDate  time.Time `gorm:"type:datetime"`
-	Duration      uint
+	Duration      float64
 	CreatedAt     time.Time      `gorm:"type:datetime"`
 	UpdatedAt     time.Time      `gorm:"type:datetime"`
 	DeletedAt     gorm.DeletedAt `gorm:"index"`

@@ -640,7 +640,7 @@ components:
                       type: string
                     
           example:
-            code: 200
+            code: 201
             message: "Successful operation"
             data:
               payment_id: "85ef6565-eb95-4be2-a4c0-a6425b27dae7"
