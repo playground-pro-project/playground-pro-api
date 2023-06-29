@@ -85,6 +85,22 @@ func modelToAvailabilityCore(result []Result) []reservation.AvailabilityCore {
 	return availabilities
 }
 
+func modelToReservationCore(models []Reservation) []reservation.ReservationCore {
+	var cores []reservation.ReservationCore
+	for _, m := range models {
+		core := reservation.ReservationCore{
+			ReservationID: m.ReservationID,
+			UserID:        m.UserID,
+			VenueID:       m.VenueID,
+			CheckInDate:   m.CheckInDate,
+			CheckOutDate:  m.CheckOutDate,
+			Duration:      m.Duration,
+		}
+		cores = append(cores, core)
+	}
+	return cores
+}
+
 // Reservation-Model to reservation-core
 func reservationModels(r Reservation) reservation.ReservationCore {
 	return reservation.ReservationCore{
