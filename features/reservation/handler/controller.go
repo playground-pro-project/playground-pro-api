@@ -50,9 +50,13 @@ func (rh *reservationHandler) MakeReservation() echo.HandlerFunc {
 			case strings.Contains(err.Error(), "empty"):
 				log.Error("bad request, request cannot be empty")
 				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, request cannot be empty", nil, nil))
+
 			case strings.Contains(err.Error(), "datetime"):
 				log.Error("bad request, invalid datetime format")
 				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, invalid datetime format", nil, nil))
+			case strings.Contains(err.Error(), "unregistered user"):
+				log.Error("unregistered user")
+				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, unregistered user", nil, nil))
 			default:
 				log.Error("internal server error")
 				return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
@@ -126,6 +130,32 @@ func (rh *reservationHandler) ReservationHistory() echo.HandlerFunc {
 			result[i] = reservationHistory(payment)
 		}
 
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful Operation", result, nil))
+	}
+}
+
+// DetailTransaction implements reservation.ReservationHandler.
+func (rh *reservationHandler) DetailTransaction() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId, err := middlewares.ExtractToken(c)
+		if err != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
+
+		paymentId := c.Param("payment_id")
+		payment, err := rh.service.DetailTransaction(userId, paymentId)
+		if err != nil {
+			if strings.Contains(err.Error(), "reservation not found") {
+				log.Error("reservation not found")
+				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+			} else {
+				log.Error("internal server error")
+				return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+			}
+		}
+
+		result := reservationHistory(payment)
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful Operation", result, nil))
 	}
 }

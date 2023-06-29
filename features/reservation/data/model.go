@@ -148,8 +148,9 @@ func paymentToCore(p Payment) reservation.PaymentCore {
 
 	if p.Reservation.VenueID != "" {
 		paymentCore.Reservation.Venue = reservation.VenueCore{
-			Name:  p.Reservation.Venue.Name,
-			Price: p.Reservation.Venue.Price,
+			Name:     p.Reservation.Venue.Name,
+			Location: p.Reservation.Venue.Location,
+			Price:    p.Reservation.Venue.Price,
 		}
 	}
 	return paymentCore

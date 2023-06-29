@@ -24,11 +24,12 @@ func makeReservation(p reservation.PaymentCore) makeReservationResponse {
 }
 
 type reservationHistoryResponse struct {
-	Name         string           `json:"venue_name"`
+	Name         string           `json:"venue_name,omitempty"`
+	Location     string           `json:"location,omitempty"`
 	CheckInDate  helper.LocalTime `json:"check_in_date,omitempty"`
 	CheckOutDate helper.LocalTime `json:"check_out_date,omitempty"`
 	Duration     float64          `json:"duration,omitempty"`
-	Price        float64          `json:"price"`
+	Price        float64          `json:"price,omitempty"`
 	GrandTotal   string           `json:"total_price,omitempty"`
 	PaymentType  string           `json:"payment_type,omitempty"`
 	PaymentCode  string           `json:"payment_code,omitempty"`
@@ -38,6 +39,7 @@ type reservationHistoryResponse struct {
 func reservationHistory(payment reservation.PaymentCore) reservationHistoryResponse {
 	response := reservationHistoryResponse{
 		Name:         payment.Reservation.Venue.Name,
+		Location:     payment.Reservation.Venue.Location,
 		CheckInDate:  helper.LocalTime(payment.Reservation.CheckInDate),
 		CheckOutDate: helper.LocalTime(payment.Reservation.CheckOutDate),
 		Duration:     payment.Reservation.Duration,
