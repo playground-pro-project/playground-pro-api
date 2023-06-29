@@ -67,6 +67,24 @@ type Result struct {
 	Check_Out_Date time.Time
 }
 
+// Convert model to AvailabilityCore
+func modelToAvailabilityCore(result []Result) []reservation.AvailabilityCore {
+	var availabilities []reservation.AvailabilityCore
+	for _, r := range result {
+		availability := reservation.AvailabilityCore{
+			VenueID:       r.VenueID,
+			Name:          r.Name,
+			Category:      r.Category,
+			PaymentID:     r.PaymentID,
+			ReservationID: r.ReservationID,
+			CheckInDate:   r.Check_In_Date,
+			CheckOutDate:  r.Check_Out_Date,
+		}
+		availabilities = append(availabilities, availability)
+	}
+	return availabilities
+}
+
 // Reservation-Model to reservation-core
 func reservationModels(r Reservation) reservation.ReservationCore {
 	return reservation.ReservationCore{

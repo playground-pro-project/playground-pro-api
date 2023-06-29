@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	echo "github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/reservation"
 	"github.com/playground-pro-project/playground-pro-api/utils/helper"
@@ -47,7 +47,7 @@ func (rh *reservationHandler) CheckAvailability() echo.HandlerFunc {
 			return helper.InternalServerError(c, "Internal server error")
 		}
 
-		venues := AvailabilityVenues(availables)
+		venues := Availability(availables)
 
 		log.Sugar().Infoln(venues)
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successfully operation.", venues, nil))

@@ -218,7 +218,7 @@ func (rq *reservationQuery) DetailTransaction(userId string, paymentId string) (
 }
 
 // CheckAvailability implements reservation.ReservationData.
-func (rq *reservationQuery) CheckAvailability(venueId string) ([]reservation.PaymentCore, error) {
+func (rq *reservationQuery) CheckAvailability(venueId string) ([]reservation.AvailabilityCore, error) {
 	var result []Result
 	query := rq.db.Raw(`
 	SELECT venues.venue_id,
@@ -249,31 +249,8 @@ func (rq *reservationQuery) CheckAvailability(venueId string) ([]reservation.Pay
 
 	log.Sugar().Info(result)
 
-	payments := make(map[string]reservation.PaymentCore)
-	for _, r := range result {
-		p, ok := payments[r.PaymentID]
-		if !ok {
-			p = reservation.PaymentCore{
-				PaymentID: r.PaymentID,
-				Venue: reservation.VenueCore{
-					VenueID:      r.VenueID,
-					Category:     r.Category,
-					Name:         r.Name,
-					Reservations: []reservation.ReservationCore{},
-				},
-			}
-		}
-		reservation := reservation.ReservationCore{
-			ReservationID: r.ReservationID,
-			CheckInDate:   r.Check_In_Date,
-			CheckOutDate:  r.Check_Out_Date,
-		}
-		p.Venue.Reservations = append(p.Venue.Reservations, reservation)
-		payments[r.PaymentID] = p
-	}
-	var res []reservation.PaymentCore
-	for _, p := range payments {
-		res = append(res, p)
-	}
-	return res, nil
+	availabilities := modelToAvailabilityCore(result)
+
+	log.Sugar().Info(availabilities)
+	return availabilities, nil
 }
