@@ -47,6 +47,11 @@ func (rh *reservationHandler) CheckAvailability() echo.HandlerFunc {
 			return helper.InternalServerError(c, "Internal server error")
 		}
 
+		if len(availables) == 0 {
+			log.Error("there is no reservation yet atm")
+			return helper.NotFoundError(c, "The requested resource was not found")
+		}
+
 		venues := Availability(availables)
 
 		log.Sugar().Infoln(venues)
