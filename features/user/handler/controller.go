@@ -60,22 +60,22 @@ func (uh *userHandler) Login() echo.HandlerFunc {
 			switch {
 			case strings.Contains(err.Error(), "invalid email format"):
 				log.Error("bad request, invalid email format")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, invalid email format", nil, nil))
+				return helper.BadRequestError(c, "Bad request, invalid email format")
 			case strings.Contains(err.Error(), "password cannot be empty"):
 				log.Error("bad request, password cannot be empty")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, password cannot be empty", nil, nil))
+				return helper.BadRequestError(c, "Bad request, password cannot be empty")
 			case strings.Contains(err.Error(), "invalid email and password"):
 				log.Error("bad request, invalid email and password")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, invalid email and password", nil, nil))
+				return helper.BadRequestError(c, "Bad request, invalid email and password")
 			case strings.Contains(err.Error(), "password does not match"):
 				log.Error("bad request, password does not match")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, password does not match", nil, nil))
+				return helper.BadRequestError(c, "Bad request, password does not match")
 			case strings.Contains(err.Error(), "error while creating jwt token"):
 				log.Error("internal server error, error while creating jwt token")
-				return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+				return helper.InternalServerError(c, "Internal server error")
 			default:
 				log.Error("internal server error")
-				return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+				return helper.InternalServerError(c, "Internal server error")
 			}
 		}
 
@@ -108,13 +108,13 @@ func (uh *userHandler) ReSendOTP() echo.HandlerFunc {
 				return c.JSON(http.StatusNotFound, helper.ErrorResponse(err.Error()))
 			}
 			log.Error(err.Error())
-			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error"))
+			return helper.InternalServerError(c, "Internal server error")
 		}
 
 		err = uh.userService.StoreToRedis(user)
 		if err != nil {
 			log.Error(err.Error())
-			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error"))
+			return helper.InternalServerError(c, "Internal server error")
 		}
 
 		return c.JSON(http.StatusCreated, helper.SuccessResponse(nil, "Check OTP number sent to your email"))
@@ -165,13 +165,13 @@ func (uh *userHandler) ValidateOTP() echo.HandlerFunc {
 
 func (uh *userHandler) GetUserProfile() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userID, err := middlewares.ExtractToken(c)
-		if err != nil {
+		userId, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
 			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+			return helper.UnauthorizedError(c, "Missing or malformed JWT")
 		}
 
-		user, err := uh.userService.GetByID(userID)
+		user, err := uh.userService.GetByID(userId)
 		if err != nil {
 			if strings.Contains(err.Error(), "user not found") {
 				return c.JSON(http.StatusNotFound, helper.ErrorResponse(err.Error()))
@@ -188,15 +188,16 @@ func (uh *userHandler) GetUserProfile() echo.HandlerFunc {
 func (uh *userHandler) UpdatePassword() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		req := ChangePasswordRequest{}
+
+		userId, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
+			log.Error("missing or malformed JWT")
+			return helper.UnauthorizedError(c, "Missing or malformed JWT")
+		}
+
 		err := c.Bind(&req)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Invalid request payload"))
-		}
-
-		userId, err := middlewares.ExtractToken(c)
-		if err != nil {
-			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
 		}
 
 		user, err := uh.userService.GetByID(userId)
@@ -227,16 +228,18 @@ func (uh *userHandler) UpdatePassword() echo.HandlerFunc {
 func (uh *userHandler) UpdateUserProfile() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		req := EditProfileRequest{}
+
+		userId, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
+			log.Error("missing or malformed JWT")
+			return helper.UnauthorizedError(c, "Missing or malformed JWT")
+		}
+
 		err := c.Bind(&req)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Invalid request payload"))
 		}
 
-		userId, err := middlewares.ExtractToken(c)
-		if err != nil {
-			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
-		}
 		updatedUser := EditProfileRequestToCore(req)
 
 		err = uh.userService.UpdateByID(userId, updatedUser)
@@ -265,7 +268,7 @@ func (uh *userHandler) DeleteUser() echo.HandlerFunc {
 		userId, errToken := middlewares.ExtractToken(c)
 		if errToken != nil {
 			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+			return helper.UnauthorizedError(c, "Missing or malformed JWT")
 		}
 
 		err := uh.userService.DeleteByID(userId)
@@ -279,10 +282,10 @@ func (uh *userHandler) DeleteUser() echo.HandlerFunc {
 
 func (uh *userHandler) UploadProfilePicture() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userID, errToken := middlewares.ExtractToken(c)
+		userId, errToken := middlewares.ExtractToken(c)
 		if errToken != nil {
 			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ErrorResponse("Missing or Malformed JWT"))
+			return helper.UnauthorizedError(c, "Missing or malformed JWT")
 		}
 
 		awsService := aws.InitS3()
@@ -335,7 +338,7 @@ func (uh *userHandler) UploadProfilePicture() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to upload file to cloud service: "+err.Error()))
 		}
 
-		usr, err := uh.userService.GetByID(userID)
+		usr, err := uh.userService.GetByID(userId)
 		if err != nil {
 			log.Error(err.Error())
 			return c.JSON(http.StatusNotFound, helper.ErrorResponse("User not found: "+err.Error()))
@@ -355,7 +358,7 @@ func (uh *userHandler) UploadProfilePicture() echo.HandlerFunc {
 		var updatedUser user.UserCore
 		updatedUser.ProfilePicture = fmt.Sprintf("%s%s", profilePictureBaseURL, filepath.Base(filename))
 
-		err = uh.userService.UpdateByID(userID, updatedUser)
+		err = uh.userService.UpdateByID(userId, updatedUser)
 		if err != nil {
 			if strings.Contains(err.Error(), "user not found") {
 				log.Error("User not found: " + err.Error())
@@ -369,22 +372,22 @@ func (uh *userHandler) UploadProfilePicture() echo.HandlerFunc {
 			"profile_picture": updatedUser.ProfilePicture,
 		}
 
-		log.Sugar().Infof(userID + " updated profile picture successfully")
+		log.Sugar().Infof(userId + " updated profile picture successfully")
 		return c.JSON(http.StatusOK, helper.SuccessResponse(resp, "Profile picture updated successfully"))
 	}
 }
 
 func (uh *userHandler) RemoveProfilePicture() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userID, errToken := middlewares.ExtractToken(c)
+		userId, errToken := middlewares.ExtractToken(c)
 		if errToken != nil {
 			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ErrorResponse("Missing or Malformed JWT"))
+			return helper.UnauthorizedError(c, "Missing or malformed JWT")
 		}
 
 		awsService := aws.InitS3()
 
-		usr, err := uh.userService.GetByID(userID)
+		usr, err := uh.userService.GetByID(userId)
 		if err != nil {
 			log.Error(err.Error())
 			return c.JSON(http.StatusNotFound, helper.ErrorResponse("User not found: "+err.Error()))
@@ -403,7 +406,7 @@ func (uh *userHandler) RemoveProfilePicture() echo.HandlerFunc {
 		updatedUser := user.UserCore{
 			ProfilePicture: defaultProfilePictureURL,
 		}
-		err = uh.userService.UpdateByID(userID, updatedUser)
+		err = uh.userService.UpdateByID(userId, updatedUser)
 		if err != nil {
 			if strings.Contains(err.Error(), "user not found") {
 				log.Error(err.Error())
@@ -413,17 +416,17 @@ func (uh *userHandler) RemoveProfilePicture() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error"))
 		}
 
-		log.Sugar().Infof(userID + " removed profile picture successfully")
+		log.Sugar().Infof(userId + " removed profile picture successfully")
 		return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "Profile picture removed successfully"))
 	}
 }
 
 func (uh *userHandler) UploadOwnerFile() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userID, errToken := middlewares.ExtractToken(c)
+		userId, errToken := middlewares.ExtractToken(c)
 		if errToken != nil {
 			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ErrorResponse("Missing or Malformed JWT"))
+			return helper.UnauthorizedError(c, "Missing or malformed JWT")
 		}
 
 		awsService := aws.InitS3()
@@ -479,7 +482,7 @@ func (uh *userHandler) UploadOwnerFile() echo.HandlerFunc {
 		updatedUser.OwnerFile = fmt.Sprintf("%s%s", ownerFileBaseURL, filepath.Base(file.Filename))
 		updatedUser.Role = "owner"
 
-		err = uh.userService.UpdateByID(userID, updatedUser)
+		err = uh.userService.UpdateByID(userId, updatedUser)
 		if err != nil {
 			if strings.Contains(err.Error(), "user not found") {
 				log.Error("User not found: " + err.Error())

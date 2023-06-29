@@ -30,16 +30,16 @@ func (rh *reservationHandler) MakeReservation() echo.HandlerFunc {
 			Payment     createPaymentRequest   `json:"payment"`
 		}{}
 
-		userId, err := middlewares.ExtractToken(c)
-		if err != nil {
+		userId, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
 			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+			return helper.UnauthorizedError(c, "Missing or malformed JWT")
 		}
 
 		errBind := c.Bind(&req)
 		if errBind != nil {
 			log.Error("error on bind request")
-			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request"+errBind.Error(), nil, nil))
+			return helper.BadRequestError(c, "Bad request")
 		}
 
 		reservationData := requestReservation(req.Reservation)
@@ -49,17 +49,16 @@ func (rh *reservationHandler) MakeReservation() echo.HandlerFunc {
 			switch {
 			case strings.Contains(err.Error(), "empty"):
 				log.Error("bad request, request cannot be empty")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, request cannot be empty", nil, nil))
-
+				return helper.BadRequestError(c, "Bad request")
 			case strings.Contains(err.Error(), "datetime"):
 				log.Error("bad request, invalid datetime format")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, invalid datetime format", nil, nil))
+				return helper.BadRequestError(c, "Bad request")
 			case strings.Contains(err.Error(), "unregistered user"):
 				log.Error("unregistered user")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, unregistered user", nil, nil))
+				return helper.BadRequestError(c, "Bad request")
 			default:
 				log.Error("internal server error")
-				return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+				return helper.InternalServerError(c, "Internal server error")
 			}
 		}
 
@@ -77,23 +76,23 @@ func (rh *reservationHandler) ReservationStatus() echo.HandlerFunc {
 		errBind := c.Bind(&midtransResponse)
 		if errBind != nil {
 			log.Sugar().Errorf("error on binding notification input", errBind)
-			return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request: "+errBind.Error(), nil, nil))
+			return helper.BadRequestError(c, "Bad request")
 		}
 
 		_, err := rh.service.ReservationStatus(reservationStatusRequest(midtransResponse))
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
 				log.Error("payment not found")
-				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+				return helper.NotFoundError(c, "The requested resource was not found")
 			} else if strings.Contains(err.Error(), "no payment record has been updated") {
 				log.Error("no payment record has been updated")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "No payment record has been updated", nil, nil))
+				return helper.BadRequestError(c, "Bad request")
 			} else if strings.Contains(err.Error(), "refund cannot be processed at least 1 hour away") {
 				log.Error("refund cannot be processed at least 1 hour away")
-				return c.JSON(http.StatusBadRequest, helper.ResponseFormat(http.StatusBadRequest, "Bad request, refund cannot be processed at least 1 hour away", nil, nil))
+				return helper.BadRequestError(c, "Bad request")
 			}
 			log.Error("internal server error")
-			return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+			return helper.InternalServerError(c, "Internal server error")
 		}
 
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful updated payment status", nil, nil))
@@ -103,26 +102,26 @@ func (rh *reservationHandler) ReservationStatus() echo.HandlerFunc {
 // ReservationHistory implements reservation.ReservationHandler.
 func (rh *reservationHandler) MyReservation() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userId, err := middlewares.ExtractToken(c)
-		if err != nil {
+		userId, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
 			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+			return helper.UnauthorizedError(c, "Missing or malformed JWT")
 		}
 
 		payments, err := rh.service.MyReservation(userId)
 		if err != nil {
 			if strings.Contains(err.Error(), "list reservations not found") {
 				log.Error("reservations not found")
-				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+				return helper.NotFoundError(c, "The requested resource was not found")
 			} else {
 				log.Error("internal server error")
-				return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+				return helper.InternalServerError(c, "Internal server error")
 			}
 		}
 
 		if len(payments) == 0 {
 			log.Error("reservation history not found")
-			return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+			return helper.NotFoundError(c, "The requested resource was not found")
 		}
 
 		result := make([]reservationHistoryResponse, len(payments))
@@ -137,21 +136,25 @@ func (rh *reservationHandler) MyReservation() echo.HandlerFunc {
 // DetailTransaction implements reservation.ReservationHandler.
 func (rh *reservationHandler) DetailTransaction() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userId, err := middlewares.ExtractToken(c)
-		if err != nil {
+		userId, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
 			log.Error("missing or malformed JWT")
-			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+			return helper.UnauthorizedError(c, "Missing or malformed JWT")
 		}
 
 		paymentId := c.Param("payment_id")
+		if paymentId == "" {
+			log.Error("empty paymentId parameter")
+			return helper.NotFoundError(c, "The requested resource was not found")
+		}
 		payment, err := rh.service.DetailTransaction(userId, paymentId)
 		if err != nil {
 			if strings.Contains(err.Error(), "reservation not found") {
 				log.Error("reservation not found")
-				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+				return helper.NotFoundError(c, "The requested resource was not found")
 			} else {
 				log.Error("internal server error")
-				return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+				return helper.InternalServerError(c, "Internal server error")
 			}
 		}
 
