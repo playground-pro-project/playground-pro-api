@@ -377,9 +377,9 @@ func (vh *venueHandler) GetAllVenueImage() echo.HandlerFunc {
 
 		images, err := vh.service.GetAllVenueImage(venueId)
 		if err != nil {
-			if strings.Contains(err.Error(), "not found") {
-				log.Error("venue image not found")
-				return c.JSON(http.StatusNotFound, helper.ErrorResponse("venue image not found, "+err.Error()))
+			if strings.Contains(err.Error(), "no images found") {
+				log.Error("no images found for venue")
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("no images found for venue"))
 			}
 			log.Error(err.Error())
 			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error"))
