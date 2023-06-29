@@ -60,7 +60,7 @@ func initUserRouter(db *gorm.DB, e *echo.Echo) {
 	e.PUT("/users/profile-picture", userHandler.UploadProfilePicture(), middlewares.JWTMiddleware())
 	e.DELETE("/users/profile-picture", userHandler.RemoveProfilePicture(), middlewares.JWTMiddleware())
 	e.GET("/users/venues", venueHandler.MyVenues(), middlewares.JWTMiddleware())
-	e.GET("/users/reservations", reservationHandler.ReservationHistory(), middlewares.JWTMiddleware())
+	e.GET("/users/reservations", reservationHandler.MyReservation(), middlewares.JWTMiddleware())
 }
 
 func initVenueRouter(db *gorm.DB, e *echo.Echo) {

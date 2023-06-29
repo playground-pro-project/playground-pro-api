@@ -144,7 +144,7 @@ func (rq *reservationQuery) ReservationCheckOutDate(reservation_id string) (time
 }
 
 // ReservationHistory implements reservation.ReservationData.
-func (rq *reservationQuery) ReservationHistory(userId string) ([]reservation.PaymentCore, error) {
+func (rq *reservationQuery) MyReservation(userId string) ([]reservation.PaymentCore, error) {
 	paymentData := []Payment{}
 	query := rq.db.Preload("Reservation", "user_id = ?", userId).Find(&paymentData)
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {

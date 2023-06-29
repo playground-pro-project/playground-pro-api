@@ -101,7 +101,7 @@ func (rh *reservationHandler) ReservationStatus() echo.HandlerFunc {
 }
 
 // ReservationHistory implements reservation.ReservationHandler.
-func (rh *reservationHandler) ReservationHistory() echo.HandlerFunc {
+func (rh *reservationHandler) MyReservation() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, err := middlewares.ExtractToken(c)
 		if err != nil {
@@ -109,7 +109,7 @@ func (rh *reservationHandler) ReservationHistory() echo.HandlerFunc {
 			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
 		}
 
-		payments, err := rh.service.ReservationHistory(userId)
+		payments, err := rh.service.MyReservation(userId)
 		if err != nil {
 			if strings.Contains(err.Error(), "list reservations not found") {
 				log.Error("reservations not found")
