@@ -390,6 +390,7 @@ func (vh *venueHandler) GetAllVenueImage() echo.HandlerFunc {
 			resp = append(resp, GetAllVenueImageToResponse(image))
 		}
 
+		log.Sugar().Infoln(resp)
 		return c.JSON(http.StatusOK, helper.SuccessResponse(resp, "venue image retrieved successfully"))
 	}
 }

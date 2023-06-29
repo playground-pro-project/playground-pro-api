@@ -246,6 +246,7 @@ func (vq *venueQuery) GetAllVenueImage(venueID string) ([]venue.VenuePictureCore
 		venueImagesCore = append(venueImagesCore, VenuePictureModelToCore(img))
 	}
 
+	log.Sugar().Info(venueImagesCore)
 	return venueImagesCore, nil
 }
 
