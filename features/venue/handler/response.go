@@ -20,7 +20,7 @@ type SearchVenueResponse struct {
 
 type SelectVenueResponse struct {
 	VenueID       string         `json:"venue_id,omitempty"`
-	OwnerID       string         `json:"owner_id,omitempty"`
+	OwnerID       string         `json:"user_id,omitempty"`
 	Category      string         `json:"category,omitempty"`
 	Name          string         `json:"venue_name,omitempty"`
 	Description   string         `json:"description,omitempty"`
@@ -108,6 +108,7 @@ func SelectVenue(v venue.VenueCore) SelectVenueResponse {
 
 	response := SelectVenueResponse{
 		VenueID:       v.VenueID,
+		OwnerID:       v.OwnerID,
 		Category:      v.Category,
 		Name:          v.Name,
 		Username:      v.Username,
