@@ -84,7 +84,6 @@ func initVenueRouter(db *gorm.DB, e *echo.Echo) {
 	e.POST("/venues/:venue_id/images", venueHandler.CreateVenueImage(), middlewares.JWTMiddleware())
 	e.DELETE("/venues/:venue_id/images/:image_id", venueHandler.DeleteVenueImage(), middlewares.JWTMiddleware())
 	e.GET("/venues/:venue_id/images", venueHandler.GetAllVenueImage(), middlewares.JWTMiddleware())
-
 }
 
 func initReservationRouter(db *gorm.DB, e *echo.Echo) {

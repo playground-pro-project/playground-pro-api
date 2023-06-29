@@ -192,8 +192,8 @@ func (vs *venueService) DeleteVenueImage(venueImageID string) error {
 	return nil
 }
 
-func (vs *venueService) GetVenueByImageID(venueImageID string) (venue.VenuePictureCore, error) {
-	venueImage, err := vs.query.GetVenueByImageID(venueImageID)
+func (vs *venueService) GetVenueImageByID(venueID, venueImageID string) (venue.VenuePictureCore, error) {
+	venueImage, err := vs.query.GetVenueImageByID(venueID, venueImageID)
 	if err != nil {
 		log.Error(err.Error())
 		return venue.VenuePictureCore{}, err

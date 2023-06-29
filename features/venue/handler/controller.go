@@ -321,16 +321,22 @@ func (vh *venueHandler) DeleteVenueImage() echo.HandlerFunc {
 			return helper.UnauthorizedError(c, "Missing or malformed JWT")
 		}
 
-		venueImageId := c.Param("image_id")
-		if venueImageId == "" {
+		venueID := c.Param("venue_id")
+		if venueID == "" {
 			log.Error("empty venue_id parameter")
 			return helper.NotFoundError(c, "The requested resource was not found")
 		}
 
-		vn, err := vh.service.GetVenueByImageID(venueImageId)
+		venueImageId := c.Param("image_id")
+		if venueImageId == "" {
+			log.Error("empty image_id parameter")
+			return helper.NotFoundError(c, "The requested resource was not found")
+		}
+
+		vn, err := vh.service.GetVenueImageByID(venueID, venueImageId)
 		if err != nil {
 			log.Error(err.Error())
-			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
+			return c.JSON(http.StatusNotFound, helper.ErrorResponse(err.Error()))
 		}
 
 		// Delete profile picture in the cloud before updated
@@ -372,7 +378,8 @@ func (vh *venueHandler) GetAllVenueImage() echo.HandlerFunc {
 		images, err := vh.service.GetAllVenueImage(venueId)
 		if err != nil {
 			log.Error(err.Error())
-			return err
+			return c.JSON(http.StatusNotFound, helper.ErrorResponse("images not found, "+err.Error()))
+
 		}
 
 		var resp []GetAllVenueImageResponse
