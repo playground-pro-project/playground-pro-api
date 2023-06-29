@@ -65,30 +65,44 @@ func reservationHistory(payment reservation.PaymentCore) reservationHistoryRespo
 	return response
 }
 
-func AvailabilityVenues(reservations []reservation.PaymentCore) []Venue {
-	venuesMap := make(map[string]Venue)
+type availability struct {
+	ReservationID string           `json:"reservation_id,omitempty"`
+	CheckInDate   helper.LocalTime `json:"check_in_date,omitempty"`
+	CheckOutDate  helper.LocalTime `json:"check_out_date,omitempty"`
+}
+
+type venue struct {
+	VenueID      string         `json:"venue_id,omitempty"`
+	Category     string         `json:"category,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	Reservations []availability `json:"reservations,omitempty"`
+}
+
+func Availability(reservations []reservation.AvailabilityCore) []venue {
+	venuesMap := make(map[string]venue)
 	for _, r := range reservations {
-		venueID := r.Venue.VenueID
-		venue, ok := venuesMap[venueID]
+		venueID := r.VenueID
+		v, ok := venuesMap[venueID]
 		if !ok {
-			venue = Venue{
-				Name:         r.Venue.Name,
-				Category:     r.Venue.Category,
-				Reservations: make([]reservationHistoryResponse, 0),
+			v = venue{
+				VenueID:      r.VenueID,
+				Name:         r.Name,
+				Category:     r.Category,
+				Reservations: make([]availability, 0),
 			}
 		}
 
-		reservation := reservationHistoryResponse{
-			ReservationID: r.Reservation.ReservationID,
-			CheckInDate:   helper.LocalTime(r.Reservation.CheckInDate),
-			CheckOutDate:  helper.LocalTime(r.Reservation.CheckOutDate),
+		reservation := availability{
+			ReservationID: r.ReservationID,
+			CheckInDate:   helper.LocalTime(r.CheckInDate),
+			CheckOutDate:  helper.LocalTime(r.CheckOutDate),
 		}
 
-		venue.Reservations = append(venue.Reservations, reservation)
-		venuesMap[venueID] = venue
+		v.Reservations = append(v.Reservations, reservation)
+		venuesMap[venueID] = v
 	}
 
-	venues := make([]Venue, 0, len(venuesMap))
+	venues := make([]venue, 0, len(venuesMap))
 	for _, v := range venuesMap {
 		venues = append(venues, v)
 	}

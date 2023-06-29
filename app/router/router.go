@@ -72,10 +72,14 @@ func initVenueRouter(db *gorm.DB, e *echo.Echo) {
 	reviewService := rs.New(reviewData)
 	reviewHandler := rh.New(reviewService)
 
+	reservationData := rsd.New(db)
+	refund := &paymentgateway.MyRefund{}
+	reservationService := rss.New(reservationData, refund)
+	reservationHandler := rsh.New(reservationService)
+
 	e.POST("/venues", venueHandler.RegisterVenue(), middlewares.JWTMiddleware())
 	e.GET("/venues", venueHandler.SearchVenues())
 	e.GET("/venues/:venue_id", venueHandler.SelectVenue(), middlewares.JWTMiddleware())
-	e.GET("/venues/:venue_id/availability", venueHandler.VenueAvailability(), middlewares.JWTMiddleware())
 	e.PUT("/venues/:venue_id", venueHandler.EditVenue(), middlewares.JWTMiddleware())
 	e.DELETE("/venues/:venue_id", venueHandler.UnregisterVenue(), middlewares.JWTMiddleware())
 	e.POST("/venues/:venue_id/reviews", reviewHandler.CreateReview, middlewares.JWTMiddleware())
@@ -84,6 +88,7 @@ func initVenueRouter(db *gorm.DB, e *echo.Echo) {
 	e.POST("/venues/:venue_id/images", venueHandler.CreateVenueImage(), middlewares.JWTMiddleware())
 	e.DELETE("/venues/:venue_id/images/:image_id", venueHandler.DeleteVenueImage(), middlewares.JWTMiddleware())
 	e.GET("/venues/:venue_id/images", venueHandler.GetAllVenueImage(), middlewares.JWTMiddleware())
+	e.GET("/venues/:venue_id", reservationHandler.CheckAvailability(), middlewares.JWTMiddleware())
 }
 
 func initReservationRouter(db *gorm.DB, e *echo.Echo) {
@@ -95,5 +100,4 @@ func initReservationRouter(db *gorm.DB, e *echo.Echo) {
 	e.POST("/reservations", reservationHandler.MakeReservation(), middlewares.JWTMiddleware())
 	e.POST("/reservations/status", reservationHandler.ReservationStatus())
 	e.GET("/reservations/:payment_id", reservationHandler.DetailTransaction(), middlewares.JWTMiddleware())
-	e.GET("/reservations/:venue_id", reservationHandler.CheckAvailability(), middlewares.JWTMiddleware())
 }

@@ -670,15 +670,12 @@ components:
               venue_name: "lapangan basket"
               reservations:
               - reservation_id: "string-reservation-id"
-                username: "Tono Haha"
                 check-in_date: "Saturday,2023-06-05 08:05"
                 check-out_date: "Saturday,2023-06-06 08:05"
               - reservation_id: "string-reservation-id"
-                username: "Trim"
                 check-in_date: "Saturday,2023-06-05 10:05"
                 check-out_date: "Saturday,2023-06-07 10:05"
               - reservation_id: "string-reservation-id"
-                username: "Concate"
                 check-in_date: "Saturday,2023-06-07 14:05"
                 check-out_date: "Saturday,2023-08-08 14:05"
 
