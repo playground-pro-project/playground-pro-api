@@ -161,6 +161,9 @@ func (vh *venueHandler) EditVenue() echo.HandlerFunc {
 			if strings.Contains(err.Error(), "not found") {
 				log.Error("venue not found")
 				return helper.NotFoundError(c, "The requested resource was not found")
+			} else if strings.Contains(err.Error(), "no venue has been created") {
+				log.Error("no venue has been created")
+				return helper.NotFoundError(c, "no venue has been created")
 			}
 			log.Error("internal server error")
 			return helper.InternalServerError(c, "Internal server error")
@@ -309,7 +312,7 @@ func (vh *venueHandler) CreateVenueImage() echo.HandlerFunc {
 		}
 
 		log.Sugar().Infof(venueId + " venue image added successfully")
-		return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "venue image added successfully"))
+		return c.JSON(http.StatusCreated, helper.SuccessResponse(nil, "venue image added successfully"))
 	}
 }
 
