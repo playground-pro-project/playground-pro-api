@@ -42,7 +42,7 @@ func (rh *reviewHandler) CreateReview(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "Review created successfully"))
+	return c.JSON(http.StatusCreated, helper.SuccessResponse(nil, "Review created successfully"))
 }
 
 func (rh *reviewHandler) DeleteReview(c echo.Context) error {

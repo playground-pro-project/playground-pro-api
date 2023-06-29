@@ -109,7 +109,7 @@ type VenueService interface {
 	CreateVenueImage(req VenuePictureCore) (VenuePictureCore, error)
 	GetAllVenueImage(venueID string) ([]VenuePictureCore, error)
 	DeleteVenueImage(venueImageID string) error
-	GetVenueByImageID(venueImageID string) (VenuePictureCore, error)
+	GetVenueImageByID(venueID, venueImageID string) (VenuePictureCore, error)
 	MyVenues(userId string) ([]VenueCore, error)
 }
 
@@ -123,6 +123,6 @@ type VenueData interface {
 	InsertVenueImage(req VenuePictureCore) (VenuePictureCore, error)
 	GetAllVenueImage(venueID string) ([]VenuePictureCore, error)
 	DeleteVenueImage(venueImageID string) error
-	GetVenueByImageID(venueImageID string) (VenuePictureCore, error)
+	GetVenueImageByID(venueID, venueImageID string) (VenuePictureCore, error)
 	MyVenues(userId string) ([]VenueCore, error)
 }
