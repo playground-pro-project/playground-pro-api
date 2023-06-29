@@ -247,10 +247,25 @@ func (rq *reservationQuery) CheckAvailability(venueId string) ([]reservation.Ava
 		log.Sugar().Info("list reservations data found in the database")
 	}
 
-	log.Sugar().Info(result)
-
 	availabilities := modelToAvailabilityCore(result)
-
-	log.Sugar().Info(availabilities)
 	return availabilities, nil
+}
+
+func (rq *reservationQuery) GetReservationsByTimeSlot(venueID string, checkInDate, checkOutDate time.Time) ([]reservation.ReservationCore, error) {
+	var reservations []Reservation
+	query := rq.db.Where("venue_id = ? AND ((check_in_date BETWEEN ? AND ?) OR (check_out_date BETWEEN ? AND ?))",
+		venueID, checkInDate, checkOutDate, checkInDate, checkOutDate).
+		Find(&reservations)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("list reservations record not found")
+		return nil, errors.New("list reservations record not found")
+	} else if query.Error != nil {
+		log.Sugar().Error("error executing list reservations query:", query.Error)
+		return nil, query.Error
+	} else {
+		log.Sugar().Info("list reservations data found in the database")
+	}
+
+	reservationCores := modelToReservationCore(reservations)
+	return reservationCores, nil
 }

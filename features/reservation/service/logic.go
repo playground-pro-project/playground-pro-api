@@ -54,7 +54,43 @@ func (rs *reservationService) MakeReservation(userId string, r reservation.Reser
 		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New(message)
 	}
 
-	// TODO 1 : Get price of spesific venue
+	// TODO 1 : Validate reservation timewindow and check availability
+	minTime := time.Now().Local()
+	maxTime := minTime.AddDate(0, 1, 0)
+	if r.CheckInDate.Before(minTime) || r.CheckInDate.After(maxTime) {
+		log.Warn("reservation date not within the allowed timewindow")
+		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New("reservation date not within the allowed timewindow")
+	}
+
+	if r.CheckOutDate.Before(minTime) || r.CheckOutDate.After(maxTime) {
+		log.Warn("reservation date not within the allowed timewindow")
+		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New("reservation date not within the allowed timewindow")
+	}
+
+	// TODO 1.5: Check if there is an existing reservation for the same time slot
+	availability, err := rs.query.CheckAvailability(r.VenueID)
+	if err != nil {
+		log.Sugar().Errorf("error on checking availability: %s", err.Error())
+		return reservation.ReservationCore{}, reservation.PaymentCore{}, err
+	}
+
+	if len(availability) > 0 {
+		log.Warn("reservation not available for the specified venue and timewindow")
+		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New("reservation not available")
+	}
+
+	existingReservations, err := rs.query.GetReservationsByTimeSlot(r.VenueID, r.CheckInDate, r.CheckOutDate)
+	if err != nil {
+		log.Sugar().Errorf("error on retrieving existing reservations: %s", err.Error())
+		return reservation.ReservationCore{}, reservation.PaymentCore{}, err
+	}
+
+	if len(existingReservations) > 0 {
+		log.Warn("reservation not available for the specified time slot")
+		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New("reservation not available")
+	}
+
+	// TODO 2 : Get price of spesific venue
 	res1, err := rs.query.PriceVenue(r.VenueID)
 	if err != nil {
 		log.Sugar().Errorf("failed to get venue price %s", r.VenueID)
@@ -69,16 +105,17 @@ func (rs *reservationService) MakeReservation(userId string, r reservation.Reser
 
 	log.Sugar().Infof("%.2f", price)
 
-	// TODO 2: Get accumulative duration of specific venue
+	// TODO 3: Get accumulative duration of specific venue
 	duration := r.CheckOutDate.Sub(r.CheckInDate).Hours()
 	r.Duration = duration
 	log.Sugar().Infof("%.2f", r.Duration)
 
-	// TODO 3: Multiply duration and price
+	// TODO 4: Multiply duration and price
 	p.GrandTotal = strconv.FormatFloat(duration*price, 'f', 2, 64)
 
 	log.Sugar().Infof(p.GrandTotal)
 
+	// TODO 5: Save data
 	result, paymentResult, err := rs.query.MakeReservation(userId, r, p)
 	if err != nil {
 		var message string

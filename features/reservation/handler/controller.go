@@ -93,6 +93,12 @@ func (rh *reservationHandler) MakeReservation() echo.HandlerFunc {
 			case strings.Contains(err.Error(), "unregistered user"):
 				log.Error("unregistered user")
 				return helper.BadRequestError(c, "Bad request")
+			case strings.Contains(err.Error(), "reservation date not within the allowed timewindow"):
+				log.Error("reservation date not within the allowed timewindow")
+				return helper.BadRequestError(c, "Bad request")
+			case strings.Contains(err.Error(), "reservation not available"):
+				log.Error("reservation not available for the specified venue and timewindow")
+				return helper.BadRequestError(c, "Bad request, reservation not available")
 			default:
 				log.Error("internal server error")
 				return helper.InternalServerError(c, "Internal server error")

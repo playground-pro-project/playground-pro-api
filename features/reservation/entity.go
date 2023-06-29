@@ -83,4 +83,5 @@ type ReservationData interface {
 	MyReservation(userId string) ([]PaymentCore, error)
 	DetailTransaction(userId string, paymentId string) (PaymentCore, error)
 	CheckAvailability(venueId string) ([]AvailabilityCore, error)
+	GetReservationsByTimeSlot(venueID string, checkInDate, checkOutDate time.Time) ([]ReservationCore, error)
 }
