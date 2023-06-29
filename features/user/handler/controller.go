@@ -82,10 +82,10 @@ func (uh *userHandler) Login() echo.HandlerFunc {
 		loginResp := UserCoreToLoginResponse(resp)
 		loginResp.Token = token
 
-		if loginResp.AccountStatus == "unverified" {
-			loginResp.Token = ""
-			return c.JSON(http.StatusOK, helper.SuccessResponse(loginResp, "OTP validation is required"))
-		}
+		// if loginResp.AccountStatus == "unverified" {
+		// 	loginResp.Token = ""
+		// 	return c.JSON(http.StatusOK, helper.SuccessResponse(loginResp, "OTP validation is required"))
+		// }
 
 		return c.JSON(http.StatusOK, helper.SuccessResponse(loginResp, "Login success"))
 	}

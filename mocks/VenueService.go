@@ -115,6 +115,32 @@ func (_m *VenueService) GetVenueByImageID(venueImageID string) (venue.VenuePictu
 	return r0, r1
 }
 
+// MyVenues provides a mock function with given fields: userId
+func (_m *VenueService) MyVenues(userId string) ([]venue.VenueCore, error) {
+	ret := _m.Called(userId)
+
+	var r0 []venue.VenueCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]venue.VenueCore, error)); ok {
+		return rf(userId)
+	}
+	if rf, ok := ret.Get(0).(func(string) []venue.VenueCore); ok {
+		r0 = rf(userId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]venue.VenueCore)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // RegisterVenue provides a mock function with given fields: userId, request
 func (_m *VenueService) RegisterVenue(userId string, request venue.VenueCore) (venue.VenueCore, error) {
 	ret := _m.Called(userId, request)

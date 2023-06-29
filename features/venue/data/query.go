@@ -115,6 +115,7 @@ func (vq *venueQuery) SelectVenue(venueId string) (venue.VenueCore, error) {
 		Joins("LEFT JOIN users ON users.user_id = venues.owner_id").
 		Where("venues.venue_id = ?", venueId).
 		Group("venues.venue_id").
+		Order("venues.updated_at DESC").
 		Preload("User").
 		Preload("VenuePictures").
 		Preload("Reviews").
@@ -274,4 +275,38 @@ func (vq *venueQuery) GetVenueByImageID(venueImageID string) (venue.VenuePicture
 	imageCore := VenuePictureModelToCore(image)
 
 	return imageCore, nil
+}
+
+// MyVenues implements venue.VenueData.
+func (vq *venueQuery) MyVenues(userId string) ([]venue.VenueCore, error) {
+	venues := []Venue{}
+	query := vq.db.Table("venues").
+		Select("venues.*, AVG(reviews.rating) AS average_rating, COUNT(reviews.review_id) AS total_reviews, users.fullname").
+		Joins("LEFT JOIN venue_pictures ON venue_pictures.venue_id = venues.venue_id").
+		Joins("LEFT JOIN reviews ON reviews.venue_id = venues.venue_id").
+		Joins("LEFT JOIN users ON users.user_id = venues.owner_id").
+		Where("venues.owner_id = ? AND venues.deleted_at IS NULL", userId).
+		Group("venues.venue_id").
+		Order("venues.updated_at DESC").
+		Preload("User").
+		Preload("VenuePictures").
+		Preload("Reviews").
+		Find(&venues)
+
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("list venues not found")
+		return nil, errors.New("venues not found")
+	} else if query.Error != nil {
+		log.Sugar().Error("error executing venues query:", query.Error)
+		return nil, query.Error
+	} else {
+		log.Sugar().Info("Venues data found in the database")
+	}
+
+	result := make([]venue.VenueCore, len(venues))
+	for i, venue := range venues {
+		result[i] = searchVenueModels(venue)
+	}
+
+	return result, nil
 }

@@ -28,7 +28,22 @@ tags:
     description: Review untuk venue yang telah disewa oleh peminjam
 
 paths:
-  "/users/reservation":
+  "/users/venues":
+    get:
+      tags:
+        - User
+      summary: Get user that hosting venue, order by lastest update
+      responses:
+        "200":
+          $ref: "#/components/responses/Response200UserVenues"
+        "404":
+          $ref: "#/components/responses/Response404"
+        "500":
+          $ref: "#/components/responses/Response500"
+      security:
+        - bearerAuth: []
+
+  "/users/reservations":
     get:
       tags:
         - User
@@ -158,7 +173,7 @@ paths:
     get:
       tags:
         - Venue
-      summary: Find specific venue, venue's reviews and rating (pagination)
+      summary: Find specific venue, venue's reviews and rating
       description: Select specific venue, venue's average reviews and rating accumulation
       parameters:
         - name: venue_id
@@ -507,6 +522,48 @@ components:
               page: 1
               total_rows: 15
               total_pages: 3
+    
+    Response200UserVenues: 
+      description: Get list of events with pagination
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 200
+              message:
+                type: string
+                example: "Successful Operation"
+              data:
+                type: array
+                items:
+                  $ref: "#/components/schemas/venues"
+              pagination:
+                $ref: "#/components/schemas/pagination"
+          example:
+            code: 200
+            message: "Successful Operation"
+            data:
+              - venue_id: "string-uuid"
+                category: "basketball"
+                name: "Venue 1"
+                username: "User 1"
+                location: "Jakarta"
+                distance: 1
+                price: 100.50
+                average_rating: 4.55
+                venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
+              - venue_id: "string-uuid"
+                category: "football"
+                name: "Venue 2"
+                username: "User 1"
+                location: "Jakarta"
+                distance: 1.3
+                price: 200.75
+                average_rating: 4.75
+                venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
 
     Response200SelectVenues:
       description: Get specific venue
@@ -564,7 +621,7 @@ components:
             properties:
               code:
                 type: integer
-                example: 201
+                example: 200
               message:
                 type: string
                 example: "Successfully deleted a venue"

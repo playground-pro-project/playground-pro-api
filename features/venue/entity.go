@@ -96,6 +96,7 @@ type VenueHandler interface {
 	CreateVenueImage() echo.HandlerFunc
 	GetAllVenueImage() echo.HandlerFunc
 	DeleteVenueImage() echo.HandlerFunc
+	MyVenues() echo.HandlerFunc
 }
 
 type VenueService interface {
@@ -109,6 +110,7 @@ type VenueService interface {
 	GetAllVenueImage(venueID string) ([]VenuePictureCore, error)
 	DeleteVenueImage(venueImageID string) error
 	GetVenueByImageID(venueImageID string) (VenuePictureCore, error)
+	MyVenues(userId string) ([]VenueCore, error)
 }
 
 type VenueData interface {
@@ -122,4 +124,5 @@ type VenueData interface {
 	GetAllVenueImage(venueID string) ([]VenuePictureCore, error)
 	DeleteVenueImage(venueImageID string) error
 	GetVenueByImageID(venueImageID string) (VenuePictureCore, error)
+	MyVenues(userId string) ([]VenueCore, error)
 }
