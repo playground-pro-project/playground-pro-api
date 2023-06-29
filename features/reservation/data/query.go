@@ -2,6 +2,7 @@ package data
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
@@ -39,6 +40,9 @@ func (rq *reservationQuery) MakeReservation(userID string, r reservation.Reserva
 	if err := tx.Create(&reservationModel).Error; err != nil {
 		tx.Rollback()
 		log.Error("error while creating reservation")
+		if strings.Contains(err.Error(), "Error 1452") {
+			return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New("unregistered user")
+		}
 		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New("internal server error while creating reservation")
 	}
 
@@ -157,12 +161,13 @@ func (rq *reservationQuery) ReservationHistory(userId string) ([]reservation.Pay
 	for i, payment := range paymentData {
 		result[i] = paymentToCore(payment)
 		if payment.Reservation.VenueID != "" {
-			venueName, venuePrice, err := rq.GetVenueNameAndPrice(payment.Reservation.VenueID)
+			venueName, venueLocation, venuePrice, err := rq.GetVenueNameAndPrice(payment.Reservation.VenueID)
 			if err != nil {
 				log.Sugar().Error("error retrieving venue name and price:", err)
 				return nil, err
 			}
 			result[i].Reservation.Venue.Name = venueName
+			result[i].Reservation.Venue.Location = venueLocation
 			result[i].Reservation.Venue.Price = venuePrice
 		}
 	}
@@ -171,16 +176,43 @@ func (rq *reservationQuery) ReservationHistory(userId string) ([]reservation.Pay
 }
 
 // GetVenueNameAndPrice retrieves the name and price of a venue by its ID
-func (rq *reservationQuery) GetVenueNameAndPrice(venueID string) (string, float64, error) {
+func (rq *reservationQuery) GetVenueNameAndPrice(venueID string) (string, string, float64, error) {
 	venue := Venue{}
-	query := rq.db.Raw("SELECT name, price FROM venues WHERE venue_id = ?", venueID).Scan(&venue)
+	query := rq.db.Raw("SELECT name, location, price FROM venues WHERE venue_id = ?", venueID).Scan(&venue)
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
 		log.Error("venue not found")
-		return "", 0, errors.New("venue not found")
+		return "", "", 0, errors.New("venue not found")
 	} else if query.Error != nil {
 		log.Sugar().Error("error executing venue query:", query.Error)
-		return "", 0, query.Error
+		return "", "", 0, query.Error
 	}
 	log.Sugar().Infof("venue data found in the database: Name=%s, Price=%f", venue.Name, venue.Price)
-	return venue.Name, venue.Price, nil
+	return venue.Name, venue.Location, venue.Price, nil
+}
+
+// DetailTransaction implements reservation.ReservationData.
+func (rq *reservationQuery) DetailTransaction(userId string, paymentId string) (reservation.PaymentCore, error) {
+	payment := Payment{}
+	query := rq.db.Preload("Reservation").Where("payment_id = ?", paymentId).First(&payment)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("payment not found")
+		return reservation.PaymentCore{}, errors.New("payment not found")
+	} else if query.Error != nil {
+		log.Sugar().Error("error executing payment query:", query.Error)
+		return reservation.PaymentCore{}, query.Error
+	}
+
+	if payment.Reservation.VenueID != "" {
+		venueName, venueLocation, venuePrice, err := rq.GetVenueNameAndPrice(payment.Reservation.VenueID)
+		if err != nil {
+			log.Sugar().Error("error retrieving venue name and price:", err)
+			return reservation.PaymentCore{}, err
+		}
+		payment.Reservation.Venue.Name = venueName
+		payment.Reservation.Venue.Location = venueLocation
+		payment.Reservation.Venue.Price = venuePrice
+	}
+
+	log.Sugar().Info("payment data found in the database")
+	return paymentToCore(payment), nil
 }

@@ -35,6 +35,7 @@ type PaymentCore struct {
 type VenueCore struct {
 	VenueID      string
 	Name         string
+	Location     string
 	Price        float64
 	Reservations []ReservationCore
 }
@@ -43,12 +44,14 @@ type ReservationHandler interface {
 	MakeReservation() echo.HandlerFunc
 	ReservationStatus() echo.HandlerFunc
 	ReservationHistory() echo.HandlerFunc
+	DetailTransaction() echo.HandlerFunc
 }
 
 type ReservationService interface {
 	MakeReservation(userId string, r ReservationCore, p PaymentCore) (ReservationCore, PaymentCore, error)
 	ReservationStatus(request PaymentCore) (PaymentCore, error)
 	ReservationHistory(userId string) ([]PaymentCore, error)
+	DetailTransaction(userId string, paymentId string) (PaymentCore, error)
 }
 
 type ReservationData interface {
@@ -57,4 +60,5 @@ type ReservationData interface {
 	PriceVenue(venueID string) (float64, error)
 	ReservationCheckOutDate(reservation_id string) (time.Time, error)
 	ReservationHistory(userId string) ([]PaymentCore, error)
+	DetailTransaction(userId string, paymentId string) (PaymentCore, error)
 }

@@ -86,6 +86,9 @@ func (rs *reservationService) MakeReservation(userId string, r reservation.Reser
 		case strings.Contains(err.Error(), "user does not exist"):
 			log.Error("failed to insert data, user does not exist")
 			message = "user does not exist"
+		case strings.Contains(err.Error(), "unregistered user"):
+			log.Error("foreign key constraint violation")
+			message = "unregistered user"
 		default:
 			log.Error("internal server error")
 			message = "internal server error"
@@ -167,4 +170,19 @@ func (rs *reservationService) ReservationHistory(userId string) ([]reservation.P
 	}
 
 	return payments, err
+}
+
+func (rs *reservationService) DetailTransaction(userId string, paymentId string) (reservation.PaymentCore, error) {
+	payment, err := rs.query.DetailTransaction(userId, paymentId)
+	if err != nil {
+		if strings.Contains(err.Error(), "reservation not found") {
+			log.Error("reservation record not found")
+			return reservation.PaymentCore{}, err
+		} else {
+			log.Error("internal server error")
+			return reservation.PaymentCore{}, err
+		}
+	}
+
+	return payment, nil
 }

@@ -350,7 +350,7 @@ paths:
             format: uuid
       responses:
         "200":
-          $ref: "#/components/responses/Response200"
+          $ref: "#/components/responses/Response200ReservationDetails"
         "400":
           $ref: "#/components/responses/Response400"
         "404":
@@ -721,6 +721,38 @@ components:
                   payment_type: "bca"
                   payment_code: VA4nUmber
                   status: "success"
+
+    Response200ReservationDetails:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 200
+              message:
+                type: string
+                example: "Successful operation"
+              data:
+                type: array
+                items:
+                  type: object
+            example:
+              code: 200
+              message: "Successful operation"
+              data:
+                venue_name: "tidar basket"
+                location: "Jakarta"
+                check_in_date: "2023/06/05 08:05:00"
+                check_out_date: "2023/08/05 08:05:00"
+                duration: 2
+                price: 100
+                total_price: 200
+                payment_type: "bca"
+                payment_code: VA4nUmber
+                status: "success"
 
     Response201MakeReservation:
       description: Successful Operation
