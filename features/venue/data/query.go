@@ -220,11 +220,11 @@ func (vq *venueQuery) InsertVenueImage(req venue.VenuePictureCore) (venue.VenueP
 
 	rowAffect := query.RowsAffected
 	if rowAffect == 0 {
-		log.Warn("no venue image has been created")
-		return venue.VenuePictureCore{}, errors.New("row affected : 0")
+		log.Error("venue not found. no venue image has been created")
+		return venue.VenuePictureCore{}, errors.New("venue not found. no venue image has been created")
 	}
 
-	log.Sugar().Infof("new venue image has been created: %s", venueImageID)
+	log.Sugar().Infof("venue not found. no venue image has been created: %s", venueImageID)
 	return VenuePictureModelToCore(model), nil
 }
 
