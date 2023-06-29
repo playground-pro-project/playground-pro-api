@@ -186,3 +186,19 @@ func (rs *reservationService) DetailTransaction(userId string, paymentId string)
 
 	return payment, nil
 }
+
+// CheckAvailability implements reservation.ReservationService.
+func (rs *reservationService) CheckAvailability(venueId string) ([]reservation.PaymentCore, error) {
+	venues, err := rs.query.CheckAvailability(venueId)
+	if err != nil {
+		if strings.Contains(err.Error(), "list venues record not found") {
+			log.Error("list venues record not found")
+			return []reservation.PaymentCore{}, errors.New("list venues record not found")
+		} else {
+			log.Error("internal server error")
+			return []reservation.PaymentCore{}, errors.New("internal server error")
+		}
+	}
+
+	return venues, err
+}
