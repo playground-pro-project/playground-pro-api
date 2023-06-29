@@ -3,6 +3,9 @@ info:
     title: Playground Pro API
     version: "1.0"
 servers:
+    # Added by API Auto Mocking Plugin
+    - description: SwaggerHub API Auto Mocking
+      url: https://virtserver.swaggerhub.com/pradanadp/Playground-Pro/1.0
     - url: https://api.server.test/v1
 tags:
     - name: Authentication
@@ -168,7 +171,6 @@ paths:
                                         example: "Bad request. Invalid request body or parameters"
             tags:
                 - Authentication
-
     /users:
         get:
             summary: Get user profile
@@ -460,64 +462,6 @@ paths:
                                     $ref: "#/components/examples/InternalServerError"
             tags:
                 - Users
-    /venues:
-        post:
-            summary: Add new venue
-            operationId: addNewVenue
-            security:
-                - JWTAuth: []
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            $ref: "#/components/schemas/NewVenueRequest"
-                        example:
-                            name: Example Venue
-                            description: This is an example venue
-                            location: 123 Main Street, City
-                            price: 100.0
-                            category: Football
-
-            responses:
-                "201":
-                    description: Venue added successfully
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/NewVenueResponse"
-                            examples:
-                                VenueAdded:
-                                    value:
-                                        data:
-                                            name: Example Venue
-                                            description: This is an example venue
-                                            location: 123 Main Street, City
-                                            price: 100.0
-                                            category: Football
-                                        message: Venue added successfully
-                "400":
-                    description: Bad request - Invalid request body or parameters
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/ErrorAddVenueResponse"
-                            examples:
-                                BadRequestError:
-                                    value:
-                                        error: Bad request. Invalid request body or parameters
-                "500":
-                    description: Internal server error
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/ErrorAddVenueResponse"
-                            examples:
-                                InternalServerError:
-                                    value:
-                                        error: Internal server error. Please try again later.
-            tags:
-                - Venues
     /venues/{venue_id}:
         get:
             summary: Get venue by ID
@@ -898,6 +842,61 @@ paths:
             tags:
                 - Venues
     /venues/{venue_id}/reviews:
+        post:
+            summary: Add a review
+            operationId: addReview
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue to post review
+                  required: true
+                  schema:
+                      type: string
+            security:
+                - JWTAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AddReviewRequest"
+                        example:
+                            venue_id: "VEN-H7IA90"
+                            review: "some review"
+                            rating: 4.5
+            responses:
+                "200":
+                    description: Review added successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessAddReviewResponse"
+                            examples:
+                                ReviewAdded:
+                                    value:
+                                        message: Review added successfully
+                "400":
+                    description: Invalid request payload
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddReviewResponse"
+                            examples:
+                                InvalidRequestPayload:
+                                    value:
+                                        error: Invalid request payload
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddReviewResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
         get:
             summary: Get all reviews for a venue
             operationId: getAllReviews
@@ -964,55 +963,7 @@ paths:
                                         error: Internal server error. Please try again later.
             tags:
                 - Venues
-    /reviews:
-        post:
-            summary: Add a review
-            operationId: addReview
-            security:
-                - JWTAuth: []
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            $ref: "#/components/schemas/AddReviewRequest"
-                        example:
-                            venue_id: "VEN-H7IA90"
-                            review: "some review"
-                            rating: 4.5
-            responses:
-                "200":
-                    description: Review added successfully
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/SuccessAddReviewResponse"
-                            examples:
-                                ReviewAdded:
-                                    value:
-                                        message: Review added successfully
-                "400":
-                    description: Invalid request payload
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/ErrorAddReviewResponse"
-                            examples:
-                                InvalidRequestPayload:
-                                    value:
-                                        error: Invalid request payload
-                "500":
-                    description: Internal server error
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/ErrorAddReviewResponse"
-                            examples:
-                                InternalServerError:
-                                    value:
-                                        error: Internal server error. Please try again later.
-            tags:
-                - Reviews
+
     /reviews/{review_id}:
         delete:
             summary: Delete a review
@@ -1151,7 +1102,7 @@ components:
                         user_id:
                             type: string
                             example: abc123
-                        full_name:
+                        fullname:
                             type: string
                             example: John Doe
                         email:
@@ -1244,7 +1195,7 @@ components:
         UpgradeUserRoleRequest:
             type: object
             properties:
-                file:
+                owner_docs:
                     type: string
                     format: binary
         UpgradeUserRoleResponse:
