@@ -169,7 +169,7 @@ func (vq *venueQuery) UnregisterVenue(userId string, venueId string) error {
 
 	if query.RowsAffected == 0 {
 		log.Warn("no venue has been created")
-		return errors.New("row affected : 0")
+		return errors.New("no row affected")
 	}
 
 	if query.Error != nil {

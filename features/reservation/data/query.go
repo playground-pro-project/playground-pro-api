@@ -96,7 +96,7 @@ func (rq *reservationQuery) ReservationStatus(request reservation.PaymentCore) (
 
 	if query.RowsAffected == 0 {
 		log.Warn("no payment record has been updated")
-		return reservation.PaymentCore{}, errors.New("no payment record has been updated")
+		return reservation.PaymentCore{}, errors.New("no row affected")
 	}
 
 	if query.Error != nil {

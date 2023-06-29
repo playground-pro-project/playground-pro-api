@@ -160,9 +160,9 @@ func (rs *reservationService) ReservationStatus(request reservation.PaymentCore)
 func (rs *reservationService) MyReservation(userId string) ([]reservation.PaymentCore, error) {
 	payments, err := rs.query.MyReservation(userId)
 	if err != nil {
-		if strings.Contains(err.Error(), "list reservation not found") {
-			log.Error("list reservation record not found")
-			return []reservation.PaymentCore{}, errors.New("list reservation not found")
+		if strings.Contains(err.Error(), "list reservations record not found") {
+			log.Error("list reservations record not found")
+			return []reservation.PaymentCore{}, errors.New("list reservations record not found")
 		} else {
 			log.Error("internal server error")
 			return []reservation.PaymentCore{}, errors.New("internal server error")

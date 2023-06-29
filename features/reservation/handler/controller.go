@@ -110,8 +110,8 @@ func (rh *reservationHandler) MyReservation() echo.HandlerFunc {
 
 		payments, err := rh.service.MyReservation(userId)
 		if err != nil {
-			if strings.Contains(err.Error(), "list reservations not found") {
-				log.Error("reservations not found")
+			if strings.Contains(err.Error(), "list reservations record not found") {
+				log.Error("list reservations record not found")
 				return helper.NotFoundError(c, "The requested resource was not found")
 			} else {
 				log.Error("internal server error")

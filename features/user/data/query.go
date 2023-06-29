@@ -42,7 +42,7 @@ func (uq *userQuery) Register(request user.UserCore) (user.UserCore, error) {
 	rowAffect := query.RowsAffected
 	if rowAffect == 0 {
 		log.Warn("no user has been created")
-		return user.UserCore{}, errors.New("row affected : 0")
+		return user.UserCore{}, errors.New("no row affected")
 	}
 
 	log.Sugar().Infof("new user has been created: %s", req.Email)
@@ -61,7 +61,7 @@ func (uq *userQuery) Login(request user.UserCore) (user.UserCore, string, error)
 	rowAffect := query.RowsAffected
 	if rowAffect == 0 {
 		log.Warn("no user has been created")
-		return user.UserCore{}, "", errors.New("row affected : 0")
+		return user.UserCore{}, "", errors.New("no row affected")
 	}
 
 	if !helper.MatchPassword(request.Password, result.Password) {

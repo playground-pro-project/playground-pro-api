@@ -186,8 +186,11 @@ func (vh *venueHandler) UnregisterVenue() echo.HandlerFunc {
 
 		err := vh.service.UnregisterVenue(userId, venueId)
 		if err != nil {
-			if strings.Contains(err.Error(), "not found") {
-				log.Error("venue not found")
+			if strings.Contains(err.Error(), "venue record not found") {
+				log.Error("venue record not found")
+				return helper.NotFoundError(c, "The requested resource was not found")
+			} else if strings.Contains(err.Error(), "no row affected") {
+				log.Error("no row affected")
 				return helper.NotFoundError(c, "The requested resource was not found")
 			}
 			log.Error("internal server error")
