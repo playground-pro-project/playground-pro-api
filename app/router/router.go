@@ -95,4 +95,5 @@ func initReservationRouter(db *gorm.DB, e *echo.Echo) {
 	e.POST("/reservations", reservationHandler.MakeReservation(), middlewares.JWTMiddleware())
 	e.POST("/reservations/status", reservationHandler.ReservationStatus())
 	e.GET("/reservations/:payment_id", reservationHandler.DetailTransaction(), middlewares.JWTMiddleware())
+	e.GET("/reservations/:venue_id", reservationHandler.CheckAvailability(), middlewares.JWTMiddleware())
 }

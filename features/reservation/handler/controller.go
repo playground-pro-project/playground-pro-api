@@ -22,6 +22,38 @@ func New(rs reservation.ReservationService) reservation.ReservationHandler {
 	}
 }
 
+// CheckAvailability implements reservation.ReservationHandler.
+func (rh *reservationHandler) CheckAvailability() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		_, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
+			log.Error("missing or malformed JWT")
+			return helper.UnauthorizedError(c, "Missing or malformed JWT")
+		}
+
+		venueID := c.Param("venue_id")
+		if venueID == "" {
+			log.Error("empty venue_id parameter")
+			return helper.NotFoundError(c, "The requested resource was not found")
+		}
+
+		availables, err := rh.service.CheckAvailability(venueID)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				log.Info("there is no reservation at this moment")
+				return helper.NotFoundError(c, "The requested resource was not found")
+			}
+			log.Error("internal server error")
+			return helper.InternalServerError(c, "Internal server error")
+		}
+
+		venues := AvailabilityVenues(availables)
+
+		log.Sugar().Infoln(venues)
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successfully operation.", venues, nil))
+	}
+}
+
 // MakeReservation implements reservation.ReservationHandler.
 func (rh *reservationHandler) MakeReservation() echo.HandlerFunc {
 	return func(c echo.Context) error {

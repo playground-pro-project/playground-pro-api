@@ -216,3 +216,64 @@ func (rq *reservationQuery) DetailTransaction(userId string, paymentId string) (
 	log.Sugar().Info("payment data found in the database")
 	return paymentToCore(payment), nil
 }
+
+// CheckAvailability implements reservation.ReservationData.
+func (rq *reservationQuery) CheckAvailability(venueId string) ([]reservation.PaymentCore, error) {
+	var result []Result
+	query := rq.db.Raw(`
+	SELECT venues.venue_id,
+		venues.name, 
+		venues.category,
+		payments.payment_id,  
+		reservations.reservation_id, 
+		reservations.check_in_date, 
+		reservations.check_out_date
+	FROM payments 
+	INNER JOIN reservations ON reservations.payment_id = payments.payment_id 
+	INNER JOIN venues ON venues.venue_id = reservations.venue_id
+	WHERE reservations.check_in_date BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 3 DAY)
+		AND payments.status IN ('success', 'pending')
+		AND venues.venue_id = ?
+	GROUP BY venues.venue_id, reservations.reservation_id
+	`, venueId).
+		Scan(&result)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("list reservations record not found")
+		return nil, errors.New("list reservations record not found")
+	} else if query.Error != nil {
+		log.Sugar().Error("error executing list reservations query:", query.Error)
+		return nil, query.Error
+	} else {
+		log.Sugar().Info("list reservations data found in the database")
+	}
+
+	log.Sugar().Info(result)
+
+	payments := make(map[string]reservation.PaymentCore)
+	for _, r := range result {
+		p, ok := payments[r.PaymentID]
+		if !ok {
+			p = reservation.PaymentCore{
+				PaymentID: r.PaymentID,
+				Venue: reservation.VenueCore{
+					VenueID:      r.VenueID,
+					Category:     r.Category,
+					Name:         r.Name,
+					Reservations: []reservation.ReservationCore{},
+				},
+			}
+		}
+		reservation := reservation.ReservationCore{
+			ReservationID: r.ReservationID,
+			CheckInDate:   r.Check_In_Date,
+			CheckOutDate:  r.Check_Out_Date,
+		}
+		p.Venue.Reservations = append(p.Venue.Reservations, reservation)
+		payments[r.PaymentID] = p
+	}
+	var res []reservation.PaymentCore
+	for _, p := range payments {
+		res = append(res, p)
+	}
+	return res, nil
+}

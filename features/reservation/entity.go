@@ -30,13 +30,22 @@ type PaymentCore struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	Reservation   ReservationCore
+	Venue         VenueCore
 }
 
 type VenueCore struct {
 	VenueID      string
+	OwnerID      string
+	Category     string
 	Name         string
+	Description  string
+	Username     string
+	ServiceTime  string
 	Location     string
+	Distance     uint
 	Price        float64
+	Longitude    float64
+	Latitude     float64
 	Reservations []ReservationCore
 }
 
@@ -45,6 +54,7 @@ type ReservationHandler interface {
 	ReservationStatus() echo.HandlerFunc
 	MyReservation() echo.HandlerFunc
 	DetailTransaction() echo.HandlerFunc
+	CheckAvailability() echo.HandlerFunc
 }
 
 type ReservationService interface {
@@ -52,6 +62,7 @@ type ReservationService interface {
 	ReservationStatus(request PaymentCore) (PaymentCore, error)
 	MyReservation(userId string) ([]PaymentCore, error)
 	DetailTransaction(userId string, paymentId string) (PaymentCore, error)
+	CheckAvailability(venueId string) ([]PaymentCore, error)
 }
 
 type ReservationData interface {
@@ -61,4 +72,5 @@ type ReservationData interface {
 	ReservationCheckOutDate(reservation_id string) (time.Time, error)
 	MyReservation(userId string) ([]PaymentCore, error)
 	DetailTransaction(userId string, paymentId string) (PaymentCore, error)
+	CheckAvailability(venueId string) ([]PaymentCore, error)
 }

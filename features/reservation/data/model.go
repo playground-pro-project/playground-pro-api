@@ -54,6 +54,19 @@ type Venue struct {
 	Reservations []Reservation  `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 
+// `gorm:"type:enum('none','card','bca','bri','bni','mandiri','qris','gopay','shopeepay');default:'none'"`
+// `gorm:"type:enum('cash','debit_card','bank_transfer','e-wallet');default:'cash'"`
+// Struct helper for query raw in gorm
+type Result struct {
+	VenueID        string
+	Name           string
+	Category       string
+	PaymentID      string
+	ReservationID  string
+	Check_In_Date  time.Time
+	Check_Out_Date time.Time
+}
+
 // Reservation-Model to reservation-core
 func reservationModels(r Reservation) reservation.ReservationCore {
 	return reservation.ReservationCore{
@@ -155,6 +168,3 @@ func paymentToCore(p Payment) reservation.PaymentCore {
 	}
 	return paymentCore
 }
-
-// `gorm:"type:enum('none','card','bca','bri','bni','mandiri','qris','gopay','shopeepay');default:'none'"`
-// `gorm:"type:enum('cash','debit_card','bank_transfer','e-wallet');default:'cash'"`
