@@ -279,7 +279,7 @@ func (uh *userHandler) DeleteUser() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 		}
 
-		return c.JSON(http.StatusBadRequest, helper.SuccessResponse(nil, "User account deleted successfully"))
+		return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "User account deleted successfully"))
 	}
 }
 
