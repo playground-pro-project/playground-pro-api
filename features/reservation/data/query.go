@@ -148,8 +148,8 @@ func (rq *reservationQuery) MyReservation(userId string) ([]reservation.PaymentC
 	paymentData := []Payment{}
 	query := rq.db.Preload("Reservation", "user_id = ?", userId).Find(&paymentData)
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
-		log.Error("list reservations not found")
-		return nil, errors.New("list reservations not found")
+		log.Error("list reservations record not found")
+		return nil, errors.New("list reservations record not found")
 	} else if query.Error != nil {
 		log.Sugar().Error("error executing list reservations query:", query.Error)
 		return nil, query.Error
