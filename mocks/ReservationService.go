@@ -67,8 +67,8 @@ func (_m *ReservationService) MakeReservation(userId string, r reservation.Reser
 	return r0, r1, r2
 }
 
-// ReservationHistory provides a mock function with given fields: userId
-func (_m *ReservationService) ReservationHistory(userId string) ([]reservation.PaymentCore, error) {
+// MyReservation provides a mock function with given fields: userId
+func (_m *ReservationService) MyReservation(userId string) ([]reservation.PaymentCore, error) {
 	ret := _m.Called(userId)
 
 	var r0 []reservation.PaymentCore

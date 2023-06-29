@@ -44,8 +44,8 @@ func (_m *ReservationHandler) MakeReservation() echo.HandlerFunc {
 	return r0
 }
 
-// ReservationHistory provides a mock function with given fields:
-func (_m *ReservationHandler) ReservationHistory() echo.HandlerFunc {
+// MyReservation provides a mock function with given fields:
+func (_m *ReservationHandler) MyReservation() echo.HandlerFunc {
 	ret := _m.Called()
 
 	var r0 echo.HandlerFunc

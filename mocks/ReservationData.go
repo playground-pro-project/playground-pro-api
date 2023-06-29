@@ -69,6 +69,32 @@ func (_m *ReservationData) MakeReservation(userId string, r reservation.Reservat
 	return r0, r1, r2
 }
 
+// MyReservation provides a mock function with given fields: userId
+func (_m *ReservationData) MyReservation(userId string) ([]reservation.PaymentCore, error) {
+	ret := _m.Called(userId)
+
+	var r0 []reservation.PaymentCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]reservation.PaymentCore, error)); ok {
+		return rf(userId)
+	}
+	if rf, ok := ret.Get(0).(func(string) []reservation.PaymentCore); ok {
+		r0 = rf(userId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]reservation.PaymentCore)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PriceVenue provides a mock function with given fields: venueID
 func (_m *ReservationData) PriceVenue(venueID string) (float64, error) {
 	ret := _m.Called(venueID)
@@ -110,32 +136,6 @@ func (_m *ReservationData) ReservationCheckOutDate(reservation_id string) (time.
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {
 		r1 = rf(reservation_id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ReservationHistory provides a mock function with given fields: userId
-func (_m *ReservationData) ReservationHistory(userId string) ([]reservation.PaymentCore, error) {
-	ret := _m.Called(userId)
-
-	var r0 []reservation.PaymentCore
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]reservation.PaymentCore, error)); ok {
-		return rf(userId)
-	}
-	if rf, ok := ret.Get(0).(func(string) []reservation.PaymentCore); ok {
-		r0 = rf(userId)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]reservation.PaymentCore)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(userId)
 	} else {
 		r1 = ret.Error(1)
 	}
