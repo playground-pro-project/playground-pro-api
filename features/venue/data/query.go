@@ -146,7 +146,7 @@ func (vq *venueQuery) EditVenue(userId string, venueId string, request venue.Ven
 
 	if query.RowsAffected == 0 {
 		log.Warn("no venue has been created")
-		return errors.New("row affected : 0")
+		return errors.New("no venue has been created")
 	}
 
 	if query.Error != nil {
@@ -214,8 +214,8 @@ func (vq *venueQuery) InsertVenueImage(req venue.VenuePictureCore) (venue.VenueP
 
 	query := vq.db.Table("venue_pictures").Create(&model)
 	if query.Error != nil {
-		log.Error("error insert data, duplicated" + query.Error.Error())
-		return venue.VenuePictureCore{}, errors.New("error insert data, duplicated")
+		log.Error("venue id is not found: " + query.Error.Error())
+		return venue.VenuePictureCore{}, errors.New("venue id is not found")
 	}
 
 	rowAffect := query.RowsAffected
