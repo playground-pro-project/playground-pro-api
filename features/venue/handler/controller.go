@@ -345,3 +345,37 @@ func (vh *venueHandler) GetAllVenueImage() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, helper.SuccessResponse(resp, "venue image retrieved successfully"))
 	}
 }
+
+// MyVenues implements venue.VenueHandler.
+func (vh *venueHandler) MyVenues() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId, err := middlewares.ExtractToken(c)
+		if err != nil {
+			log.Error("missing or malformed JWT")
+			return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+		}
+
+		venues, err := vh.service.MyVenues(userId)
+		if err != nil {
+			if strings.Contains(err.Error(), "venues not found") {
+				log.Error("venues not found")
+				return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+			} else {
+				log.Error("internal server error")
+				return c.JSON(http.StatusInternalServerError, helper.ResponseFormat(http.StatusInternalServerError, "Internal server error", nil, nil))
+			}
+		}
+
+		result := make([]SearchVenueResponse, len(venues))
+		for i, venue := range venues {
+			result[i] = SearchVenue(venue)
+		}
+
+		if len(result) == 0 {
+			log.Error("venues not found")
+			return c.JSON(http.StatusNotFound, helper.ResponseFormat(http.StatusNotFound, "The requested resource was not found", nil, nil))
+		}
+
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful Operation", result, nil))
+	}
+}

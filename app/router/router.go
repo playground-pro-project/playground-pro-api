@@ -39,6 +39,15 @@ func initUserRouter(db *gorm.DB, e *echo.Echo) {
 	userService := us.New(userData, validate)
 	userHandler := uh.New(userService)
 
+	venueData := vd.New(db)
+	venueService := vs.New(venueData)
+	venueHandler := vh.New(venueService)
+
+	reservationData := rsd.New(db)
+	refund := &paymentgateway.MyRefund{}
+	reservationService := rss.New(reservationData, refund)
+	reservationHandler := rsh.New(reservationService)
+
 	e.POST("/register", userHandler.Register())
 	e.POST("/login", userHandler.Login())
 	e.POST("/resend-otp", userHandler.ReSendOTP())
@@ -50,6 +59,8 @@ func initUserRouter(db *gorm.DB, e *echo.Echo) {
 	e.POST("/users/upgrade", userHandler.UploadOwnerFile(), middlewares.JWTMiddleware())
 	e.PUT("/users/profile-picture", userHandler.UploadProfilePicture(), middlewares.JWTMiddleware())
 	e.DELETE("/users/profile-picture", userHandler.RemoveProfilePicture(), middlewares.JWTMiddleware())
+	e.GET("/users/venues", venueHandler.MyVenues(), middlewares.JWTMiddleware())
+	e.GET("/users/reservations", reservationHandler.MyReservation(), middlewares.JWTMiddleware())
 }
 
 func initVenueRouter(db *gorm.DB, e *echo.Echo) {
@@ -73,6 +84,7 @@ func initVenueRouter(db *gorm.DB, e *echo.Echo) {
 	e.POST("/venues/:venue_id/images", venueHandler.CreateVenueImage(), middlewares.JWTMiddleware())
 	e.DELETE("/venues/:venue_id/images/:image_id", venueHandler.DeleteVenueImage(), middlewares.JWTMiddleware())
 	e.GET("/venues/:venue_id/images", venueHandler.GetAllVenueImage(), middlewares.JWTMiddleware())
+
 }
 
 func initReservationRouter(db *gorm.DB, e *echo.Echo) {
@@ -83,6 +95,5 @@ func initReservationRouter(db *gorm.DB, e *echo.Echo) {
 
 	e.POST("/reservations", reservationHandler.MakeReservation(), middlewares.JWTMiddleware())
 	e.POST("/reservations/status", reservationHandler.ReservationStatus())
-	e.GET("/users/reservations", reservationHandler.ReservationHistory(), middlewares.JWTMiddleware())
 	e.GET("/reservations/:payment_id", reservationHandler.DetailTransaction(), middlewares.JWTMiddleware())
 }

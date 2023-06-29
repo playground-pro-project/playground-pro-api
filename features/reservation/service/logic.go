@@ -157,8 +157,8 @@ func (rs *reservationService) ReservationStatus(request reservation.PaymentCore)
 }
 
 // ReservationHistory implements reservation.ReservationService.
-func (rs *reservationService) ReservationHistory(userId string) ([]reservation.PaymentCore, error) {
-	payments, err := rs.query.ReservationHistory(userId)
+func (rs *reservationService) MyReservation(userId string) ([]reservation.PaymentCore, error) {
+	payments, err := rs.query.MyReservation(userId)
 	if err != nil {
 		if strings.Contains(err.Error(), "list reservation not found") {
 			log.Error("list reservation record not found")

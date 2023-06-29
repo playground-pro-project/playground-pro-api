@@ -14,6 +14,30 @@ type ReservationData struct {
 	mock.Mock
 }
 
+// DetailTransaction provides a mock function with given fields: userId, paymentId
+func (_m *ReservationData) DetailTransaction(userId string, paymentId string) (reservation.PaymentCore, error) {
+	ret := _m.Called(userId, paymentId)
+
+	var r0 reservation.PaymentCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (reservation.PaymentCore, error)); ok {
+		return rf(userId, paymentId)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) reservation.PaymentCore); ok {
+		r0 = rf(userId, paymentId)
+	} else {
+		r0 = ret.Get(0).(reservation.PaymentCore)
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(userId, paymentId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // MakeReservation provides a mock function with given fields: userId, r, p
 func (_m *ReservationData) MakeReservation(userId string, r reservation.ReservationCore, p reservation.PaymentCore) (reservation.ReservationCore, reservation.PaymentCore, error) {
 	ret := _m.Called(userId, r, p)

@@ -198,3 +198,19 @@ func (vs *venueService) GetVenueByImageID(venueImageID string) (venue.VenuePictu
 
 	return venueImage, nil
 }
+
+// MyVenues implements venue.VenueService.
+func (vs *venueService) MyVenues(userId string) ([]venue.VenueCore, error) {
+	venues, err := vs.query.MyVenues(userId)
+	if err != nil {
+		if strings.Contains(err.Error(), "venues not found") {
+			log.Error("list venues record not found")
+			return []venue.VenueCore{}, errors.New("venues not found")
+		} else {
+			log.Error("internal server error")
+			return []venue.VenueCore{}, errors.New("internal server error")
+		}
+	}
+
+	return venues, err
+}
