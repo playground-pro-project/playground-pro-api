@@ -231,14 +231,14 @@ func (vq *venueQuery) InsertVenueImage(req venue.VenuePictureCore) (venue.VenueP
 func (vq *venueQuery) GetAllVenueImage(venueID string) ([]venue.VenuePictureCore, error) {
 	var venueImages []VenuePicture
 	query := vq.db.Table("venue_pictures").Where("venue_id = ?", venueID).Find(&venueImages)
-	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
-		log.Error("venue image record not found")
-		return nil, errors.New("venue image record not found")
-	}
-
 	if query.Error != nil {
 		log.Error("error retrieve all images venue" + query.Error.Error())
 		return nil, errors.New("error retrieve all images venue")
+	}
+
+	if query.RowsAffected == 0 {
+		log.Error("no images found for venue")
+		return nil, errors.New("no images found for venue")
 	}
 
 	var venueImagesCore []venue.VenuePictureCore
