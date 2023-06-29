@@ -1428,241 +1428,241 @@
 #                                 type: string
 #                                 example: "Successfully updated a venue"
 
-#             Response200DeactiveVenues:
-#                 description: Successful operation
-#                 content:
-#                     application/json:
-#                         schema:
-#                             type: object
-#                             properties:
-#                                 code:
-#                                     type: integer
-#                                     example: 200
-#                                 message:
-#                                     type: string
-#                                     example: "Successfully deleted a venue"
+    Response200DeactiveVenues:
+        description: Successful operation
+        content:
+            application/json:
+                schema:
+                    type: object
+                    properties:
+                        code:
+                            type: integer
+                            example: 200
+                        message:
+                            type: string
+                            example: "Successfully deleted a venue"
 
-#             Response200CheckAvailability:
-#                 description: Successful Operation
-#                 content:
-#                     application/json:
-#                         schema:
-#                             type: object
-#                             properties:
-#                                 code:
-#                                     type: integer
-#                                 message:
-#                                     type: string
-#                                 data:
-#                                     type: array
-#                                     items:
-#                                         type: object
-#                                         properties:
-#                                             reservation_id:
-#                                                 type: string
-#                                             category:
-#                                                 type: string
-#                                             name:
-#                                                 type: string
-#                                             subtotal:
-#                                                 type: integer
-#                                             duration:
-#                                                 type: integer
-#                                             gross_amount:
-#                                                 type: integer
-#                                             check-in_date:
-#                                                 type: string
-#                                                 format: date-time
-#                                             check-out_date:
-#                                                 type: string
-#                                                 format: date-time
-#                         example:
-#                             code: 200
-#                             message: "Successful operation"
-#                             data:
-#                                 venue_id: "string-venue-id"
-#                                 owner_id: "string-user-id"
-#                                 category: "basketball"
-#                                 venue_name: "lapangan basket"
-#                                 reservations:
-#                                     - reservation_id: "string-reservation-id"
-#                                     username: "Tono Haha"
-#                                     check-in_date: "Saturday,2023-06-05 08:05"
-#                                     check-out_date: "Saturday,2023-06-06 08:05"
-#                                     - reservation_id: "string-reservation-id"
-#                                     username: "Trim"
-#                                     check-in_date: "Saturday,2023-06-05 10:05"
-#                                     check-out_date: "Saturday,2023-06-07 10:05"
-#                                     - reservation_id: "string-reservation-id"
-#                                     username: "Concate"
-#                                     check-in_date: "Saturday,2023-06-07 14:05"
-#                                     check-out_date: "Saturday,2023-08-08 14:05"
+    Response200CheckAvailability:
+        description: Successful Operation
+        content:
+            application/json:
+                schema:
+                    type: object
+                    properties:
+                        code:
+                            type: integer
+                        message:
+                            type: string
+                        data:
+                            type: array
+                            items:
+                                type: object
+                                properties:
+                                    reservation_id:
+                                        type: string
+                                    category:
+                                        type: string
+                                    name:
+                                        type: string
+                                    subtotal:
+                                        type: integer
+                                    duration:
+                                        type: integer
+                                    gross_amount:
+                                        type: integer
+                                    check-in_date:
+                                        type: string
+                                        format: date-time
+                                    check-out_date:
+                                        type: string
+                                        format: date-time
+                example:
+                    code: 200
+                    message: "Successful operation"
+                    data:
+                        venue_id: "string-venue-id"
+                        owner_id: "string-user-id"
+                        category: "basketball"
+                        venue_name: "lapangan basket"
+                        reservations:
+                            - reservation_id: "string-reservation-id"
+                              username: "Tono Haha"
+                              check-in_date: "Saturday,2023-06-05 08:05"
+                              check-out_date: "Saturday,2023-06-06 08:05"
+                            - reservation_id: "string-reservation-id"
+                              username: "Trim"
+                              check-in_date: "Saturday,2023-06-05 10:05"
+                              check-out_date: "Saturday,2023-06-07 10:05"
+                            - reservation_id: "string-reservation-id"
+                              username: "Concate"
+                              check-in_date: "Saturday,2023-06-07 14:05"
+                              check-out_date: "Saturday,2023-08-08 14:05"
 
-#             Response200Reservation:
-#                 description: Successful Operation
-#                 content:
-#                     application/json:
-#                         schema:
-#                             type: object
-#                             properties:
-#                                 code:
-#                                     type: integer
-#                                 message:
-#                                     type: string
-#                                 data:
-#                                     type: array
-#                                     items:
-#                                         type: object
-#                                         properties:
-#                                             reservation_id:
-#                                                 type: string
-#                                             category:
-#                                                 type: string
-#                                             name:
-#                                                 type: string
-#                                             subtotal:
-#                                                 type: integer
-#                                             duration:
-#                                                 type: integer
-#                                             gross_amount:
-#                                                 type: integer
-#                                             check-in_date:
-#                                                 type: string
-#                                                 format: date-time
-#                                             check-out_date:
-#                                                 type: string
-#                                                 format: date-time
-#                         example:
-#                             code: 200
-#                             message: "Successful operation"
-#                             data:
-#                                 - reservation_id: "string-uuid"
-#                                   category: "futsal"
-#                                   name: "Arena Futsal Tidar"
-#                                   subtotal: 100
-#                                   duration: 2
-#                                   gross_amount: 200
-#                                   check-in_date: "Saturday,2023-06-05 08:05"
-#                                   check-out_date: "Saturday,2023-08-05 08:05"
-#                                 - reservation_id: "string-uuid"
-#                                   category: "futsal"
-#                                   name: "Arena Futsal Tidar"
-#                                   subtotal: 100
-#                                   duration: 2
-#                                   gross_amount: 200
-#                                   check-in_date: "Saturday,2023-06-05 08:05"
-#                                   check-out_date: "Saturday,2023-08-05 08:05"
+            Response200Reservation:
+                description: Successful Operation
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                code:
+                                    type: integer
+                                message:
+                                    type: string
+                                data:
+                                    type: array
+                                    items:
+                                        type: object
+                                        properties:
+                                            reservation_id:
+                                                type: string
+                                            category:
+                                                type: string
+                                            name:
+                                                type: string
+                                            subtotal:
+                                                type: integer
+                                            duration:
+                                                type: integer
+                                            gross_amount:
+                                                type: integer
+                                            check-in_date:
+                                                type: string
+                                                format: date-time
+                                            check-out_date:
+                                                type: string
+                                                format: date-time
+                        example:
+                            code: 200
+                            message: "Successful operation"
+                            data:
+                                - reservation_id: "string-uuid"
+                                  category: "futsal"
+                                  name: "Arena Futsal Tidar"
+                                  subtotal: 100
+                                  duration: 2
+                                  gross_amount: 200
+                                  check-in_date: "Saturday,2023-06-05 08:05"
+                                  check-out_date: "Saturday,2023-08-05 08:05"
+                                - reservation_id: "string-uuid"
+                                  category: "futsal"
+                                  name: "Arena Futsal Tidar"
+                                  subtotal: 100
+                                  duration: 2
+                                  gross_amount: 200
+                                  check-in_date: "Saturday,2023-06-05 08:05"
+                                  check-out_date: "Saturday,2023-08-05 08:05"
 
-#             Response200UserReservation:
-#                 description: Successful operation
-#                 content:
-#                     application/json:
-#                         schema:
-#                             type: object
-#                             properties:
-#                                 code:
-#                                     type: integer
-#                                     example: 200
-#                                 message:
-#                                     type: string
-#                                     example: "Successful operation"
-#                                 data:
-#                                     type: array
-#                                     items:
-#                                         type: object
-#                             example:
-#                                 code: 200
-#                                 message: "Successful operation"
-#                                 data:
-#                                     - venue_name: "tidar basket"
-#                                       location: "Jakarta"
-#                                       check_in_date: "2023/06/05 08:05:00"
-#                                       check_out_date: "2023/08/05 08:05:00"
-#                                       duration: 2
-#                                       price: 100
-#                                       total_price: 200
-#                                       payment_type: "bca"
-#                                       payment_code: VA4nUmber
-#                                       status: "success"
-#                                     - venue_name: "tidar basket"
-#                                       location: "Jakarta"
-#                                       check_in_date: "2023/06/05 08:05:00"
-#                                       check_out_date: "2023/08/05 08:05:00"
-#                                       duration: 2
-#                                       price: 100
-#                                       total_price: 200
-#                                       payment_type: "bca"
-#                                       payment_code: VA4nUmber
-#                                       status: "success"
+            Response200UserReservation:
+                description: Successful operation
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                code:
+                                    type: integer
+                                    example: 200
+                                message:
+                                    type: string
+                                    example: "Successful operation"
+                                data:
+                                    type: array
+                                    items:
+                                        type: object
+                            example:
+                                code: 200
+                                message: "Successful operation"
+                                data:
+                                    - venue_name: "tidar basket"
+                                      location: "Jakarta"
+                                      check_in_date: "2023/06/05 08:05:00"
+                                      check_out_date: "2023/08/05 08:05:00"
+                                      duration: 2
+                                      price: 100
+                                      total_price: 200
+                                      payment_type: "bca"
+                                      payment_code: VA4nUmber
+                                      status: "success"
+                                    - venue_name: "tidar basket"
+                                      location: "Jakarta"
+                                      check_in_date: "2023/06/05 08:05:00"
+                                      check_out_date: "2023/08/05 08:05:00"
+                                      duration: 2
+                                      price: 100
+                                      total_price: 200
+                                      payment_type: "bca"
+                                      payment_code: VA4nUmber
+                                      status: "success"
 
-#             Response200ReservationDetails:
-#                 description: Successful operation
-#                 content:
-#                     application/json:
-#                         schema:
-#                             type: object
-#                             properties:
-#                                 code:
-#                                     type: integer
-#                                     example: 200
-#                                 message:
-#                                     type: string
-#                                     example: "Successful operation"
-#                                 data:
-#                                     type: array
-#                                     items:
-#                                         type: object
-#                             example:
-#                                 code: 200
-#                                 message: "Successful operation"
-#                                 data:
-#                                     venue_name: "tidar basket"
-#                                     location: "Jakarta"
-#                                     check_in_date: "2023/06/05 08:05:00"
-#                                     check_out_date: "2023/08/05 08:05:00"
-#                                     duration: 2
-#                                     price: 100
-#                                     total_price: 200
-#                                     payment_type: "bca"
-#                                     payment_code: VA4nUmber
-#                                     status: "success"
+            Response200ReservationDetails:
+                description: Successful operation
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                code:
+                                    type: integer
+                                    example: 200
+                                message:
+                                    type: string
+                                    example: "Successful operation"
+                                data:
+                                    type: array
+                                    items:
+                                        type: object
+                            example:
+                                code: 200
+                                message: "Successful operation"
+                                data:
+                                    venue_name: "tidar basket"
+                                    location: "Jakarta"
+                                    check_in_date: "2023/06/05 08:05:00"
+                                    check_out_date: "2023/08/05 08:05:00"
+                                    duration: 2
+                                    price: 100
+                                    total_price: 200
+                                    payment_type: "bca"
+                                    payment_code: VA4nUmber
+                                    status: "success"
 
-#             Response201MakeReservation:
-#                 description: Successful Operation
-#                 content:
-#                     application/json:
-#                         schema:
-#                             type: object
-#                             properties:
-#                                 code:
-#                                     type: integer
-#                                 message:
-#                                     type: string
-#                                 data:
-#                                     type: array
-#                                     items:
-#                                         type: object
-#                                         properties:
-#                                             payment_id:
-#                                                 type: string
-#                                             reservation_id:
-#                                                 type: string
-#                                             payment_method:
-#                                                 type: string
-#                                             payment_type:
-#                                                 type: string
-#                                             payment_code:
-#                                                 type: string
+            Response201MakeReservation:
+                description: Successful Operation
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                code:
+                                    type: integer
+                                message:
+                                    type: string
+                                data:
+                                    type: array
+                                    items:
+                                        type: object
+                                        properties:
+                                            payment_id:
+                                                type: string
+                                            reservation_id:
+                                                type: string
+                                            payment_method:
+                                                type: string
+                                            payment_type:
+                                                type: string
+                                            payment_code:
+                                                type: string
 
-#                         example:
-#                             code: 201
-#                             message: "Successful operation"
-#                             data:
-#                                 payment_id: "85ef6565-eb95-4be2-a4c0-a6425b27dae7"
-#                                 reservation_id: "271b7e12-6936-47e3-a1de-c8fdbfee250f"
-#                                 payment_method: "cstore"
-#                                 payment_type: "alfamart"
-#                                 payment_code: "43863390217"
+                        example:
+                            code: 201
+                            message: "Successful operation"
+                            data:
+                                payment_id: "85ef6565-eb95-4be2-a4c0-a6425b27dae7"
+                                reservation_id: "271b7e12-6936-47e3-a1de-c8fdbfee250f"
+                                payment_method: "cstore"
+                                payment_type: "alfamart"
+                                payment_code: "43863390217"
 
 #     schemas:
 #         users:
