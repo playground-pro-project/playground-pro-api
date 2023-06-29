@@ -4,7 +4,6 @@ import (
 	"math"
 	"time"
 
-	image "github.com/playground-pro-project/playground-pro-api/features/image/data"
 	reservation "github.com/playground-pro-project/playground-pro-api/features/reservation/data"
 	review "github.com/playground-pro-project/playground-pro-api/features/review/data"
 	"github.com/playground-pro-project/playground-pro-api/features/venue"
@@ -12,23 +11,23 @@ import (
 )
 
 type Venue struct {
-	VenueID       string               `gorm:"primaryKey;type:varchar(45)"`
-	OwnerID       string               `gorm:"type:varchar(45)"`
-	Category      string               `gorm:"type:enum('basketball','football','futsal','badminton');default:'basketball'"`
-	Name          string               `gorm:"type:varchar(225);not null;unique"`
-	Description   string               `gorm:"type:text"`
-	ServiceTime   string               `gorm:"type:varchar(100)"`
-	Location      string               `gorm:"type:text"`
-	Price         float64              `gorm:"type:double"`
-	Longitude     float64              `gorm:"type:double"`
-	Latitude      float64              `gorm:"type:double"`
-	CreatedAt     time.Time            `gorm:"type:datetime"`
-	UpdatedAt     time.Time            `gorm:"type:datetime"`
-	DeletedAt     gorm.DeletedAt       `gorm:"index"`
-	User          User                 `gorm:"references:OwnerID;foreignKey:UserID"`
-	VenuePictures []image.VenuePicture `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
-	Reservations  []Reservation        `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
-	Reviews       []review.Review      `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	VenueID       string          `gorm:"primaryKey;type:varchar(45)"`
+	OwnerID       string          `gorm:"type:varchar(45)"`
+	Category      string          `gorm:"type:enum('basketball','football','futsal','badminton');default:'basketball'"`
+	Name          string          `gorm:"type:varchar(225);not null;unique"`
+	Description   string          `gorm:"type:text"`
+	ServiceTime   string          `gorm:"type:varchar(100)"`
+	Location      string          `gorm:"type:text"`
+	Price         float64         `gorm:"type:double"`
+	Longitude     float64         `gorm:"type:double"`
+	Latitude      float64         `gorm:"type:double"`
+	CreatedAt     time.Time       `gorm:"type:datetime"`
+	UpdatedAt     time.Time       `gorm:"type:datetime"`
+	DeletedAt     gorm.DeletedAt  `gorm:"index"`
+	User          User            `gorm:"references:OwnerID;foreignKey:UserID"`
+	VenuePictures []VenuePicture  `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	Reservations  []Reservation   `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	Reviews       []review.Review `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 
 type User struct {
@@ -227,7 +226,7 @@ func venueEntities(v venue.VenueCore) Venue {
 		CreatedAt:     v.CreatedAt,
 		UpdatedAt:     v.UpdatedAt,
 		DeletedAt:     gorm.DeletedAt{Time: v.DeletedAt},
-		VenuePictures: []image.VenuePicture{},
+		VenuePictures: []VenuePicture{},
 		Reviews:       []review.Review{},
 	}
 }

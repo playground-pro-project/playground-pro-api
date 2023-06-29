@@ -3,7 +3,6 @@ package database
 import (
 	"fmt"
 
-	venue_picture "github.com/playground-pro-project/playground-pro-api/features/image/data"
 	reservation "github.com/playground-pro-project/playground-pro-api/features/reservation/data"
 	review "github.com/playground-pro-project/playground-pro-api/features/review/data"
 	user "github.com/playground-pro-project/playground-pro-api/features/user/data"
@@ -30,7 +29,7 @@ func InitDatabase(c *config.AppConfig) *gorm.DB {
 	err = db.AutoMigrate(
 		&user.User{},
 		&venue.Venue{},
-		&venue_picture.VenuePicture{},
+		&venue.VenuePicture{},
 		&reservation.Payment{},
 		&reservation.Reservation{},
 		&review.Review{},

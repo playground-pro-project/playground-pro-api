@@ -23,13 +23,13 @@ func New(s review.ReviewService) *reviewHandler {
 }
 
 func (rh *reviewHandler) CreateReview(c echo.Context) error {
-	userId, err := middlewares.ExtractToken(c)
-	if err != nil {
+	userId, errToken := middlewares.ExtractToken(c)
+	if errToken != nil {
 		log.Error("missing or malformed JWT")
 		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
 	}
-	venueID := c.Param("venue_id")
 
+	venueID := c.Param("venue_id")
 	req := CreateReviewRequest{}
 	errBind := c.Bind(&req)
 	if errBind != nil {
@@ -37,7 +37,7 @@ func (rh *reviewHandler) CreateReview(c echo.Context) error {
 	}
 
 	reviewCore := CreateReviewRequestToCore(req)
-	_, err = rh.reviewService.CreateReview(venueID, userId, reviewCore)
+	_, err := rh.reviewService.CreateReview(venueID, userId, reviewCore)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 	}
@@ -46,6 +46,11 @@ func (rh *reviewHandler) CreateReview(c echo.Context) error {
 }
 
 func (rh *reviewHandler) DeleteReview(c echo.Context) error {
+	_, errToken := middlewares.ExtractToken(c)
+	if errToken != nil {
+		log.Error("missing or malformed JWT")
+		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+	}
 	reviewID := c.Param("review_id")
 	err := rh.reviewService.DeleteByID(reviewID)
 	if err != nil {
@@ -56,6 +61,11 @@ func (rh *reviewHandler) DeleteReview(c echo.Context) error {
 }
 
 func (rh *reviewHandler) GetAllReview(c echo.Context) error {
+	_, errToken := middlewares.ExtractToken(c)
+	if errToken != nil {
+		log.Error("missing or malformed JWT")
+		return c.JSON(http.StatusUnauthorized, helper.ResponseFormat(http.StatusUnauthorized, "Missing or Malformed JWT", nil, nil))
+	}
 	venueID := c.Param("venue_id")
 	reviews, err := rh.reviewService.GetAllByVenueID(venueID)
 	if err != nil {
