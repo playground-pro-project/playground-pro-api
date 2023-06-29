@@ -57,6 +57,9 @@ func (s *userService) Login(req user.UserCore) (user.UserCore, string, error) {
 		case strings.Contains(err.Error(), "password does not match"):
 			log.Error("password does not match")
 			message = "password does not match"
+		case strings.Contains(err.Error(), "no row affected"):
+			log.Error("no row affected")
+			message = "no row affected"
 		case strings.Contains(err.Error(), "error while creating jwt token"):
 			log.Error("error while creating jwt token")
 			message = "error while creating jwt token"

@@ -122,9 +122,12 @@ func (vs *venueService) EditVenue(userId string, venueId string, request venue.V
 func (vs *venueService) UnregisterVenue(userId string, venueId string) error {
 	err := vs.query.UnregisterVenue(userId, venueId)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if strings.Contains(err.Error(), "venue record not found") {
 			log.Error("venue record not found")
 			return errors.New("venue record not found")
+		} else if strings.Contains(err.Error(), "no row affected") {
+			log.Error("no row affected")
+			return errors.New("no row affected")
 		} else {
 			log.Error("internal server error")
 			return errors.New("internal server error")

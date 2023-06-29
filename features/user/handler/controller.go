@@ -70,6 +70,9 @@ func (uh *userHandler) Login() echo.HandlerFunc {
 			case strings.Contains(err.Error(), "password does not match"):
 				log.Error("bad request, password does not match")
 				return helper.BadRequestError(c, "Bad request, password does not match")
+			case strings.Contains(err.Error(), "no row affected"):
+				log.Error("no row affected")
+				return helper.NotFoundError(c, "The requested resource was not found")
 			case strings.Contains(err.Error(), "error while creating jwt token"):
 				log.Error("internal server error, error while creating jwt token")
 				return helper.InternalServerError(c, "Internal server error")

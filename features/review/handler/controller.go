@@ -75,6 +75,11 @@ func (rh *reviewHandler) GetAllReview(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Internal server error"))
 	}
 
+	if len(reviews) == 0 {
+		log.Error("reservation history not found")
+		return helper.NotFoundError(c, "The requested resource was not found")
+	}
+
 	reviewsResponse := []GetAllReviewResponse{}
 	for _, review := range reviews {
 		reviewsResponse = append(reviewsResponse, ReviewCoreToGetAllReviewResponse(review))
