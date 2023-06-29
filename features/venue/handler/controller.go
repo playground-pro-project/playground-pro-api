@@ -287,15 +287,6 @@ func (vh *venueHandler) CreateVenueImage() echo.HandlerFunc {
 			}
 			defer fileContent.Close()
 
-			awsService := aws.InitS3()
-
-			// Upload profile picture file to cloud
-			err = awsService.UploadFile(path, fileType, fileContent)
-			if err != nil {
-				log.Error("Failed to upload file to cloud service: " + err.Error())
-				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to upload file to cloud service: "+err.Error()))
-			}
-
 			image := venue.VenuePictureCore{
 				VenueID: venueId,
 				URL:     fmt.Sprintf("%s%s", venueFileBaseURL, filepath.Base(filename)),
@@ -304,7 +295,16 @@ func (vh *venueHandler) CreateVenueImage() echo.HandlerFunc {
 			_, err = vh.service.CreateVenueImage(image)
 			if err != nil {
 				log.Error("Failed to insert image. " + err.Error())
-				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to insert image"))
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("Failed to insert image. "+err.Error()))
+			}
+
+			awsService := aws.InitS3()
+
+			// Upload profile picture file to cloud
+			err = awsService.UploadFile(path, fileType, fileContent)
+			if err != nil {
+				log.Error("Failed to upload file to cloud service: " + err.Error())
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to upload file to cloud service: "+err.Error()))
 			}
 		}
 
