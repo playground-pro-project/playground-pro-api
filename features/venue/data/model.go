@@ -106,7 +106,7 @@ func searchVenueModels(v Venue) venue.VenueCore {
 		VenueID:       v.VenueID,
 		Category:      v.Category,
 		Name:          v.Name,
-		Username:      v.User.Fullname,
+		OwnerID:       v.OwnerID,
 		Location:      v.Location,
 		Price:         v.Price,
 		AverageRating: averageRating,
