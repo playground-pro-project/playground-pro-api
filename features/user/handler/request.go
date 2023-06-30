@@ -7,7 +7,7 @@ import (
 const (
 	maxFileSize              = 1 << 20     // 1 MB
 	maxOwnerFileSize         = 5 * 1 << 20 // 5 MB
-	profilePictureBaseURL    = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/user-profile-picture/"
+	profilePictureBaseURL    = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/profile-picture/"
 	defaultProfilePictureURL = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
 	ownerFileBaseURL         = "https://aws-pgp-bucket.s3.ap-southeast-2.amazonaws.com/owner-docs/"
 )
