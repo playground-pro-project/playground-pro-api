@@ -238,27 +238,24 @@ func (uh *userHandler) UpdateUserProfile() echo.HandlerFunc {
 			return helper.UnauthorizedError(c, "Missing or malformed JWT")
 		}
 
-		err := c.Bind(&req)
-		if err != nil {
+		// Check if the request body is empty
+		if err := c.Bind(&req); err != nil {
+			if err == echo.ErrBadRequest {
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Empty request payload"))
+			}
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Invalid request payload"))
 		}
 
 		updatedUser := EditProfileRequestToCore(req)
 
-		err = uh.userService.UpdateByID(userId, updatedUser)
+		err := uh.userService.UpdateByID(userId, updatedUser)
 		if err != nil {
 			if strings.Contains(err.Error(), "user not found") {
-				return c.JSON(
-					http.StatusNotFound, helper.ErrorResponse(err.Error()),
-				)
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse(err.Error()))
 			} else if strings.Contains(err.Error(), "email") {
-				return c.JSON(
-					http.StatusBadRequest, helper.ErrorResponse(err.Error()),
-				)
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 			} else if strings.Contains(err.Error(), "phone") {
-				return c.JSON(
-					http.StatusBadRequest, helper.ErrorResponse(err.Error()),
-				)
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 			}
 			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
 		}
@@ -266,6 +263,7 @@ func (uh *userHandler) UpdateUserProfile() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, helper.SuccessResponse(nil, "User profile updated successfully"))
 	}
 }
+
 func (uh *userHandler) DeleteUser() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, errToken := middlewares.ExtractToken(c)
