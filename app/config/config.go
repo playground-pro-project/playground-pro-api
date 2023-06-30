@@ -136,7 +136,7 @@ func readEnv() *AppConfig {
 
 	if isRead {
 		viper.AddConfigPath(".")
-		viper.SetConfigName("config")
+		viper.SetConfigName("local")
 		viper.SetConfigType("yaml")
 
 		err := viper.ReadInConfig()

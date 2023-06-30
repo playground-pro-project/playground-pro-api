@@ -239,16 +239,21 @@ func (uh *userHandler) UpdateUserProfile() echo.HandlerFunc {
 		}
 
 		// Check if the request body is empty
-		if err := c.Bind(&req); err != nil {
-			if err == echo.ErrBadRequest {
-				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Empty request payload"))
-			}
+		if c.Request().ContentLength == 0 {
+			log.Error("Empty request payload")
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Empty request payload"))
+		}
+
+		err := c.Bind(&req)
+		if err != nil {
+			log.Error("Invalid request payload")
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Invalid request payload"))
 		}
 
 		updatedUser := EditProfileRequestToCore(req)
+		fmt.Println("Updated User: ", updatedUser)
 
-		err := uh.userService.UpdateByID(userId, updatedUser)
+		err = uh.userService.UpdateByID(userId, updatedUser)
 		if err != nil {
 			if strings.Contains(err.Error(), "user not found") {
 				return c.JSON(http.StatusNotFound, helper.ErrorResponse(err.Error()))
