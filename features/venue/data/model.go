@@ -25,9 +25,9 @@ type Venue struct {
 	UpdatedAt     time.Time       `gorm:"type:datetime"`
 	DeletedAt     gorm.DeletedAt  `gorm:"index"`
 	User          User            `gorm:"references:OwnerID;foreignKey:UserID"`
-	VenuePictures []VenuePicture  `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	VenuePictures []VenuePicture  `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Reservations  []Reservation   `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
-	Reviews       []review.Review `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	Reviews       []review.Review `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type User struct {
