@@ -1345,19 +1345,19 @@ components:
                         code: 200
                         message: "Successful Operation"
                         data:
-                            - venue_id: "string-uuid"
+                            - user_id : "string-uuid"
+                              venue_id: "string-uuid"
                               category: "basketball"
                               name: "Venue 1"
-                              username: "User 1"
                               location: "Jakarta"
                               distance: 1
                               price: 100.50
                               average_rating: 4.55
                               venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
-                            - venue_id: "string-uuid"
+                            - user_id : "string-uuid" 
+                              venue_id: "string-uuid"
                               category: "football"
                               name: "Venue 2"
-                              username: "User 2"
                               location: "Jakarta"
                               distance: 1.3
                               price: 200.75

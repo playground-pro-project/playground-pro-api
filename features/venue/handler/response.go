@@ -66,6 +66,7 @@ func GetAllVenueImageToResponse(v venue.VenuePictureCore) GetAllVenueImageRespon
 
 func SearchVenue(v venue.VenueCore) SearchVenueResponse {
 	response := SearchVenueResponse{
+		UserID:        v.OwnerID,
 		VenueID:       v.VenueID,
 		Category:      v.Category,
 		Name:          v.Name,
