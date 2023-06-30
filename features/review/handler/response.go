@@ -5,7 +5,7 @@ import (
 )
 
 type GetAllReviewResponse struct {
-	ReviewID string       `json:"review_id`
+	ReviewID string       `json:"review_id"`
 	UserID   string       `json:"user_id"`
 	Review   string       `json:"review"`
 	Rating   float64      `json:"rating"`
