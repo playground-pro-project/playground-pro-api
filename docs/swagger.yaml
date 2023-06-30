@@ -504,6 +504,37 @@ paths:
             security:
                 - bearerAuth: []
 
+    "/users/venues/charts":
+        get:
+            tags:
+                - Users
+            summary: Get user that hosting venue, order by lastest update
+            parameters:
+                - in: query
+                  name: keyword
+                  schema:
+                      type: string
+                  description: String value of payment status (pending, success, or expire)
+                  required: false
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/reservations"
+                        example:
+                            check-in_date: "2023/06/05 08:05:00"
+                            check-out_date: "2023/06/05 10:05:00"
+            responses:
+                "200":
+                    $ref: "#/components/responses/Response200UsersVenuesCharts"
+                "404":
+                    $ref: "#/components/responses/Response404"
+                "500":
+                    $ref: "#/components/responses/Response500"
+            security:
+                - bearerAuth: []
+
     "/venues":
         get:
             tags:
@@ -1380,6 +1411,37 @@ components:
                               price: 200.75
                               average_rating: 4.75
                               venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
+
+        Response200UsersVenuesCharts:
+            description: Get list of venues for charts
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 200
+                            message:
+                                type: string
+                                example: "Successful Operation"
+                            data:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/venues"
+                    example:
+                        code: 200
+                        message: "Successful Operation"
+                        data:
+                            - venue_id: "string-uuid"
+                              venue_name: "Venue 1"
+                              sales_volume: 100
+                            - venue_id: "string-uuid"
+                              venue_name: "Venue 1"
+                              sales_volume: 100
+                            - venue_id: "string-uuid"
+                              venue_name: "Venue 1"
+                              sales_volume: 100
 
         Response200SelectVenues:
             description: Get specific venue
