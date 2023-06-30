@@ -4,10 +4,13 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/review"
 	"github.com/playground-pro-project/playground-pro-api/utils/helper"
 	"gorm.io/gorm"
 )
+
+var log = middlewares.Log()
 
 type reviewQuery struct {
 	db *gorm.DB
@@ -45,6 +48,7 @@ func (rq reviewQuery) Create(venueID string, userID string, review review.Review
 	}
 
 	if createResult.RowsAffected == 0 {
+		log.Error("no row affected. fail to create review")
 		return "", errors.New("failed to insert, row affected is 0")
 	}
 
@@ -53,14 +57,17 @@ func (rq reviewQuery) Create(venueID string, userID string, review review.Review
 
 // DeleteByID implements review.ReviewData.
 func (rq reviewQuery) DeleteByID(reviewID string) error {
-	deleteResult := rq.db.Where("review_id = ?", reviewID).Delete(&Review{})
+	deleteResult := rq.db.Table("reviews").Where("review_id = ?", reviewID).Delete(&Review{})
 	if deleteResult.Error != nil {
+		log.Sugar().Errorf("failed to delete review: %w", deleteResult.Error)
 		return fmt.Errorf("failed to delete review: %w", deleteResult.Error)
 	}
 	if deleteResult.RowsAffected == 0 {
+		log.Error("no row affected. review not found")
 		return fmt.Errorf("no review found with ID: %s", reviewID)
 	}
 
+	log.Sugar().Info("success delete review")
 	return nil
 }
 
