@@ -80,6 +80,7 @@ type MyReservation struct {
 	PaymentType   string
 	PaymentCode   string
 	Status        string
+	SalesVolume   uint
 }
 
 func modelToMyReservationCore(result []MyReservation) []reservation.MyReservationCore {
@@ -99,6 +100,7 @@ func modelToMyReservationCore(result []MyReservation) []reservation.MyReservatio
 			PaymentType:   r.PaymentType,
 			PaymentCode:   r.PaymentCode,
 			Status:        r.Status,
+			SalesVolume:   r.SalesVolume,
 		}
 		myReservations = append(myReservations, myReservation)
 	}

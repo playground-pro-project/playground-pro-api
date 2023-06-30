@@ -241,3 +241,19 @@ func (rs *reservationService) CheckAvailability(venueId string) ([]reservation.A
 
 	return result, err
 }
+
+// MyVenueCharts implements reservation.ReservationService.
+func (rs *reservationService) MyVenueCharts(userId string, keyword string, request reservation.MyReservationCore) ([]reservation.MyReservationCore, error) {
+	result, err := rs.query.MyVenueCharts(userId, keyword, request)
+	if err != nil {
+		if strings.Contains(err.Error(), "list charts record not found") {
+			log.Error("list charts record not found")
+			return []reservation.MyReservationCore{}, errors.New("list charts record not found")
+		} else {
+			log.Error("internal server error")
+			return []reservation.MyReservationCore{}, errors.New("internal server error")
+		}
+	}
+
+	return result, err
+}

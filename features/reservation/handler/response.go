@@ -76,6 +76,22 @@ func myReservation(r reservation.MyReservationCore) myReservationResponse {
 	return response
 }
 
+type chartResponse struct {
+	VenueID     string `json:"venue_id"`
+	VenueName   string `json:"venue_name"`
+	SalesVolume uint   `json:"sales_volume"`
+}
+
+func charts(r reservation.MyReservationCore) chartResponse {
+	response := chartResponse{
+		VenueID:     r.VenueID,
+		VenueName:   r.VenueName,
+		SalesVolume: r.SalesVolume,
+	}
+
+	return response
+}
+
 func reservationHistory(payment reservation.PaymentCore) (reservationHistoryResponse, error) {
 	grandTotalStr := payment.GrandTotal
 	grandTotal, err := strconv.ParseFloat(grandTotalStr, 64)

@@ -271,3 +271,34 @@ func (rq *reservationQuery) GetReservationsByTimeSlot(venueID string, checkInDat
 	reservationCores := modelToReservationCore(reservations)
 	return reservationCores, nil
 }
+
+// ReservationHistory implements reservation.ReservationData.
+func (rq *reservationQuery) MyVenueCharts(userId string, keyword string, request reservation.MyReservationCore) ([]reservation.MyReservationCore, error) {
+	result := []MyReservation{}
+	search := "%" + keyword + "%"
+	query := rq.db.Raw(`
+	SELECT venues.venue_id,
+		venues.name AS venue_name,
+		COUNT(payments.payment_id) AS sales_volume
+	FROM payments
+	JOIN reservations ON payments.payment_id = reservations.payment_id
+	JOIN venues ON reservations.venue_id = venues.venue_id
+	WHERE reservations.user_id = ? 
+		AND reservations.check_in_date BETWEEN ? AND ?
+		AND payments.status LIKE ?
+	GROUP BY venues.venue_id;
+	`, userId, request.CheckInDate, request.CheckOutDate, search).
+		Scan(&result)
+	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
+		log.Error("list reservations record not found")
+		return nil, errors.New("list reservations record not found")
+	} else if query.Error != nil {
+		log.Sugar().Error("error executing list reservations query:", query.Error)
+		return nil, query.Error
+	} else {
+		log.Sugar().Info("list reservations data found in the database")
+	}
+	log.Sugar().Info(result)
+	log.Sugar().Info(modelToMyReservationCore(result))
+	return modelToMyReservationCore(result), nil
+}
