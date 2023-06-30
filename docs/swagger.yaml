@@ -1,2424 +1,2424 @@
-# openapi: 3.0.0
-# info:
-#     description: |
-#         Playground Pro adalah sebuah marketplace yang digunakan untuk memesan venue.
-#     version: "1.0.0"
-#     title: Playground Pro Restful-API
-#     contact:
-#         email: apiteam@swagger.io
-#     license:
-#         name: Apache 2.0
-#         url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-# servers:
-#     # Added by API Auto Mocking Plugin
-#     - description: SwaggerHub API Auto Mocking
-#       url: https://virtserver.swaggerhub.com/dimasyudhana/playground-pro/1.0.0
-#     - description: Production
-#       url: https://peterzalai.biz.id
-# tags:
-#     - name: Authentication
-#       description: Identifikasi data pengguna
-#     - name: Users
-#       description: Pengguna aplikasi yang dibangun
-#     - name: Venues
-#       description: Product yang akan disewakan penyewa
-#     - name: Reservations
-#       description: Proses menyewa venue dan pembayaran setelah membuat pemesanan vanue oleh peminjam
-#     - name: Reviews
-#       description: Review untuk venue yang telah disewa oleh peminjam
+openapi: 3.0.0
+info:
+    description: |
+        Playground Pro adalah sebuah marketplace yang digunakan untuk memesan venue.
+    version: "1.0.0"
+    title: Playground Pro Restful-API
+    contact:
+        email: apiteam@swagger.io
+    license:
+        name: Apache 2.0
+        url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+servers:
+    # Added by API Auto Mocking Plugin
+    - description: SwaggerHub API Auto Mocking
+      url: https://virtserver.swaggerhub.com/dimasyudhana/playground-pro/1.0.0
+    - description: Production
+      url: https://peterzalai.biz.id
+tags:
+    - name: Authentication
+      description: Identifikasi data pengguna
+    - name: Users
+      description: Pengguna aplikasi yang dibangun
+    - name: Venues
+      description: Product yang akan disewakan penyewa
+    - name: Reservations
+      description: Proses menyewa venue dan pembayaran setelah membuat pemesanan vanue oleh peminjam
+    - name: Reviews
+      description: Review untuk venue yang telah disewa oleh peminjam
 
-# paths:
-#     /register:
-#         post:
-#             summary: Register a new user
-#             operationId: registerUser
-#             requestBody:
-#                 required: true
-#                 content:
-#                     application/json:
-#                         schema:
-#                             $ref: "#/components/schemas/Auth"
-#             responses:
-#                 "200":
-#                     description: User registration successful
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/RegistrationResponse"
-#                 "400":
-#                     description: Invalid request payload
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                 "409":
-#                     description: User already exists
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#             tags:
-#                 - Authentication
-#     /login:
-#         post:
-#             summary: User login
-#             operationId: userLogin
-#             requestBody:
-#                 required: true
-#                 content:
-#                     application/json:
-#                         schema:
-#                             $ref: "#/components/schemas/LoginRequest"
-#             responses:
-#                 "200":
-#                     description: OK - User login successful
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/LoginResponse"
-#                 "401":
-#                     description: Unauthorized - Invalid credentials
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorLoginResponse"
-#             tags:
-#                 - Authentication
-#     /validation:
-#         post:
-#             summary: OTP validation
-#             requestBody:
-#                 required: true
-#                 content:
-#                     application/json:
-#                         schema:
-#                             type: object
-#                             properties:
-#                                 user_id:
-#                                     type: string
-#                                     example: USR-HAY7A8QU
-#                                 otp_code:
-#                                     type: string
-#                                     example: 239076
-#             responses:
-#                 "200":
-#                     description: Verification successful
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 type: object
-#                                 properties:
-#                                     status:
-#                                         type: string
-#                                         example: Success
-#                                     message:
-#                                         type: string
-#                                         example: Verification success
-#                 "400":
-#                     description: Invalid request payload
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 type: object
-#                                 properties:
-#                                     status:
-#                                         type: string
-#                                         example: Fail
-#                                     message:
-#                                         type: string
-#                                         example: "Bad request. Invalid request body or parameters"
-#                 "404":
-#                     description: OTP has been expired
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 type: object
-#                                 properties:
-#                                     status:
-#                                         type: string
-#                                         example: Fail
-#                                     message:
-#                                         type: string
-#                                         example: "OTP has been expired"
-#             tags:
-#                 - Authentication
-#     /resend-otp:
-#         post:
-#             summary: Resend OTP
-#             requestBody:
-#                 required: true
-#                 content:
-#                     application/json:
-#                         schema:
-#                             type: object
-#                             properties:
-#                                 email:
-#                                     type: string
-#                                     format: email
-#                                     example: user@mail.com
-#             responses:
-#                 "200":
-#                     description: Resend OTP
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 type: object
-#                                 properties:
-#                                     message:
-#                                         type: string
-#                                         example: Check OTP sent to your email
-#                 "400":
-#                     description: Invalid request payload
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 type: object
-#                                 properties:
-#                                     status:
-#                                         type: string
-#                                         example: Fail
-#                                     message:
-#                                         type: string
-#                                         example: "Bad request. Invalid request body or parameters"
-#             tags:
-#                 - Authentication
-#     /users:
-#         get:
-#             summary: Get user profile
-#             operationId: getUserProfile
-#             security:
-#                 - bearerAuth: []
-#             responses:
-#                 "200":
-#                     description: OK - User profile retrieved successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/UserProfileResponse"
-#                 "401":
-#                     description: Unauthorized - Invalid or missing token
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorProfileResponse"
-#                             examples:
-#                                 InvalidTokenError:
-#                                     $ref: "#/components/examples/InvalidTokenError"
-#                 "404":
-#                     description: User profile not found
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorProfileResponse"
-#                             examples:
-#                                 NotFound:
-#                                     $ref: "#/components/examples/NotFound"
-#             tags:
-#                 - Users
-#         put:
-#             summary: Update user profile
-#             operationId: updateUserProfile
-#             security:
-#                 - bearerAuth: []
-#             requestBody:
-#                 required: true
-#                 content:
-#                     application/json:
-#                         schema:
-#                             $ref: "#/components/schemas/EditUserProfileRequest"
-#             responses:
-#                 "200":
-#                     description: User profile updated successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/SuccessResponse"
-#                 "400":
-#                     description: Bad request - Invalid request body
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorUpdateResponse"
-#                             examples:
-#                                 BadRequestError:
-#                                     $ref: "#/components/examples/BadRequestError"
-#                 "401":
-#                     description: Unauthorized - Invalid or missing token
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorUpdateResponse"
-#                             examples:
-#                                 InvalidTokenError:
-#                                     $ref: "#/components/examples/InvalidTokenError"
-#             tags:
-#                 - Users
-#         delete:
-#             summary: Delete user account
-#             operationId: deleteUserAccount
-#             security:
-#                 - bearerAuth: []
-#             responses:
-#                 "200":
-#                     description: User account deleted successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/DeleteUserAccountResponse"
-#                 "401":
-#                     description: Unauthorized - Invalid or missing token
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorDeleteResponse"
-#                             examples:
-#                                 InvalidTokenError:
-#                                     $ref: "#/components/examples/InvalidTokenError"
-#                 "500":
-#                     description: Internal server error
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorDeleteResponse"
-#                             examples:
-#                                 InternalServerError:
-#                                     $ref: "#/components/examples/InternalServerError"
-#             tags:
-#                 - Users
-#     /users/profile-picture:
-#         put:
-#             summary: Change user profile picture
-#             operationId: changeProfilePicture
-#             security:
-#                 - bearerAuth: []
-#             requestBody:
-#                 required: true
-#                 content:
-#                     multipart/form-data:
-#                         schema:
-#                             $ref: "#/components/schemas/ChangeProfilePictureRequest"
-#             responses:
-#                 "200":
-#                     description: User profile picture changed successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ChangeProfilePictureResponse"
-#                 "400":
-#                     description: Bad request - Invalid request body
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
-#                             examples:
-#                                 BadRequestError:
-#                                     $ref: "#/components/examples/BadRequestError"
-#                 "401":
-#                     description: Unauthorized - Invalid or missing token
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
-#                             examples:
-#                                 InvalidTokenError:
-#                                     $ref: "#/components/examples/InvalidTokenError"
-#                 "500":
-#                     description: Internal server error
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
-#                             examples:
-#                                 InternalServerError:
-#                                     $ref: "#/components/examples/InternalServerError"
-#             tags:
-#                 - Users
-#         delete:
-#             summary: Remove user profile picture
-#             operationId: removeProfilePicture
-#             security:
-#                 - bearerAuth: []
-#             responses:
-#                 "200":
-#                     description: User profile picture changed successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 type: object
-#                                 properties:
-#                                     message:
-#                                         type: string
-#                                         example: Profile picture removed successfully
-#                 "400":
-#                     description: Bad request - Invalid request body
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
-#                             examples:
-#                                 BadRequestError:
-#                                     $ref: "#/components/examples/BadRequestError"
-#                 "401":
-#                     description: Unauthorized - Invalid or missing token
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
-#                             examples:
-#                                 InvalidTokenError:
-#                                     $ref: "#/components/examples/InvalidTokenError"
-#                 "500":
-#                     description: Internal server error
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
-#                             examples:
-#                                 InternalServerError:
-#                                     $ref: "#/components/examples/InternalServerError"
-#             tags:
-#                 - Users
-#     /users/upgrade:
-#         post:
-#             summary: Upgrade user role from 'user' to 'owner'
-#             operationId: upgradeUserRole
-#             security:
-#                 - bearerAuth: []
-#             requestBody:
-#                 required: true
-#                 content:
-#                     multipart/form-data:
-#                         schema:
-#                             $ref: "#/components/schemas/UpgradeUserRoleRequest"
-#             responses:
-#                 "200":
-#                     description: User role upgraded successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/UpgradeUserRoleResponse"
-#                 "400":
-#                     description: Bad request - Invalid request body
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorUpgradeUserRoleResponse"
-#                             examples:
-#                                 BadRequestError:
-#                                     $ref: "#/components/examples/BadRequestError"
-#                 "401":
-#                     description: Unauthorized - Invalid or missing token
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorUpgradeUserRoleResponse"
-#                             examples:
-#                                 InvalidTokenError:
-#                                     $ref: "#/components/examples/InvalidTokenError"
-#                 "500":
-#                     description: Internal server error
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorUpgradeUserRoleResponse"
-#                             examples:
-#                                 InternalServerError:
-#                                     $ref: "#/components/examples/InternalServerError"
-#             tags:
-#                 - Users
-#     /users/password:
-#         put:
-#             summary: Change user password
-#             operationId: changeUserPassword
-#             security:
-#                 - bearerAuth: []
-#             requestBody:
-#                 required: true
-#                 content:
-#                     application/json:
-#                         schema:
-#                             $ref: "#/components/schemas/ChangePasswordRequest"
-#             responses:
-#                 "200":
-#                     description: User password changed successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ChangePasswordResponse"
-#                 "400":
-#                     description: Bad request - Invalid request body
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorChangePasswordResponse"
-#                             example:
-#                                 error: Wrong password
-#                 "401":
-#                     description: Unauthorized - Invalid or missing token
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorChangePasswordResponse"
-#                             examples:
-#                                 InvalidTokenError:
-#                                     $ref: "#/components/examples/InvalidTokenError"
-#                 "500":
-#                     description: Internal server error
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorChangePasswordResponse"
-#                             examples:
-#                                 InternalServerError:
-#                                     $ref: "#/components/examples/InternalServerError"
-#             tags:
-#                 - Users
-
-#     "/users/venues":
-#         get:
-#             tags:
-#                 - Users
-#             summary: Get user that hosting venue, order by lastest update
-#             responses:
-#                 "200":
-#                     $ref: "#/components/responses/Response200UserVenues"
-#                 "404":
-#                     $ref: "#/components/responses/Response404"
-#                 "500":
-#                     $ref: "#/components/responses/Response500"
-#             security:
-#                 - bearerAuth: []
-
-#     "/users/reservations":
-#         get:
-#             tags:
-#                 - Users
-#             summary: Get user that booking venue, order by lastest update
-#             responses:
-#                 "200":
-#                     $ref: "#/components/responses/Response200UserReservation"
-#                 "404":
-#                     $ref: "#/components/responses/Response404"
-#                 "500":
-#                     $ref: "#/components/responses/Response500"
-#             security:
-#                 - bearerAuth: []
-
-#     "/venues":
-#         get:
-#             tags:
-#                 - Venues
-#             summary: Find list venue, venue's reviews and rating (pagination)
-#             description: Find list venue, venue's average reviews and rating accumulation
-#             parameters:
-#                 - in: query
-#                   name: category
-#                   schema:
-#                       type: string
-#                   description: String value of category to retrieve list of category venues
-#                   required: false
-#                 - in: query
-#                   name: place
-#                   schema:
-#                       type: string
-#                   description: String value of place to retrieve list of place venues
-#                   required: false
-#                 - in: query
-#                   name: rating
-#                   schema:
-#                       type: integer
-#                   description: String range value of rating to retrieve list of rating venues
-#                   required: false
-#                 - in: query
-#                   name: price
-#                   schema:
-#                       type: integer
-#                   description: String range value of price to retrieve list of price venues
-#                   required: false
-#                 - in: query
-#                   name: limit
-#                   schema:
-#                       type: integer
-#                   description: The limit number to retrieve
-#                   required: true
-#                 - in: query
-#                   name: offset
-#                   schema:
-#                       type: integer
-#                   description: The offset number to retrieve
-#                   required: false
-#                 - in: query
-#                   name: page
-#                   schema:
-#                       type: integer
-#                   description: The page number to retrieve
-#                   required: true
-#                 - in: query
-#                   name: sort
-#                   schema:
-#                       type: string
-#                   required: false
-#             responses:
-#                 "200":
-#                     $ref: "#/components/responses/Response200ListVenues"
-#                 "400":
-#                     $ref: "#/components/responses/Response400"
-#                 "404":
-#                     $ref: "#/components/responses/Response404"
-#                 "500":
-#                     $ref: "#/components/responses/Response500"
-
-#         post:
-#             tags:
-#                 - Venues
-#             summary: Register venue
-#             description: User can register a venue
-#             requestBody:
-#                 required: true
-#                 content:
-#                     application/json:
-#                         schema:
-#                             type: object
-#                             properties:
-#                                 category:
-#                                     type: string
-#                                 name:
-#                                     type: string
-#                                     uniqueItems: true
-#                                     description: Nama unik tempat olahraga
-#                                 description:
-#                                     type: string
-#                                     description: Deskripsi tempat olahraga
-#                                 service_time:
-#                                     type: string
-#                                 location:
-#                                     type: string
-#                                     description: Alamat tempat olahraga
-#                                 price:
-#                                     type: number
-#                                     description: Harga sewa tempat olahraga
-#                                     format: float
-#                         example:
-#                             category: "football"
-#                             name: "Bola Bolaan"
-#                             description: "Deskripsi Bola Bolaan"
-#                             service_time: "07:45 - 23:00"
-#                             location: "Jalan Utama No. 123, Kota Anywhere"
-#                             price: 29.99
-#             responses:
-#                 "201":
-#                     $ref: "#/components/responses/Response201"
-#                 "400":
-#                     $ref: "#/components/responses/Response400"
-#                 "500":
-#                     $ref: "#/components/responses/Response500"
-#             security:
-#                 - bearerAuth: []
-
-#     "/venues/{venue_id}":
-#         get:
-#             tags:
-#                 - Venues
-#             summary: Find specific venue, venue's reviews and rating
-#             description: Select specific venue, venue's average reviews and rating accumulation
-#             parameters:
-#                 - name: venue_id
-#                   in: path
-#                   description: Venue ID
-#                   required: true
-#                   schema:
-#                       type: string
-#             responses:
-#                 "200":
-#                     $ref: "#/components/responses/Response200SelectVenues"
-#                 "400":
-#                     $ref: "#/components/responses/Response400"
-#                 "404":
-#                     $ref: "#/components/responses/Response404"
-#                 "500":
-#                     $ref: "#/components/responses/Response500"
-
-#         put:
-#             tags:
-#                 - Venues
-#             summary: Edit venue by venue_id
-#             description: User can edit a their venue by venue_id
-#             parameters:
-#                 - name: venue_id
-#                   in: path
-#                   description: Venue ID
-#                   required: true
-#                   schema:
-#                       type: string
-#             requestBody:
-#                 required: true
-#                 content:
-#                     application/json:
-#                         schema:
-#                             type: object
-#                             properties:
-#                                 category:
-#                                     type: string
-#                                 name:
-#                                     type: string
-#                                     uniqueItems: true
-#                                     description: Nama unik tempat olahraga
-#                                 description:
-#                                     type: string
-#                                     description: Deskripsi tempat olahraga
-#                                 service_time:
-#                                     type: string
-#                                 location:
-#                                     type: string
-#                                     description: Alamat tempat olahraga
-#                                 price:
-#                                     type: number
-#                                     description: Harga sewa tempat olahraga
-#                                     format: float
-#                         example:
-#                             category: "football"
-#                             name: "Bola Bolaan"
-#                             description: "Deskripsi Bola Bolaan"
-#                             service_time: "07:45 - 23:00"
-#                             location: "Jalan Utama No. 123, Kota Anywhere"
-#                             price: 29.99
-#             responses:
-#                 "200":
-#                     $ref: "#/components/responses/Response200EditVenues"
-#                 "400":
-#                     $ref: "#/components/responses/Response400"
-#                 "404":
-#                     $ref: "#/components/responses/Response404"
-#                 "500":
-#                     $ref: "#/components/responses/Response500"
-#             security:
-#                 - bearerAuth: []
-
-#         delete:
-#             tags:
-#                 - Venues
-#             summary: Deactive venue by venue_id
-#             description: Deactive specific venue by venue_id
-#             parameters:
-#                 - name: venue_id
-#                   in: path
-#                   description: Venue ID
-#                   required: true
-#                   schema:
-#                       type: string
-#             responses:
-#                 "200":
-#                     $ref: "#/components/responses/Response200DeactiveVenues"
-#                 "404":
-#                     $ref: "#/components/responses/Response404"
-#                 "500":
-#                     $ref: "#/components/responses/Response500"
-#             security:
-#                 - bearerAuth: []
-#     /venues/{venue_id}/images:
-#         post:
-#             summary: Add venue images
-#             operationId: addVenueImages
-#             security:
-#                 - bearerAuth: []
-#             parameters:
-#                 - name: venue_id
-#                   in: path
-#                   description: ID of the venue to add images to
-#                   required: true
-#                   schema:
-#                       type: string
-#             requestBody:
-#                 required: true
-#                 content:
-#                     multipart/form-data:
-#                         schema:
-#                             type: object
-#                             properties:
-#                                 files:
-#                                     type: array
-#                                     items:
-#                                         type: string
-#                                         format: binary
-#                                     maxItems: 5
-#             responses:
-#                 "200":
-#                     description: Venue images added successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/AddVenueImagesResponse"
-#                             examples:
-#                                 VenueImagesAdded:
-#                                     value:
-#                                         message: Venue images added successfully
-#                 "400":
-#                     description: Invalid request payload
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorAddVenueImageResponse"
-#                             examples:
-#                                 InvalidRequestPayload:
-#                                     value:
-#                                         error: Invalid request payload
-#                 "404":
-#                     description: Venue not found
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorAddVenueImageResponse"
-#                             examples:
-#                                 VenueNotFoundError:
-#                                     value:
-#                                         error: Venue not found
-#                 "500":
-#                     description: Internal server error
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorAddVenueImageResponse"
-#                             examples:
-#                                 InternalServerError:
-#                                     value:
-#                                         error: Internal server error. Please try again later.
-#             tags:
-#                 - Venues
-#         get:
-#             summary: Get all images for a venue
-#             operationId: getAllImagesForVenue
-#             security:
-#                 - bearerAuth: []
-#             parameters:
-#                 - name: venue_id
-#                   in: path
-#                   description: ID of the venue to retrieve images for
-#                   required: true
-#                   schema:
-#                       type: string
-#             responses:
-#                 "200":
-#                     description: Images retrieved successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ImageListResponse"
-#                             examples:
-#                                 ImagesRetrieved:
-#                                     value:
-#                                         message: Images retrieved successfully
-#                                         data:
-#                                             - image_id: "image1"
-#                                               image_link: "https://example.com/image1.jpg"
-#                                             - image_id: "image2"
-#                                               image_link: "https://example.com/image2.jpg"
-#                 "400":
-#                     description: Invalid request parameters
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                             examples:
-#                                 InvalidRequestParams:
-#                                     value:
-#                                         error: Invalid request parameters
-#                 "404":
-#                     description: Venue not found
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                             examples:
-#                                 VenueNotFoundError:
-#                                     value:
-#                                         error: Venue not found
-#                 "500":
-#                     description: Internal server error
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                             examples:
-#                                 InternalServerError:
-#                                     value:
-#                                         error: Internal server error. Please try again later.
-#             tags:
-#                 - Venues
-#     /venues/{venue_id}/images/{image_id}:
-#         delete:
-#             summary: Delete venue image
-#             operationId: deleteVenueImage
-#             security:
-#                 - bearerAuth: []
-#             parameters:
-#                 - name: venue_id
-#                   in: path
-#                   description: ID of the venue containing the image
-#                   required: true
-#                   schema:
-#                       type: string
-#                 - name: image_id
-#                   in: path
-#                   description: ID of the image to delete
-#                   required: true
-#                   schema:
-#                       type: string
-#             responses:
-#                 "200":
-#                     description: Venue image deleted successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/SuccessResponse"
-#                             examples:
-#                                 VenueImageDeleted:
-#                                     value:
-#                                         message: Venue image deleted successfully
-#                 "400":
-#                     description: Invalid request parameters
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                             examples:
-#                                 InvalidRequestParams:
-#                                     value:
-#                                         error: Invalid request parameters
-#                 "404":
-#                     description: Venue or image not found
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                             examples:
-#                                 VenueOrImageNotFoundError:
-#                                     value:
-#                                         error: Venue or image not found
-#                 "500":
-#                     description: Internal server error
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                             examples:
-#                                 InternalServerError:
-#                                     value:
-#                                         error: Internal server error. Please try again later.
-#             tags:
-#                 - Venues
-#     /venues/{venue_id}/reviews:
-#         post:
-#             summary: Add a review
-#             operationId: addReview
-#             parameters:
-#                 - name: venue_id
-#                   in: path
-#                   description: ID of the venue to post review
-#                   required: true
-#                   schema:
-#                       type: string
-#             security:
-#                 - bearerAuth: []
-#             requestBody:
-#                 required: true
-#                 content:
-#                     application/json:
-#                         schema:
-#                             $ref: "#/components/schemas/AddReviewRequest"
-#                         example:
-#                             venue_id: "VEN-H7IA90"
-#                             review: "some review"
-#                             rating: 4.5
-#             responses:
-#                 "200":
-#                     description: Review added successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/SuccessAddReviewResponse"
-#                             examples:
-#                                 ReviewAdded:
-#                                     value:
-#                                         message: Review added successfully
-#                 "400":
-#                     description: Invalid request payload
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorAddReviewResponse"
-#                             examples:
-#                                 InvalidRequestPayload:
-#                                     value:
-#                                         error: Invalid request payload
-#                 "500":
-#                     description: Internal server error
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorAddReviewResponse"
-#                             examples:
-#                                 InternalServerError:
-#                                     value:
-#                                         error: Internal server error. Please try again later.
-#             tags:
-#                 - Venues
-#         get:
-#             summary: Get all reviews for a venue
-#             operationId: getAllReviews
-#             parameters:
-#                 - name: venue_id
-#                   in: path
-#                   description: ID of the venue to retrieve reviews for
-#                   required: true
-#                   schema:
-#                       type: string
-#             responses:
-#                 "200":
-#                     description: Reviews retrieved successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ReviewListResponse"
-#                             examples:
-#                                 ReviewsRetrieved:
-#                                     value:
-#                                         message: Reviews retrieved successfully
-#                                         data:
-#                                             - review_id: "review1"
-#                                               review: "Great place to visit!"
-#                                               rating: 4.5
-#                                               user:
-#                                                   user_id: "user1"
-#                                                   full_name: "John Doe"
-#                                             - review_id: "review2"
-#                                               review: "Average experience."
-#                                               rating: 3.0
-#                                               user:
-#                                                   user_id: "user2"
-#                                                   full_name: "Jane Smith"
-#                 "400":
-#                     description: Invalid request parameters
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                             examples:
-#                                 InvalidRequestParams:
-#                                     value:
-#                                         error: Invalid request parameters
-#                 "404":
-#                     description: Venue not found
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                             examples:
-#                                 VenueNotFoundError:
-#                                     value:
-#                                         error: Venue not found
-#                 "500":
-#                     description: Internal server error
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                             examples:
-#                                 InternalServerError:
-#                                     value:
-#                                         error: Internal server error. Please try again later.
-#             tags:
-#                 - Venues
-
-#     /reviews/{review_id}:
-#         delete:
-#             summary: Delete a review
-#             operationId: deleteReview
-#             security:
-#                 - bearerAuth: []
-#             parameters:
-#                 - name: review_id
-#                   in: path
-#                   description: ID of the review to delete
-#                   required: true
-#                   schema:
-#                       type: string
-#             responses:
-#                 "200":
-#                     description: Review deleted successfully
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/SuccessResponse"
-#                             examples:
-#                                 ReviewDeleted:
-#                                     value:
-#                                         message: Review deleted successfully
-#                 "400":
-#                     description: Invalid request parameters
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                             examples:
-#                                 InvalidRequestParams:
-#                                     value:
-#                                         error: Invalid request parameters
-#                 "404":
-#                     description: Review not found
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                             examples:
-#                                 ReviewNotFoundError:
-#                                     value:
-#                                         error: Review not found
-#                 "500":
-#                     description: Internal server error
-#                     content:
-#                         application/json:
-#                             schema:
-#                                 $ref: "#/components/schemas/ErrorResponse"
-#                             examples:
-#                                 InternalServerError:
-#                                     value:
-#                                         error: Internal server error. Please try again later.
-#             tags:
-#                 - Reviews
-
-#     "/venues/{venue_id}/availability":
-#         get:
-#             tags:
-#                 - Venues
-#             summary: Check availability
-#             description: _
-#             parameters:
-#                 - name: venue_id
-#                   in: path
-#                   description: Venue ID
-#                   required: true
-#                   schema:
-#                       type: string
-#                       format: uuid
-#             responses:
-#                 "200":
-#                     $ref: "#/components/responses/Response200CheckAvailability"
-#                 "400":
-#                     $ref: "#/components/responses/Response400"
-#                 "404":
-#                     $ref: "#/components/responses/Response404"
-#                 "500":
-#                     $ref: "#/components/responses/Response500"
-#             security:
-#                 - bearerAuth: []
-
-#     "/reservations":
-#         post:
-#             tags:
-#                 - Reservations
-#             summary: User can make a reservation
-#             description: Endpoint login user to the web-application
-#             requestBody:
-#                 required: true
-#                 content:
-#                     application/json:
-#                         schema:
-#                             $ref: "#/components/schemas/reservations"
-#                         example:
-#                             reservation:
-#                                 venue_id: "string-uuid"
-#                                 check-in_date: "2023/06/05 08:05"
-#                                 check-out_date: "2023/08/05 08:05"
-#                             payment:
-#                                 payment_type: "bri/bca/bni/mandiri/permata/indomaret/alfamart/gopay/shopeepay/qris"
-#             responses:
-#                 "201":
-#                     $ref: "#/components/responses/Response201MakeReservation"
-#                 "400":
-#                     $ref: "#/components/responses/Response400"
-#                 "500":
-#                     $ref: "#/components/responses/Response500"
-#             security:
-#                 - bearerAuth: []
-
-#     "/reservations/status":
-#         post:
-#             tags:
-#                 - Reservations
-#             summary: Retrive payment notification update
-#             description: Retrive payment notification to update status on database
-#             requestBody:
-#                 required: true
-#                 content:
-#                     application/json:
-#                         schema:
-#                             $ref: "#/components/schemas/midtrans_callback"
-#             responses:
-#                 "200":
-#                     $ref: "#/components/responses/Response200"
-#                 "400":
-#                     $ref: "#/components/responses/Response400"
-#                 "404":
-#                     $ref: "#/components/responses/Response404"
-#                 "500":
-#                     $ref: "#/components/responses/Response500"
-#             security:
-#                 - bearerAuth: []
-
-#     "/reservations/{reservation_id}":
-#         get:
-#             tags:
-#                 - Reservations
-#             summary: Detail transaction by reservation_id
-#             description: _
-#             parameters:
-#                 - name: reservation_id
-#                   in: path
-#                   description: Reservation ID
-#                   required: true
-#                   schema:
-#                       type: string
-#                       format: uuid
-#             responses:
-#                 "200":
-#                     $ref: "#/components/responses/Response200ReservationDetails"
-#                 "400":
-#                     $ref: "#/components/responses/Response400"
-#                 "404":
-#                     $ref: "#/components/responses/Response404"
-#                 "500":
-#                     $ref: "#/components/responses/Response500"
-#             security:
-#                 - bearerAuth: []
-
-# components:
-#     securitySchemes:
-#         bearerAuth:
-#             type: http
-#             scheme: bearer
-#             bearerFormat: JWT
-
-#     requestBodies:
-#         RequestLoginUser:
-#             required: true
-#             content:
-#                 multipart/form-data:
-#                     schema:
-#                         $ref: "#/components/schemas/users"
-
-#     responses:
-#         Response200:
-#             description: Successful operation
-#             content:
-#                 application/json:
-#                     schema:
-#                         type: object
-#                         properties:
-#                             code:
-#                                 type: integer
-#                                 example: 200
-#                             message:
-#                                 type: string
-#                                 example: "Successful operation"
-
-#         Response201:
-#             description: Successful operation
-#             content:
-#                 application/json:
-#                     schema:
-#                         type: object
-#                         properties:
-#                             code:
-#                                 type: integer
-#                                 example: 201
-#                             message:
-#                                 type: string
-#                                 example: "Successful operation"
-
-#         Response400:
-#             description: Bad request
-#             content:
-#                 application/json:
-#                     schema:
-#                         type: object
-#                         properties:
-#                             code:
-#                                 type: integer
-#                                 example: 400
-#                             message:
-#                                 type: string
-#                                 example: "Bad request"
-
-#         Response401:
-#             description: Bad request
-#             content:
-#                 application/json:
-#                     schema:
-#                         type: object
-#                         properties:
-#                             code:
-#                                 type: integer
-#                                 example: 401
-#                             message:
-#                                 type: string
-#                                 example: "Unauthorized access."
-
-#         Response404:
-#             description: Not Found
-#             content:
-#                 application/json:
-#                     schema:
-#                         type: object
-#                         properties:
-#                             code:
-#                                 type: integer
-#                                 example: 404
-#                             message:
-#                                 type: string
-#                                 example: "The requested resource was not found"
-
-#         Response500:
-#             description: Internal server error
-#             content:
-#                 application/json:
-#                     schema:
-#                         type: object
-#                         properties:
-#                             code:
-#                                 type: integer
-#                                 example: 500
-#                             message:
-#                                 type: string
-#                                 example: "Internal server error"
-
-#         Response200ListVenues:
-#             description: Get list of events with pagination
-#             content:
-#                 application/json:
-#                     schema:
-#                         type: object
-#                         properties:
-#                             code:
-#                                 type: integer
-#                                 example: 200
-#                             message:
-#                                 type: string
-#                                 example: "Successful Operation"
-#                             data:
-#                                 type: array
-#                                 items:
-#                                     $ref: "#/components/schemas/venues"
-#                             pagination:
-#                                 $ref: "#/components/schemas/pagination"
-#                     example:
-#                         code: 200
-#                         message: "Successful Operation"
-#                         data:
-#                             - venue_id: "string-uuid"
-#                               category: "basketball"
-#                               name: "Venue 1"
-#                               username: "User 1"
-#                               location: "Jakarta"
-#                               distance: 1
-#                               price: 100.50
-#                               average_rating: 4.55
-#                               venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
-#                             - venue_id: "string-uuid"
-#                               category: "football"
-#                               name: "Venue 2"
-#                               username: "User 2"
-#                               location: "Jakarta"
-#                               distance: 1.3
-#                               price: 200.75
-#                               average_rating: 4.75
-#                               venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
-#                         pagination:
-#                             limit: 5
-#                             offset: 0
-#                             page: 1
-#                             total_rows: 15
-#                             total_pages: 3
-
-#         Response200UserVenues:
-#             description: Get list of events with pagination
-#             content:
-#                 application/json:
-#                     schema:
-#                         type: object
-#                         properties:
-#                             code:
-#                                 type: integer
-#                                 example: 200
-#                             message:
-#                                 type: string
-#                                 example: "Successful Operation"
-#                             data:
-#                                 type: array
-#                                 items:
-#                                     $ref: "#/components/schemas/venues"
-#                             pagination:
-#                                 $ref: "#/components/schemas/pagination"
-#                     example:
-#                         code: 200
-#                         message: "Successful Operation"
-#                         data:
-#                             - venue_id: "string-uuid"
-#                               category: "basketball"
-#                               name: "Venue 1"
-#                               username: "User 1"
-#                               location: "Jakarta"
-#                               distance: 1
-#                               price: 100.50
-#                               average_rating: 4.55
-#                               venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
-#                             - venue_id: "string-uuid"
-#                               category: "football"
-#                               name: "Venue 2"
-#                               username: "User 1"
-#                               location: "Jakarta"
-#                               distance: 1.3
-#                               price: 200.75
-#                               average_rating: 4.75
-#                               venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
-
-#         Response200SelectVenues:
-#             description: Get specific venue
-#             content:
-#                 application/json:
-#                     schema:
-#                         type: object
-#                         properties:
-#                             code:
-#                                 type: integer
-#                                 example: 200
-#                             message:
-#                                 type: string
-#                                 example: "Successful Operation"
-#                             data:
-#                                 type: array
-#                                 items:
-#                                     $ref: "#/components/schemas/venues"
-#                             pagination:
-#                                 $ref: "#/components/schemas/pagination"
-#                     example:
-#                         code: 200
-#                         message: "Successful Operation"
-#                         data:
-#                             venue_name: "venue_name"
-#                             category: "basketball"
-#                             address: "address"
-#                             booking_date: "2023-04-05"
-#                             start: "07:00"
-#                             end: "23:00"
-#                             payment_code: "Jakarta"
-#                             payment_type: "Mandiri"
-#                             status: "success"
-
-#         Response200EditVenues:
-#             description: Successful operation
-#             content:
-#                 application/json:
-#                     schema:
-#                         type: object
-#                         properties:
-#                             code:
-#                                 type: integer
-#                                 example: 201
-#                             message:
-#                                 type: string
-#                                 example: "Successfully updated a venue"
-
-    Response200DeactiveVenues:
-        description: Successful operation
-        content:
-            application/json:
-                schema:
-                    type: object
-                    properties:
-                        code:
-                            type: integer
-                            example: 200
-                        message:
-                            type: string
-                            example: "Successfully deleted a venue"
-
-    Response200CheckAvailability:
-        description: Successful Operation
-        content:
-            application/json:
-                schema:
-                    type: object
-                    properties:
-                        code:
-                            type: integer
-                        message:
-                            type: string
-                        data:
-                            type: array
-                            items:
-                                type: object
-                                properties:
-                                    reservation_id:
-                                        type: string
-                                    category:
-                                        type: string
-                                    name:
-                                        type: string
-                                    subtotal:
-                                        type: integer
-                                    duration:
-                                        type: integer
-                                    gross_amount:
-                                        type: integer
-                                    check-in_date:
-                                        type: string
-                                        format: date-time
-                                    check-out_date:
-                                        type: string
-                                        format: date-time
-                example:
-                    code: 200
-                    message: "Successful operation"
-                    data:
-                        venue_id: "string-venue-id"
-                        owner_id: "string-user-id"
-                        category: "basketball"
-                        venue_name: "lapangan basket"
-                        reservations:
-                            - reservation_id: "string-reservation-id"
-                              username: "Tono Haha"
-                              check-in_date: "Saturday,2023-06-05 08:05"
-                              check-out_date: "Saturday,2023-06-06 08:05"
-                            - reservation_id: "string-reservation-id"
-                              username: "Trim"
-                              check-in_date: "Saturday,2023-06-05 10:05"
-                              check-out_date: "Saturday,2023-06-07 10:05"
-                            - reservation_id: "string-reservation-id"
-                              username: "Concate"
-                              check-in_date: "Saturday,2023-06-07 14:05"
-                              check-out_date: "Saturday,2023-08-08 14:05"
-
-            Response200Reservation:
-                description: Successful Operation
+paths:
+    /register:
+        post:
+            summary: Register a new user
+            operationId: registerUser
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/Auth"
+            responses:
+                "200":
+                    description: User registration successful
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RegistrationResponse"
+                "400":
+                    description: Invalid request payload
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                "409":
+                    description: User already exists
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+            tags:
+                - Authentication
+    /login:
+        post:
+            summary: User login
+            operationId: userLogin
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/LoginRequest"
+            responses:
+                "200":
+                    description: OK - User login successful
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/LoginResponse"
+                "401":
+                    description: Unauthorized - Invalid credentials
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorLoginResponse"
+            tags:
+                - Authentication
+    /validation:
+        post:
+            summary: OTP validation
+            requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
                             type: object
                             properties:
-                                code:
-                                    type: integer
-                                message:
+                                user_id:
                                     type: string
-                                data:
+                                    example: USR-HAY7A8QU
+                                otp_code:
+                                    type: string
+                                    example: 239076
+            responses:
+                "200":
+                    description: Verification successful
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: Success
+                                    message:
+                                        type: string
+                                        example: Verification success
+                "400":
+                    description: Invalid request payload
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: Fail
+                                    message:
+                                        type: string
+                                        example: "Bad request. Invalid request body or parameters"
+                "404":
+                    description: OTP has been expired
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: Fail
+                                    message:
+                                        type: string
+                                        example: "OTP has been expired"
+            tags:
+                - Authentication
+    /resend-otp:
+        post:
+            summary: Resend OTP
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                    example: user@mail.com
+            responses:
+                "200":
+                    description: Resend OTP
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: Check OTP sent to your email
+                "400":
+                    description: Invalid request payload
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: Fail
+                                    message:
+                                        type: string
+                                        example: "Bad request. Invalid request body or parameters"
+            tags:
+                - Authentication
+    /users:
+        get:
+            summary: Get user profile
+            operationId: getUserProfile
+            security:
+                - bearerAuth: []
+            responses:
+                "200":
+                    description: OK - User profile retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserProfileResponse"
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorProfileResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+                "404":
+                    description: User profile not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorProfileResponse"
+                            examples:
+                                NotFound:
+                                    $ref: "#/components/examples/NotFound"
+            tags:
+                - Users
+        put:
+            summary: Update user profile
+            operationId: updateUserProfile
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/EditUserProfileRequest"
+            responses:
+                "200":
+                    description: User profile updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessResponse"
+                "400":
+                    description: Bad request - Invalid request body
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateResponse"
+                            examples:
+                                BadRequestError:
+                                    $ref: "#/components/examples/BadRequestError"
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+            tags:
+                - Users
+        delete:
+            summary: Delete user account
+            operationId: deleteUserAccount
+            security:
+                - bearerAuth: []
+            responses:
+                "200":
+                    description: User account deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/DeleteUserAccountResponse"
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDeleteResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDeleteResponse"
+                            examples:
+                                InternalServerError:
+                                    $ref: "#/components/examples/InternalServerError"
+            tags:
+                - Users
+    /users/profile-picture:
+        put:
+            summary: Change user profile picture
+            operationId: changeProfilePicture
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            $ref: "#/components/schemas/ChangeProfilePictureRequest"
+            responses:
+                "200":
+                    description: User profile picture changed successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ChangeProfilePictureResponse"
+                "400":
+                    description: Bad request - Invalid request body
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
+                            examples:
+                                BadRequestError:
+                                    $ref: "#/components/examples/BadRequestError"
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
+                            examples:
+                                InternalServerError:
+                                    $ref: "#/components/examples/InternalServerError"
+            tags:
+                - Users
+        delete:
+            summary: Remove user profile picture
+            operationId: removeProfilePicture
+            security:
+                - bearerAuth: []
+            responses:
+                "200":
+                    description: User profile picture changed successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: Profile picture removed successfully
+                "400":
+                    description: Bad request - Invalid request body
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
+                            examples:
+                                BadRequestError:
+                                    $ref: "#/components/examples/BadRequestError"
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpdateProfilePictureResponse"
+                            examples:
+                                InternalServerError:
+                                    $ref: "#/components/examples/InternalServerError"
+            tags:
+                - Users
+    /users/upgrade:
+        post:
+            summary: Upgrade user role from 'user' to 'owner'
+            operationId: upgradeUserRole
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            $ref: "#/components/schemas/UpgradeUserRoleRequest"
+            responses:
+                "200":
+                    description: User role upgraded successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UpgradeUserRoleResponse"
+                "400":
+                    description: Bad request - Invalid request body
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpgradeUserRoleResponse"
+                            examples:
+                                BadRequestError:
+                                    $ref: "#/components/examples/BadRequestError"
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpgradeUserRoleResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorUpgradeUserRoleResponse"
+                            examples:
+                                InternalServerError:
+                                    $ref: "#/components/examples/InternalServerError"
+            tags:
+                - Users
+    /users/password:
+        put:
+            summary: Change user password
+            operationId: changeUserPassword
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/ChangePasswordRequest"
+            responses:
+                "200":
+                    description: User password changed successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ChangePasswordResponse"
+                "400":
+                    description: Bad request - Invalid request body
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorChangePasswordResponse"
+                            example:
+                                error: Wrong password
+                "401":
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorChangePasswordResponse"
+                            examples:
+                                InvalidTokenError:
+                                    $ref: "#/components/examples/InvalidTokenError"
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorChangePasswordResponse"
+                            examples:
+                                InternalServerError:
+                                    $ref: "#/components/examples/InternalServerError"
+            tags:
+                - Users
+
+    "/users/venues":
+        get:
+            tags:
+                - Users
+            summary: Get user that hosting venue, order by lastest update
+            responses:
+                "200":
+                    $ref: "#/components/responses/Response200UserVenues"
+                "404":
+                    $ref: "#/components/responses/Response404"
+                "500":
+                    $ref: "#/components/responses/Response500"
+            security:
+                - bearerAuth: []
+
+    "/users/reservations":
+        get:
+            tags:
+                - Users
+            summary: Get user that booking venue, order by lastest update
+            responses:
+                "200":
+                    $ref: "#/components/responses/Response200UserReservation"
+                "404":
+                    $ref: "#/components/responses/Response404"
+                "500":
+                    $ref: "#/components/responses/Response500"
+            security:
+                - bearerAuth: []
+
+    "/venues":
+        get:
+            tags:
+                - Venues
+            summary: Find list venue, venue's reviews and rating (pagination)
+            description: Find list venue, venue's average reviews and rating accumulation
+            parameters:
+                - in: query
+                  name: category
+                  schema:
+                      type: string
+                  description: String value of category to retrieve list of category venues
+                  required: false
+                - in: query
+                  name: place
+                  schema:
+                      type: string
+                  description: String value of place to retrieve list of place venues
+                  required: false
+                - in: query
+                  name: rating
+                  schema:
+                      type: integer
+                  description: String range value of rating to retrieve list of rating venues
+                  required: false
+                - in: query
+                  name: price
+                  schema:
+                      type: integer
+                  description: String range value of price to retrieve list of price venues
+                  required: false
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                  description: The limit number to retrieve
+                  required: true
+                - in: query
+                  name: offset
+                  schema:
+                      type: integer
+                  description: The offset number to retrieve
+                  required: false
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                  description: The page number to retrieve
+                  required: true
+                - in: query
+                  name: sort
+                  schema:
+                      type: string
+                  required: false
+            responses:
+                "200":
+                    $ref: "#/components/responses/Response200ListVenues"
+                "400":
+                    $ref: "#/components/responses/Response400"
+                "404":
+                    $ref: "#/components/responses/Response404"
+                "500":
+                    $ref: "#/components/responses/Response500"
+
+        post:
+            tags:
+                - Venues
+            summary: Register venue
+            description: User can register a venue
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                category:
+                                    type: string
+                                name:
+                                    type: string
+                                    uniqueItems: true
+                                    description: Nama unik tempat olahraga
+                                description:
+                                    type: string
+                                    description: Deskripsi tempat olahraga
+                                service_time:
+                                    type: string
+                                location:
+                                    type: string
+                                    description: Alamat tempat olahraga
+                                price:
+                                    type: number
+                                    description: Harga sewa tempat olahraga
+                                    format: float
+                        example:
+                            category: "football"
+                            name: "Bola Bolaan"
+                            description: "Deskripsi Bola Bolaan"
+                            service_time: "07:45 - 23:00"
+                            location: "Jalan Utama No. 123, Kota Anywhere"
+                            price: 29.99
+            responses:
+                "201":
+                    $ref: "#/components/responses/Response201"
+                "400":
+                    $ref: "#/components/responses/Response400"
+                "500":
+                    $ref: "#/components/responses/Response500"
+            security:
+                - bearerAuth: []
+
+    "/venues/{venue_id}":
+        get:
+            tags:
+                - Venues
+            summary: Find specific venue, venue's reviews and rating
+            description: Select specific venue, venue's average reviews and rating accumulation
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: Venue ID
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    $ref: "#/components/responses/Response200SelectVenues"
+                "400":
+                    $ref: "#/components/responses/Response400"
+                "404":
+                    $ref: "#/components/responses/Response404"
+                "500":
+                    $ref: "#/components/responses/Response500"
+
+        put:
+            tags:
+                - Venues
+            summary: Edit venue by venue_id
+            description: User can edit a their venue by venue_id
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: Venue ID
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                category:
+                                    type: string
+                                name:
+                                    type: string
+                                    uniqueItems: true
+                                    description: Nama unik tempat olahraga
+                                description:
+                                    type: string
+                                    description: Deskripsi tempat olahraga
+                                service_time:
+                                    type: string
+                                location:
+                                    type: string
+                                    description: Alamat tempat olahraga
+                                price:
+                                    type: number
+                                    description: Harga sewa tempat olahraga
+                                    format: float
+                        example:
+                            category: "football"
+                            name: "Bola Bolaan"
+                            description: "Deskripsi Bola Bolaan"
+                            service_time: "07:45 - 23:00"
+                            location: "Jalan Utama No. 123, Kota Anywhere"
+                            price: 29.99
+            responses:
+                "200":
+                    $ref: "#/components/responses/Response200EditVenues"
+                "400":
+                    $ref: "#/components/responses/Response400"
+                "404":
+                    $ref: "#/components/responses/Response404"
+                "500":
+                    $ref: "#/components/responses/Response500"
+            security:
+                - bearerAuth: []
+
+        delete:
+            tags:
+                - Venues
+            summary: Deactive venue by venue_id
+            description: Deactive specific venue by venue_id
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: Venue ID
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    $ref: "#/components/responses/Response200DeactiveVenues"
+                "404":
+                    $ref: "#/components/responses/Response404"
+                "500":
+                    $ref: "#/components/responses/Response500"
+            security:
+                - bearerAuth: []
+    /venues/{venue_id}/images:
+        post:
+            summary: Add venue images
+            operationId: addVenueImages
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue to add images to
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            type: object
+                            properties:
+                                files:
                                     type: array
                                     items:
-                                        type: object
-                                        properties:
-                                            reservation_id:
-                                                type: string
-                                            category:
-                                                type: string
-                                            name:
-                                                type: string
-                                            subtotal:
-                                                type: integer
-                                            duration:
-                                                type: integer
-                                            gross_amount:
-                                                type: integer
-                                            check-in_date:
-                                                type: string
-                                                format: date-time
-                                            check-out_date:
-                                                type: string
-                                                format: date-time
+                                        type: string
+                                        format: binary
+                                    maxItems: 5
+            responses:
+                "200":
+                    description: Venue images added successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AddVenueImagesResponse"
+                            examples:
+                                VenueImagesAdded:
+                                    value:
+                                        message: Venue images added successfully
+                "400":
+                    description: Invalid request payload
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddVenueImageResponse"
+                            examples:
+                                InvalidRequestPayload:
+                                    value:
+                                        error: Invalid request payload
+                "404":
+                    description: Venue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddVenueImageResponse"
+                            examples:
+                                VenueNotFoundError:
+                                    value:
+                                        error: Venue not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddVenueImageResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+        get:
+            summary: Get all images for a venue
+            operationId: getAllImagesForVenue
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue to retrieve images for
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Images retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ImageListResponse"
+                            examples:
+                                ImagesRetrieved:
+                                    value:
+                                        message: Images retrieved successfully
+                                        data:
+                                            - image_id: "image1"
+                                              image_link: "https://example.com/image1.jpg"
+                                            - image_id: "image2"
+                                              image_link: "https://example.com/image2.jpg"
+                "400":
+                    description: Invalid request parameters
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InvalidRequestParams:
+                                    value:
+                                        error: Invalid request parameters
+                "404":
+                    description: Venue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                VenueNotFoundError:
+                                    value:
+                                        error: Venue not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+    /venues/{venue_id}/images/{image_id}:
+        delete:
+            summary: Delete venue image
+            operationId: deleteVenueImage
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue containing the image
+                  required: true
+                  schema:
+                      type: string
+                - name: image_id
+                  in: path
+                  description: ID of the image to delete
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Venue image deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessResponse"
+                            examples:
+                                VenueImageDeleted:
+                                    value:
+                                        message: Venue image deleted successfully
+                "400":
+                    description: Invalid request parameters
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InvalidRequestParams:
+                                    value:
+                                        error: Invalid request parameters
+                "404":
+                    description: Venue or image not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                VenueOrImageNotFoundError:
+                                    value:
+                                        error: Venue or image not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+    /venues/{venue_id}/reviews:
+        post:
+            summary: Add a review
+            operationId: addReview
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue to post review
+                  required: true
+                  schema:
+                      type: string
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AddReviewRequest"
+                        example:
+                            venue_id: "VEN-H7IA90"
+                            review: "some review"
+                            rating: 4.5
+            responses:
+                "200":
+                    description: Review added successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessAddReviewResponse"
+                            examples:
+                                ReviewAdded:
+                                    value:
+                                        message: Review added successfully
+                "400":
+                    description: Invalid request payload
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddReviewResponse"
+                            examples:
+                                InvalidRequestPayload:
+                                    value:
+                                        error: Invalid request payload
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorAddReviewResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+        get:
+            summary: Get all reviews for a venue
+            operationId: getAllReviews
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: ID of the venue to retrieve reviews for
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Reviews retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ReviewListResponse"
+                            examples:
+                                ReviewsRetrieved:
+                                    value:
+                                        message: Reviews retrieved successfully
+                                        data:
+                                            - review_id: "review1"
+                                              review: "Great place to visit!"
+                                              rating: 4.5
+                                              user:
+                                                  user_id: "user1"
+                                                  full_name: "John Doe"
+                                            - review_id: "review2"
+                                              review: "Average experience."
+                                              rating: 3.0
+                                              user:
+                                                  user_id: "user2"
+                                                  full_name: "Jane Smith"
+                "400":
+                    description: Invalid request parameters
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InvalidRequestParams:
+                                    value:
+                                        error: Invalid request parameters
+                "404":
+                    description: Venue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                VenueNotFoundError:
+                                    value:
+                                        error: Venue not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Venues
+
+    /reviews/{review_id}:
+        delete:
+            summary: Delete a review
+            operationId: deleteReview
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: review_id
+                  in: path
+                  description: ID of the review to delete
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Review deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessResponse"
+                            examples:
+                                ReviewDeleted:
+                                    value:
+                                        message: Review deleted successfully
+                "400":
+                    description: Invalid request parameters
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InvalidRequestParams:
+                                    value:
+                                        error: Invalid request parameters
+                "404":
+                    description: Review not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                ReviewNotFoundError:
+                                    value:
+                                        error: Review not found
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                            examples:
+                                InternalServerError:
+                                    value:
+                                        error: Internal server error. Please try again later.
+            tags:
+                - Reviews
+
+    "/venues/{venue_id}/availability":
+        get:
+            tags:
+                - Venues
+            summary: Check availability
+            description: _
+            parameters:
+                - name: venue_id
+                  in: path
+                  description: Venue ID
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+            responses:
+                "200":
+                    $ref: "#/components/responses/Response200CheckAvailability"
+                "400":
+                    $ref: "#/components/responses/Response400"
+                "404":
+                    $ref: "#/components/responses/Response404"
+                "500":
+                    $ref: "#/components/responses/Response500"
+            security:
+                - bearerAuth: []
+
+    "/reservations":
+        post:
+            tags:
+                - Reservations
+            summary: User can make a reservation
+            description: Endpoint login user to the web-application
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/reservations"
+                        example:
+                            reservation:
+                                venue_id: "string-uuid"
+                                check-in_date: "2023/06/05 08:05"
+                                check-out_date: "2023/08/05 08:05"
+                            payment:
+                                payment_type: "bri/bca/bni/mandiri/permata/indomaret/alfamart/gopay/shopeepay/qris"
+            responses:
+                "201":
+                    $ref: "#/components/responses/Response201MakeReservation"
+                "400":
+                    $ref: "#/components/responses/Response400"
+                "500":
+                    $ref: "#/components/responses/Response500"
+            security:
+                - bearerAuth: []
+
+    "/reservations/status":
+        post:
+            tags:
+                - Reservations
+            summary: Retrive payment notification update
+            description: Retrive payment notification to update status on database
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/midtrans_callback"
+            responses:
+                "200":
+                    $ref: "#/components/responses/Response200"
+                "400":
+                    $ref: "#/components/responses/Response400"
+                "404":
+                    $ref: "#/components/responses/Response404"
+                "500":
+                    $ref: "#/components/responses/Response500"
+            security:
+                - bearerAuth: []
+
+    "/reservations/{reservation_id}":
+        get:
+            tags:
+                - Reservations
+            summary: Detail transaction by reservation_id
+            description: _
+            parameters:
+                - name: reservation_id
+                  in: path
+                  description: Reservation ID
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+            responses:
+                "200":
+                    $ref: "#/components/responses/Response200ReservationDetails"
+                "400":
+                    $ref: "#/components/responses/Response400"
+                "404":
+                    $ref: "#/components/responses/Response404"
+                "500":
+                    $ref: "#/components/responses/Response500"
+            security:
+                - bearerAuth: []
+
+components:
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+
+    requestBodies:
+        RequestLoginUser:
+            required: true
+            content:
+                multipart/form-data:
+                    schema:
+                        $ref: "#/components/schemas/users"
+
+    responses:
+        Response200:
+            description: Successful operation
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 200
+                            message:
+                                type: string
+                                example: "Successful operation"
+
+        Response201:
+            description: Successful operation
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 201
+                            message:
+                                type: string
+                                example: "Successful operation"
+
+        Response400:
+            description: Bad request
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 400
+                            message:
+                                type: string
+                                example: "Bad request"
+
+        Response401:
+            description: Bad request
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 401
+                            message:
+                                type: string
+                                example: "Unauthorized access."
+
+        Response404:
+            description: Not Found
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 404
+                            message:
+                                type: string
+                                example: "The requested resource was not found"
+
+        Response500:
+            description: Internal server error
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 500
+                            message:
+                                type: string
+                                example: "Internal server error"
+
+        Response200ListVenues:
+            description: Get list of events with pagination
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 200
+                            message:
+                                type: string
+                                example: "Successful Operation"
+                            data:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/venues"
+                            pagination:
+                                $ref: "#/components/schemas/pagination"
+                    example:
+                        code: 200
+                        message: "Successful Operation"
+                        data:
+                            - venue_id: "string-uuid"
+                              category: "basketball"
+                              name: "Venue 1"
+                              username: "User 1"
+                              location: "Jakarta"
+                              distance: 1
+                              price: 100.50
+                              average_rating: 4.55
+                              venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
+                            - venue_id: "string-uuid"
+                              category: "football"
+                              name: "Venue 2"
+                              username: "User 2"
+                              location: "Jakarta"
+                              distance: 1.3
+                              price: 200.75
+                              average_rating: 4.75
+                              venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
+                        pagination:
+                            limit: 5
+                            offset: 0
+                            page: 1
+                            total_rows: 15
+                            total_pages: 3
+
+        Response200UserVenues:
+            description: Get list of events with pagination
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 200
+                            message:
+                                type: string
+                                example: "Successful Operation"
+                            data:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/venues"
+                            pagination:
+                                $ref: "#/components/schemas/pagination"
+                    example:
+                        code: 200
+                        message: "Successful Operation"
+                        data:
+                            - venue_id: "string-uuid"
+                              category: "basketball"
+                              name: "Venue 1"
+                              username: "User 1"
+                              location: "Jakarta"
+                              distance: 1
+                              price: 100.50
+                              average_rating: 4.55
+                              venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
+                            - venue_id: "string-uuid"
+                              category: "football"
+                              name: "Venue 2"
+                              username: "User 1"
+                              location: "Jakarta"
+                              distance: 1.3
+                              price: 200.75
+                              average_rating: 4.75
+                              venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
+
+        Response200SelectVenues:
+            description: Get specific venue
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 200
+                            message:
+                                type: string
+                                example: "Successful Operation"
+                            data:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/venues"
+                            pagination:
+                                $ref: "#/components/schemas/pagination"
+                    example:
+                        code: 200
+                        message: "Successful Operation"
+                        data:
+                            venue_name: "venue_name"
+                            category: "basketball"
+                            address: "address"
+                            booking_date: "2023-04-05"
+                            start: "07:00"
+                            end: "23:00"
+                            payment_code: "Jakarta"
+                            payment_type: "Mandiri"
+                            status: "success"
+
+        Response200EditVenues:
+            description: Successful operation
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 201
+                            message:
+                                type: string
+                                example: "Successfully updated a venue"
+
+        Response200DeactiveVenues:
+            description: Successful operation
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 200
+                            message:
+                                type: string
+                                example: "Successfully deleted a venue"
+
+        Response200CheckAvailability:
+            description: Successful Operation
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                            message:
+                                type: string
+                            data:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        reservation_id:
+                                            type: string
+                                        category:
+                                            type: string
+                                        name:
+                                            type: string
+                                        subtotal:
+                                            type: integer
+                                        duration:
+                                            type: integer
+                                        gross_amount:
+                                            type: integer
+                                        check-in_date:
+                                            type: string
+                                            format: date-time
+                                        check-out_date:
+                                            type: string
+                                            format: date-time
+                    example:
+                        code: 200
+                        message: "Successful operation"
+                        data:
+                            venue_id: "string-venue-id"
+                            owner_id: "string-user-id"
+                            category: "basketball"
+                            venue_name: "lapangan basket"
+                            reservations:
+                                - reservation_id: "string-reservation-id"
+                                  username: "Tono Haha"
+                                  check-in_date: "Saturday,2023-06-05 08:05"
+                                  check-out_date: "Saturday,2023-06-06 08:05"
+                                - reservation_id: "string-reservation-id"
+                                  username: "Trim"
+                                  check-in_date: "Saturday,2023-06-05 10:05"
+                                  check-out_date: "Saturday,2023-06-07 10:05"
+                                - reservation_id: "string-reservation-id"
+                                  username: "Concate"
+                                  check-in_date: "Saturday,2023-06-07 14:05"
+                                  check-out_date: "Saturday,2023-08-08 14:05"
+
+        Response200Reservation:
+            description: Successful Operation
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                            message:
+                                type: string
+                            data:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        reservation_id:
+                                            type: string
+                                        category:
+                                            type: string
+                                        name:
+                                            type: string
+                                        subtotal:
+                                            type: integer
+                                        duration:
+                                            type: integer
+                                        gross_amount:
+                                            type: integer
+                                        check-in_date:
+                                            type: string
+                                            format: date-time
+                                        check-out_date:
+                                            type: string
+                                            format: date-time
+                    example:
+                        code: 200
+                        message: "Successful operation"
+                        data:
+                            - reservation_id: "string-uuid"
+                              category: "futsal"
+                              name: "Arena Futsal Tidar"
+                              subtotal: 100
+                              duration: 2
+                              gross_amount: 200
+                              check-in_date: "Saturday,2023-06-05 08:05"
+                              check-out_date: "Saturday,2023-08-05 08:05"
+                            - reservation_id: "string-uuid"
+                              category: "futsal"
+                              name: "Arena Futsal Tidar"
+                              subtotal: 100
+                              duration: 2
+                              gross_amount: 200
+                              check-in_date: "Saturday,2023-06-05 08:05"
+                              check-out_date: "Saturday,2023-08-05 08:05"
+
+        Response200UserReservation:
+            description: Successful operation
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 200
+                            message:
+                                type: string
+                                example: "Successful operation"
+                            data:
+                                type: array
+                                items:
+                                    type: object
                         example:
                             code: 200
                             message: "Successful operation"
                             data:
-                                - reservation_id: "string-uuid"
-                                  category: "futsal"
-                                  name: "Arena Futsal Tidar"
-                                  subtotal: 100
+                                - venue_name: "tidar basket"
+                                  location: "Jakarta"
+                                  check_in_date: "2023/06/05 08:05:00"
+                                  check_out_date: "2023/08/05 08:05:00"
                                   duration: 2
-                                  gross_amount: 200
-                                  check-in_date: "Saturday,2023-06-05 08:05"
-                                  check-out_date: "Saturday,2023-08-05 08:05"
-                                - reservation_id: "string-uuid"
-                                  category: "futsal"
-                                  name: "Arena Futsal Tidar"
-                                  subtotal: 100
+                                  price: 100
+                                  total_price: 200
+                                  payment_type: "bca"
+                                  payment_code: VA4nUmber
+                                  status: "success"
+                                - venue_name: "tidar basket"
+                                  location: "Jakarta"
+                                  check_in_date: "2023/06/05 08:05:00"
+                                  check_out_date: "2023/08/05 08:05:00"
                                   duration: 2
-                                  gross_amount: 200
-                                  check-in_date: "Saturday,2023-06-05 08:05"
-                                  check-out_date: "Saturday,2023-08-05 08:05"
+                                  price: 100
+                                  total_price: 200
+                                  payment_type: "bca"
+                                  payment_code: VA4nUmber
+                                  status: "success"
 
-            Response200UserReservation:
-                description: Successful operation
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            properties:
-                                code:
-                                    type: integer
-                                    example: 200
-                                message:
-                                    type: string
-                                    example: "Successful operation"
-                                data:
-                                    type: array
-                                    items:
-                                        type: object
-                            example:
-                                code: 200
-                                message: "Successful operation"
-                                data:
-                                    - venue_name: "tidar basket"
-                                      location: "Jakarta"
-                                      check_in_date: "2023/06/05 08:05:00"
-                                      check_out_date: "2023/08/05 08:05:00"
-                                      duration: 2
-                                      price: 100
-                                      total_price: 200
-                                      payment_type: "bca"
-                                      payment_code: VA4nUmber
-                                      status: "success"
-                                    - venue_name: "tidar basket"
-                                      location: "Jakarta"
-                                      check_in_date: "2023/06/05 08:05:00"
-                                      check_out_date: "2023/08/05 08:05:00"
-                                      duration: 2
-                                      price: 100
-                                      total_price: 200
-                                      payment_type: "bca"
-                                      payment_code: VA4nUmber
-                                      status: "success"
-
-            Response200ReservationDetails:
-                description: Successful operation
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            properties:
-                                code:
-                                    type: integer
-                                    example: 200
-                                message:
-                                    type: string
-                                    example: "Successful operation"
-                                data:
-                                    type: array
-                                    items:
-                                        type: object
-                            example:
-                                code: 200
-                                message: "Successful operation"
-                                data:
-                                    venue_name: "tidar basket"
-                                    location: "Jakarta"
-                                    check_in_date: "2023/06/05 08:05:00"
-                                    check_out_date: "2023/08/05 08:05:00"
-                                    duration: 2
-                                    price: 100
-                                    total_price: 200
-                                    payment_type: "bca"
-                                    payment_code: VA4nUmber
-                                    status: "success"
-
-            Response201MakeReservation:
-                description: Successful Operation
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            properties:
-                                code:
-                                    type: integer
-                                message:
-                                    type: string
-                                data:
-                                    type: array
-                                    items:
-                                        type: object
-                                        properties:
-                                            payment_id:
-                                                type: string
-                                            reservation_id:
-                                                type: string
-                                            payment_method:
-                                                type: string
-                                            payment_type:
-                                                type: string
-                                            payment_code:
-                                                type: string
-
+        Response200ReservationDetails:
+            description: Successful operation
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                                example: 200
+                            message:
+                                type: string
+                                example: "Successful operation"
+                            data:
+                                type: array
+                                items:
+                                    type: object
                         example:
-                            code: 201
+                            code: 200
                             message: "Successful operation"
                             data:
-                                payment_id: "85ef6565-eb95-4be2-a4c0-a6425b27dae7"
-                                reservation_id: "271b7e12-6936-47e3-a1de-c8fdbfee250f"
-                                payment_method: "cstore"
-                                payment_type: "alfamart"
-                                payment_code: "43863390217"
+                                venue_name: "tidar basket"
+                                location: "Jakarta"
+                                check_in_date: "2023/06/05 08:05:00"
+                                check_out_date: "2023/08/05 08:05:00"
+                                duration: 2
+                                price: 100
+                                total_price: 200
+                                payment_type: "bca"
+                                payment_code: VA4nUmber
+                                status: "success"
 
-#     schemas:
-#         users:
-#             type: object
-#             properties:
-#                 user_id:
-#                     type: string
-#                     format: uuid
-#                 fullname:
-#                     type: string
-#                 email:
-#                     type: string
-#                     format: email
-#                 phone:
-#                     type: string
-#                 password:
-#                     type: string
-#                 bio:
-#                     type: string
-#                 address:
-#                     type: string
-#                 role:
-#                     type: string
-#                     enum:
-#                         - user
-#                         - owner
-#                 profile_picture:
-#                     type: string
-#                 created_at:
-#                     type: string
-#                     format: date-time
-#                 updated_at:
-#                     type: string
-#                     format: date-time
-#                 deleted_at:
-#                     type: string
-#                     format: date-time
-#         venues:
-#             type: object
-#             required:
-#                 - name
-#                 - venue_picture_id
-#             properties:
-#                 venue_id:
-#                     type: string
-#                     format: uuid
-#                 user_id:
-#                     type: string
-#                     format: uuid
-#                 category:
-#                     type: string
-#                     format: uuid
-#                     enum:
-#                         - basketball
-#                         - football
-#                         - futsal
-#                         - badminton
-#                         - swimming
-#                 name:
-#                     type: string
-#                 description:
-#                     type: string
-#                 location:
-#                     type: string
-#                 price:
-#                     type: integer
-#                 longitude:
-#                     type: string
-#                 latitude:
-#                     type: string
-#                 created_at:
-#                     type: string
-#                     format: date-time
-#                 updated_at:
-#                     type: string
-#                     format: date-time
-#                 deleted_at:
-#                     type: string
-#                     format: date-time
-#         venue_pictures:
-#             type: object
-#             required:
-#                 - venue_picture
-#             properties:
-#                 venue_picture_id:
-#                     type: string
-#                 venue_id:
-#                     type: string
-#                 url:
-#                     type: string
-#                 created_at:
-#                     type: string
-#                     format: date-time
-#                 updated_at:
-#                     type: string
-#                     format: date-time
-#                 deleted_at:
-#                     type: string
-#                     format: date-time
-#         reservations:
-#             type: object
-#             properties:
-#                 reservation_id:
-#                     type: string
-#                     format: uuid
-#                 user_id:
-#                     type: string
-#                     format: uuid
-#                 venue_id:
-#                     type: string
-#                     format: uuid
-#                 payment_id:
-#                     type: string
-#                     format: uuid
-#                 check-in_date:
-#                     type: string
-#                     format: date-time
-#                 check-out_date:
-#                     type: string
-#                     format: date-time
-#                 duration:
-#                     type: integer
-#                     format: uint
-#                 subtotal:
-#                     type: integer
-#                     format: float64
-#                 created_at:
-#                     type: string
-#                     format: date-time
-#                 updated_at:
-#                     type: string
-#                     format: date-time
-#                 deleted_at:
-#                     type: string
-#                     format: date-time
-#         payments:
-#             type: object
-#             required:
-#                 - grand_total
-#                 - bank_account
-#             properties:
-#                 payment_id:
-#                     type: string
-#                     format: uuid
-#                 va_number:
-#                     type: string
-#                 grand_total:
-#                     type: string
-#                 bank_account:
-#                     type: string
-#                     enum:
-#                         - cash
-#                         - bca
-#                         - bni
-#                         - bri
-#                         - mandiri
-#                 status:
-#                     type: string
-#                 created_at:
-#                     type: string
-#                     format: date-time
-#                 updated_at:
-#                     type: string
-#                     format: date-time
-#                 deleted_at:
-#                     type: string
-#                     format: date-time
-#         reviews:
-#             type: object
-#             required:
-#                 - user_id
-#                 - venue_id
-#                 - rating
-#             properties:
-#                 review_id:
-#                     type: integer
-#                     format: uint64
-#                 user_id:
-#                     type: string
-#                     format: uuid
-#                 venue_id:
-#                     type: string
-#                     format: uuid
-#                 review:
-#                     type: string
-#                 rating:
-#                     type: integer
-#                     enum:
-#                         - 1
-#                         - 2
-#                         - 3
-#                         - 4
-#                         - 5
-#                 created_at:
-#                     type: string
-#                     format: date-time
-#                 updated_at:
-#                     type: string
-#                     format: date-time
-#                 deleted_at:
-#                     type: string
-#                     format: date-time
-#         midtrans_callback:
-#             type: object
-#             properties:
-#                 transaction_time:
-#                     type: string
-#                 transaction_status:
-#                     type: string
-#                 transaction_id:
-#                     type: string
-#                 status_message:
-#                     type: string
-#                 status_code:
-#                     type: string
-#                 signature_key:
-#                     type: string
-#                 payment_type:
-#                     type: string
-#                 order_id:
-#                     type: string
-#                 merchant_id:
-#                     type: string
-#                 masked_card:
-#                     type: string
-#                 gross_amount:
-#                     type: string
-#                 fraud_status:
-#                     type: string
-#                 eci:
-#                     type: string
-#                 currency:
-#                     type: string
-#                 channel_response_message:
-#                     type: string
-#                 channel_response_code:
-#                     type: string
-#                 card_type:
-#                     type: string
-#                 bank:
-#                     type: string
-#                 approval_code:
-#                     type: string
-#         api_response:
-#             type: object
-#             properties:
-#                 code:
-#                     type: integer
-#                     format: int32
-#                 message:
-#                     type: string
-#                 data:
-#                     type: string
-#         pagination:
-#             type: object
-#             properties:
-#                 limit:
-#                     type: integer
-#                     description: The current limit number.
-#                 offset:
-#                     type: integer
-#                     description: The current offset number.
-#                 page:
-#                     type: integer
-#                     description: The current page number.
-#                 total_pages:
-#                     type: integer
-#                     description: The total number of pages.
-#                 total_items:
-#                     type: integer
-#                     description: The total number of items.
-#         Auth:
-#             type: object
-#             properties:
-#                 full_name:
-#                     type: string
-#                     example: John Doe
-#                 email:
-#                     type: string
-#                     format: email
-#                     example: johndoe@example.com
-#                 password:
-#                     type: string
-#                     format: password
-#                     example: password123
-#                 phone:
-#                     type: string
-#                     format: phone
-#                     example: 082945161823
-#         RegistrationResponse:
-#             type: object
-#             properties:
-#                 message:
-#                     type: string
-#                     example: User registered successfully
-#         ErrorResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#                     example: Invalid username format
-#         LoginRequest:
-#             type: object
-#             properties:
-#                 email:
-#                     type: string
-#                     format: email
-#                     example: johndoe@example.com
-#                 password:
-#                     type: string
-#                     format: password
-#                     example: password123
-#         LoginResponse:
-#             type: object
-#             properties:
-#                 data:
-#                     type: object
-#                     properties:
-#                         user_id:
-#                             type: string
-#                             example: usr-4g6yhu
-#                         role:
-#                             type: string
-#                             example: user
-#                         token:
-#                             type: string
-#                             example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFiYzEyMyIsInJvbGUiOiJ1c2VyIiwidG9rZW4iOiJmZWVkZWQtc29tZS10b2tlbiJ9.8iEyFnFqvc5GT5Ht7YjCz0rCmI6tr6eR6x2YwN0Z5Ec
-#                 message:
-#                     type: string
-#                     example: Login successful
-#         ErrorLoginResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#                     example: Invalid credentials
-#         UserProfileResponse:
-#             type: object
-#             properties:
-#                 data:
-#                     type: object
-#                     properties:
-#                         user_id:
-#                             type: string
-#                             example: abc123
-#                         fullname:
-#                             type: string
-#                             example: John Doe
-#                         email:
-#                             type: string
-#                             format: email
-#                             example: johndoe@example.com
-#                         phone:
-#                             type: string
-#                             example: "+1 123456789"
-#                         role:
-#                             type: string
-#                             example: user
-#                         bio:
-#                             type: string
-#                             example: Software Developer
-#                         address:
-#                             type: string
-#                             example: 123 Main St, City
-#                         profile_picture:
-#                             type: string
-#                             format: uri
-#                             example: https://example.com/profile-picture.jpg
-#                 message:
-#                     type: string
-#                     example: User profile retrieved successfully
-#         ErrorProfileResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#                     example: Invalid or missing token
-#         EditUserProfileRequest:
-#             type: object
-#             properties:
-#                 full_name:
-#                     type: string
-#                     example: John Doe
-#                 email:
-#                     type: string
-#                     format: email
-#                     example: johndoe@example.com
-#                 phone:
-#                     type: string
-#                     example: "+1 123456789"
-#                 address:
-#                     type: string
-#                     example: 123 Main St, City
-#                 bio:
-#                     type: string
-#                     example: Software Developer
-#         SuccessResponse:
-#             type: object
-#             properties:
-#                 message:
-#                     type: string
-#                     example: User profile updated successfully
-#         ErrorUpdateResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#                     example: Invalid or missing token
-#         ChangeProfilePictureRequest:
-#             type: object
-#             properties:
-#                 profile_picture:
-#                     type: string
-#                     format: binary
-#         ChangeProfilePictureResponse:
-#             type: object
-#             properties:
-#                 data:
-#                     type: object
-#                     properties:
-#                         profile_picture:
-#                             type: string
-#                             format: uri
-#                             example: https://example.com/new-profile-picture.jpg
-#                 message:
-#                     type: string
-#                     example: Profile picture updated successfully
-#         ErrorUpdateProfilePictureResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#                     example: Invalid or missing token
-#             required:
-#                 - error
-#         UpgradeUserRoleRequest:
-#             type: object
-#             properties:
-#                 owner_docs:
-#                     type: string
-#                     format: binary
-#         UpgradeUserRoleResponse:
-#             type: object
-#             properties:
-#                 message:
-#                     type: string
-#                     example: File added successfully
-#         ErrorUpgradeUserRoleResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#             required:
-#                 - error
-#         ChangePasswordRequest:
-#             type: object
-#             properties:
-#                 old_password:
-#                     type: string
-#                     example: oldpass
-#                 new_password:
-#                     type: string
-#                     example: newpass
-#         ChangePasswordResponse:
-#             type: object
-#             properties:
-#                 message:
-#                     type: string
-#                     example: Password updated successfully
-#         ErrorChangePasswordResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#             required:
-#                 - error
-#         DeleteUserAccountResponse:
-#             type: object
-#             properties:
-#                 message:
-#                     type: string
-#                     example: User account deleted successfully
-#         ErrorDeleteResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#             required:
-#                 - error
-#         NewVenueRequest:
-#             type: object
-#             properties:
-#                 name:
-#                     type: string
-#                 description:
-#                     type: string
-#                 location:
-#                     type: string
-#                 price:
-#                     type: number
-#                 category:
-#                     type: string
-#         NewVenueResponse:
-#             type: object
-#             properties:
-#                 data:
-#                     $ref: "#/components/schemas/NewVenueData"
-#                 message:
-#                     type: string
-#             required:
-#                 - data
-#                 - message
-#         NewVenueData:
-#             type: object
-#             properties:
-#                 name:
-#                     type: string
-#                 description:
-#                     type: string
-#                 location:
-#                     type: string
-#                 price:
-#                     type: number
-#                 category:
-#                     type: string
-#         ErrorAddVenueResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#             required:
-#                 - error
-#         UpdateVenueRequest:
-#             type: object
-#             properties:
-#                 name:
-#                     type: string
-#                 description:
-#                     type: string
-#                 location:
-#                     type: string
-#                 price:
-#                     type: number
-#                 category:
-#                     type: string
-#         UpdateVenueResponse:
-#             type: object
-#             properties:
-#                 data:
-#                     $ref: "#/components/schemas/UpdateVenueData"
-#                 message:
-#                     type: string
-#             required:
-#                 - data
-#                 - message
-#         UpdateVenueData:
-#             type: object
-#             properties:
-#                 venue_id:
-#                     type: string
-#                 name:
-#                     type: string
-#                 description:
-#                     type: string
-#                 location:
-#                     type: string
-#                 price:
-#                     type: number
-#                 category:
-#                     type: string
-#         GetVenueResponse:
-#             type: object
-#             properties:
-#                 data:
-#                     $ref: "#/components/schemas/VenueData"
-#                 message:
-#                     type: string
-#             required:
-#                 - data
-#                 - message
-#         VenueData:
-#             type: object
-#             properties:
-#                 venue_id:
-#                     type: string
-#                 name:
-#                     type: string
-#                 description:
-#                     type: string
-#                 location:
-#                     type: string
-#                 price:
-#                     type: number
-#                 category:
-#                     type: string
-#                 distance:
-#                     type: number
-#                 reviews:
-#                     type: array
-#                     items:
-#                         $ref: "#/components/schemas/ReviewData"
-#                 venue_images:
-#                     type: array
-#                     items:
-#                         type: string
-#         ReviewData:
-#             type: object
-#             properties:
-#                 user:
-#                     $ref: "#/components/schemas/UserData"
-#                 review:
-#                     type: string
-#                 rating:
-#                     type: number
-#         UserData:
-#             type: object
-#             properties:
-#                 user_id:
-#                     type: string
-#                 full_name:
-#                     type: string
-#         ErrorGetVenueByIDResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#             required:
-#                 - error
-#         DeleteVenueResponse:
-#             type: object
-#             properties:
-#                 message:
-#                     type: string
-#             required:
-#                 - message
-#         ErrorDeleteVenueResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#             required:
-#                 - error
-#         AddVenueImagesResponse:
-#             type: object
-#             properties:
-#                 data:
-#                     $ref: "#/components/schemas/VenueImagesData"
-#                 message:
-#                     type: string
-#             required:
-#                 - data
-#                 - message
-#         VenueImagesData:
-#             type: object
-#             properties:
-#                 image_id:
-#                     type: string
-#                 image_urls:
-#                     type: string
-#         ErrorAddVenueImageResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#             required:
-#                 - error
-#         AddReviewRequest:
-#             type: object
-#             properties:
-#                 venue_id:
-#                     type: string
-#                 review:
-#                     type: string
-#                 rating:
-#                     type: number
-#             required:
-#                 - venue_id
-#                 - review
-#                 - rating
-#         SuccessAddReviewResponse:
-#             type: object
-#             properties:
-#                 message:
-#                     type: string
-#             required:
-#                 - message
-#         ErrorAddReviewResponse:
-#             type: object
-#             properties:
-#                 error:
-#                     type: string
-#             required:
-#                 - error
-#         ReviewListResponse:
-#             type: object
-#             properties:
-#                 message:
-#                     type: string
-#                 data:
-#                     type: array
-#                     items:
-#                         $ref: "#/components/schemas/Review"
-#             required:
-#                 - message
-#                 - data
-#         Review:
-#             type: object
-#             properties:
-#                 review_id:
-#                     type: string
-#                 review:
-#                     type: string
-#                 rating:
-#                     type: number
-#                 user:
-#                     type: object
-#                     properties:
-#                         user_id:
-#                             type: string
-#                         full_name:
-#                             type: string
-#                     required:
-#                         - user_id
-#                         - full_name
-#         ImageListResponse:
-#             type: object
-#             properties:
-#                 message:
-#                     type: string
-#                 data:
-#                     type: array
-#                     items:
-#                         $ref: "#/components/schemas/Image"
-#             required:
-#                 - message
-#                 - data
-#         Image:
-#             type: object
-#             properties:
-#                 image_id:
-#                     type: string
-#                 image_link:
-#                     type: string
-#             required:
-#                 - image_id
-#                 - image_link
-#     examples:
-#         InvalidTokenError:
-#             value:
-#                 error: Unauthorized. Invalid token provided
-#         BadRequestError:
-#             value:
-#                 error: Bad request. Invalid request body or parameters
-#         InternalServerError:
-#             value:
-#                 error: Internal server error. Please try again later.
-#         NotFound:
-#             value:
-#                 error: Data not found
+        Response201MakeReservation:
+            description: Successful Operation
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: integer
+                            message:
+                                type: string
+                            data:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        payment_id:
+                                            type: string
+                                        reservation_id:
+                                            type: string
+                                        payment_method:
+                                            type: string
+                                        payment_type:
+                                            type: string
+                                        payment_code:
+                                            type: string
+
+                    example:
+                        code: 201
+                        message: "Successful operation"
+                        data:
+                            payment_id: "85ef6565-eb95-4be2-a4c0-a6425b27dae7"
+                            reservation_id: "271b7e12-6936-47e3-a1de-c8fdbfee250f"
+                            payment_method: "cstore"
+                            payment_type: "alfamart"
+                            payment_code: "43863390217"
+
+    schemas:
+        users:
+            type: object
+            properties:
+                user_id:
+                    type: string
+                    format: uuid
+                fullname:
+                    type: string
+                email:
+                    type: string
+                    format: email
+                phone:
+                    type: string
+                password:
+                    type: string
+                bio:
+                    type: string
+                address:
+                    type: string
+                role:
+                    type: string
+                    enum:
+                        - user
+                        - owner
+                profile_picture:
+                    type: string
+                created_at:
+                    type: string
+                    format: date-time
+                updated_at:
+                    type: string
+                    format: date-time
+                deleted_at:
+                    type: string
+                    format: date-time
+        venues:
+            type: object
+            required:
+                - name
+                - venue_picture_id
+            properties:
+                venue_id:
+                    type: string
+                    format: uuid
+                user_id:
+                    type: string
+                    format: uuid
+                category:
+                    type: string
+                    format: uuid
+                    enum:
+                        - basketball
+                        - football
+                        - futsal
+                        - badminton
+                        - swimming
+                name:
+                    type: string
+                description:
+                    type: string
+                location:
+                    type: string
+                price:
+                    type: integer
+                longitude:
+                    type: string
+                latitude:
+                    type: string
+                created_at:
+                    type: string
+                    format: date-time
+                updated_at:
+                    type: string
+                    format: date-time
+                deleted_at:
+                    type: string
+                    format: date-time
+        venue_pictures:
+            type: object
+            required:
+                - venue_picture
+            properties:
+                venue_picture_id:
+                    type: string
+                venue_id:
+                    type: string
+                url:
+                    type: string
+                created_at:
+                    type: string
+                    format: date-time
+                updated_at:
+                    type: string
+                    format: date-time
+                deleted_at:
+                    type: string
+                    format: date-time
+        reservations:
+            type: object
+            properties:
+                reservation_id:
+                    type: string
+                    format: uuid
+                user_id:
+                    type: string
+                    format: uuid
+                venue_id:
+                    type: string
+                    format: uuid
+                payment_id:
+                    type: string
+                    format: uuid
+                check-in_date:
+                    type: string
+                    format: date-time
+                check-out_date:
+                    type: string
+                    format: date-time
+                duration:
+                    type: integer
+                    format: uint
+                subtotal:
+                    type: integer
+                    format: float64
+                created_at:
+                    type: string
+                    format: date-time
+                updated_at:
+                    type: string
+                    format: date-time
+                deleted_at:
+                    type: string
+                    format: date-time
+        payments:
+            type: object
+            required:
+                - grand_total
+                - bank_account
+            properties:
+                payment_id:
+                    type: string
+                    format: uuid
+                va_number:
+                    type: string
+                grand_total:
+                    type: string
+                bank_account:
+                    type: string
+                    enum:
+                        - cash
+                        - bca
+                        - bni
+                        - bri
+                        - mandiri
+                status:
+                    type: string
+                created_at:
+                    type: string
+                    format: date-time
+                updated_at:
+                    type: string
+                    format: date-time
+                deleted_at:
+                    type: string
+                    format: date-time
+        reviews:
+            type: object
+            required:
+                - user_id
+                - venue_id
+                - rating
+            properties:
+                review_id:
+                    type: integer
+                    format: uint64
+                user_id:
+                    type: string
+                    format: uuid
+                venue_id:
+                    type: string
+                    format: uuid
+                review:
+                    type: string
+                rating:
+                    type: integer
+                    enum:
+                        - 1
+                        - 2
+                        - 3
+                        - 4
+                        - 5
+                created_at:
+                    type: string
+                    format: date-time
+                updated_at:
+                    type: string
+                    format: date-time
+                deleted_at:
+                    type: string
+                    format: date-time
+        midtrans_callback:
+            type: object
+            properties:
+                transaction_time:
+                    type: string
+                transaction_status:
+                    type: string
+                transaction_id:
+                    type: string
+                status_message:
+                    type: string
+                status_code:
+                    type: string
+                signature_key:
+                    type: string
+                payment_type:
+                    type: string
+                order_id:
+                    type: string
+                merchant_id:
+                    type: string
+                masked_card:
+                    type: string
+                gross_amount:
+                    type: string
+                fraud_status:
+                    type: string
+                eci:
+                    type: string
+                currency:
+                    type: string
+                channel_response_message:
+                    type: string
+                channel_response_code:
+                    type: string
+                card_type:
+                    type: string
+                bank:
+                    type: string
+                approval_code:
+                    type: string
+        api_response:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+                data:
+                    type: string
+        pagination:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    description: The current limit number.
+                offset:
+                    type: integer
+                    description: The current offset number.
+                page:
+                    type: integer
+                    description: The current page number.
+                total_pages:
+                    type: integer
+                    description: The total number of pages.
+                total_items:
+                    type: integer
+                    description: The total number of items.
+        Auth:
+            type: object
+            properties:
+                full_name:
+                    type: string
+                    example: John Doe
+                email:
+                    type: string
+                    format: email
+                    example: johndoe@example.com
+                password:
+                    type: string
+                    format: password
+                    example: password123
+                phone:
+                    type: string
+                    format: phone
+                    example: 082945161823
+        RegistrationResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: User registered successfully
+        ErrorResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+                    example: Invalid username format
+        LoginRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                    format: email
+                    example: johndoe@example.com
+                password:
+                    type: string
+                    format: password
+                    example: password123
+        LoginResponse:
+            type: object
+            properties:
+                data:
+                    type: object
+                    properties:
+                        user_id:
+                            type: string
+                            example: usr-4g6yhu
+                        role:
+                            type: string
+                            example: user
+                        token:
+                            type: string
+                            example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFiYzEyMyIsInJvbGUiOiJ1c2VyIiwidG9rZW4iOiJmZWVkZWQtc29tZS10b2tlbiJ9.8iEyFnFqvc5GT5Ht7YjCz0rCmI6tr6eR6x2YwN0Z5Ec
+                message:
+                    type: string
+                    example: Login successful
+        ErrorLoginResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+                    example: Invalid credentials
+        UserProfileResponse:
+            type: object
+            properties:
+                data:
+                    type: object
+                    properties:
+                        user_id:
+                            type: string
+                            example: abc123
+                        fullname:
+                            type: string
+                            example: John Doe
+                        email:
+                            type: string
+                            format: email
+                            example: johndoe@example.com
+                        phone:
+                            type: string
+                            example: "+1 123456789"
+                        role:
+                            type: string
+                            example: user
+                        bio:
+                            type: string
+                            example: Software Developer
+                        address:
+                            type: string
+                            example: 123 Main St, City
+                        profile_picture:
+                            type: string
+                            format: uri
+                            example: https://example.com/profile-picture.jpg
+                message:
+                    type: string
+                    example: User profile retrieved successfully
+        ErrorProfileResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+                    example: Invalid or missing token
+        EditUserProfileRequest:
+            type: object
+            properties:
+                full_name:
+                    type: string
+                    example: John Doe
+                email:
+                    type: string
+                    format: email
+                    example: johndoe@example.com
+                phone:
+                    type: string
+                    example: "+1 123456789"
+                address:
+                    type: string
+                    example: 123 Main St, City
+                bio:
+                    type: string
+                    example: Software Developer
+        SuccessResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: User profile updated successfully
+        ErrorUpdateResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+                    example: Invalid or missing token
+        ChangeProfilePictureRequest:
+            type: object
+            properties:
+                profile_picture:
+                    type: string
+                    format: binary
+        ChangeProfilePictureResponse:
+            type: object
+            properties:
+                data:
+                    type: object
+                    properties:
+                        profile_picture:
+                            type: string
+                            format: uri
+                            example: https://example.com/new-profile-picture.jpg
+                message:
+                    type: string
+                    example: Profile picture updated successfully
+        ErrorUpdateProfilePictureResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+                    example: Invalid or missing token
+            required:
+                - error
+        UpgradeUserRoleRequest:
+            type: object
+            properties:
+                owner_docs:
+                    type: string
+                    format: binary
+        UpgradeUserRoleResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: File added successfully
+        ErrorUpgradeUserRoleResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        ChangePasswordRequest:
+            type: object
+            properties:
+                old_password:
+                    type: string
+                    example: oldpass
+                new_password:
+                    type: string
+                    example: newpass
+        ChangePasswordResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: Password updated successfully
+        ErrorChangePasswordResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        DeleteUserAccountResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: User account deleted successfully
+        ErrorDeleteResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        NewVenueRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                location:
+                    type: string
+                price:
+                    type: number
+                category:
+                    type: string
+        NewVenueResponse:
+            type: object
+            properties:
+                data:
+                    $ref: "#/components/schemas/NewVenueData"
+                message:
+                    type: string
+            required:
+                - data
+                - message
+        NewVenueData:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                location:
+                    type: string
+                price:
+                    type: number
+                category:
+                    type: string
+        ErrorAddVenueResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        UpdateVenueRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                location:
+                    type: string
+                price:
+                    type: number
+                category:
+                    type: string
+        UpdateVenueResponse:
+            type: object
+            properties:
+                data:
+                    $ref: "#/components/schemas/UpdateVenueData"
+                message:
+                    type: string
+            required:
+                - data
+                - message
+        UpdateVenueData:
+            type: object
+            properties:
+                venue_id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                location:
+                    type: string
+                price:
+                    type: number
+                category:
+                    type: string
+        GetVenueResponse:
+            type: object
+            properties:
+                data:
+                    $ref: "#/components/schemas/VenueData"
+                message:
+                    type: string
+            required:
+                - data
+                - message
+        VenueData:
+            type: object
+            properties:
+                venue_id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                location:
+                    type: string
+                price:
+                    type: number
+                category:
+                    type: string
+                distance:
+                    type: number
+                reviews:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/ReviewData"
+                venue_images:
+                    type: array
+                    items:
+                        type: string
+        ReviewData:
+            type: object
+            properties:
+                user:
+                    $ref: "#/components/schemas/UserData"
+                review:
+                    type: string
+                rating:
+                    type: number
+        UserData:
+            type: object
+            properties:
+                user_id:
+                    type: string
+                full_name:
+                    type: string
+        ErrorGetVenueByIDResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        DeleteVenueResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        ErrorDeleteVenueResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        AddVenueImagesResponse:
+            type: object
+            properties:
+                data:
+                    $ref: "#/components/schemas/VenueImagesData"
+                message:
+                    type: string
+            required:
+                - data
+                - message
+        VenueImagesData:
+            type: object
+            properties:
+                image_id:
+                    type: string
+                image_urls:
+                    type: string
+        ErrorAddVenueImageResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        AddReviewRequest:
+            type: object
+            properties:
+                venue_id:
+                    type: string
+                review:
+                    type: string
+                rating:
+                    type: number
+            required:
+                - venue_id
+                - review
+                - rating
+        SuccessAddReviewResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        ErrorAddReviewResponse:
+            type: object
+            properties:
+                error:
+                    type: string
+            required:
+                - error
+        ReviewListResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                data:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/Review"
+            required:
+                - message
+                - data
+        Review:
+            type: object
+            properties:
+                review_id:
+                    type: string
+                review:
+                    type: string
+                rating:
+                    type: number
+                user:
+                    type: object
+                    properties:
+                        user_id:
+                            type: string
+                        full_name:
+                            type: string
+                    required:
+                        - user_id
+                        - full_name
+        ImageListResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                data:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/Image"
+            required:
+                - message
+                - data
+        Image:
+            type: object
+            properties:
+                image_id:
+                    type: string
+                image_link:
+                    type: string
+            required:
+                - image_id
+                - image_link
+    examples:
+        InvalidTokenError:
+            value:
+                error: Unauthorized. Invalid token provided
+        BadRequestError:
+            value:
+                error: Bad request. Invalid request body or parameters
+        InternalServerError:
+            value:
+                error: Internal server error. Please try again later.
+        NotFound:
+            value:
+                error: Data not found
