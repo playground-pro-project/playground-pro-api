@@ -3,8 +3,11 @@ package service
 import (
 	"fmt"
 
+	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
 	"github.com/playground-pro-project/playground-pro-api/features/review"
 )
+
+var log = middlewares.Log()
 
 type reviewService struct {
 	reviewData review.ReviewData
@@ -34,9 +37,11 @@ func (rs *reviewService) CreateReview(venueID string, userID string, review revi
 func (rs *reviewService) DeleteByID(reviewID string) error {
 	err := rs.reviewData.DeleteByID(reviewID)
 	if err != nil {
+		log.Sugar().Errorf("error: %w", err)
 		return fmt.Errorf("error: %w", err)
 	}
 
+	log.Sugar().Info("success delete review")
 	return nil
 }
 

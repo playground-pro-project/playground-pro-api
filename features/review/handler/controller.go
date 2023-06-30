@@ -54,6 +54,7 @@ func (rh *reviewHandler) DeleteReview(c echo.Context) error {
 	reviewID := c.Param("review_id")
 	err := rh.reviewService.DeleteByID(reviewID)
 	if err != nil {
+		log.Error(err.Error())
 		return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 	}
 
