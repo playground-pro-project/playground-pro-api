@@ -104,7 +104,7 @@ func readEnv() *AppConfig {
 	if val, found := os.LookupEnv("REDIS_DATABASE"); found {
 		REDIS_DATABASE, err = strconv.Atoi(val)
 		if err != nil {
-			log.Println("error while reading gomail port")
+			log.Println("can't convert string to int")
 		}
 		isRead = false
 	}
@@ -121,17 +121,17 @@ func readEnv() *AppConfig {
 
 	if val, found := os.LookupEnv("EMAIL_SENDER_NAME"); found {
 		EMAIL_SENDER_NAME = val
-		isRead = true
+		isRead = false
 	}
 
 	if val, found := os.LookupEnv("EMAIL_SENDER_ADDRESS"); found {
 		EMAIL_SENDER_ADDRESS = val
-		isRead = true
+		isRead = false
 	}
 
 	if val, found := os.LookupEnv("EMAIL_SENDER_PASSWORD"); found {
 		EMAIL_SENDER_PASSWORD = val
-		isRead = true
+		isRead = false
 	}
 
 	if isRead {
