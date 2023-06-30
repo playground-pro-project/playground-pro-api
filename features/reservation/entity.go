@@ -74,6 +74,7 @@ type MyReservationCore struct {
 	PaymentType   string
 	PaymentCode   string
 	Status        string
+	SalesVolume   uint
 }
 
 type ReservationHandler interface {
@@ -82,6 +83,7 @@ type ReservationHandler interface {
 	MyReservation() echo.HandlerFunc
 	DetailTransaction() echo.HandlerFunc
 	CheckAvailability() echo.HandlerFunc
+	MyVenueCharts() echo.HandlerFunc
 }
 
 type ReservationService interface {
@@ -90,6 +92,7 @@ type ReservationService interface {
 	MyReservation(userId string) ([]MyReservationCore, error)
 	DetailTransaction(userId string, paymentId string) (PaymentCore, error)
 	CheckAvailability(venueId string) ([]AvailabilityCore, error)
+	MyVenueCharts(userId string, keyword string, request MyReservationCore) ([]MyReservationCore, error)
 }
 
 type ReservationData interface {
@@ -101,4 +104,5 @@ type ReservationData interface {
 	DetailTransaction(userId string, paymentId string) (PaymentCore, error)
 	CheckAvailability(venueId string) ([]AvailabilityCore, error)
 	GetReservationsByTimeSlot(venueID string, checkInDate, checkOutDate time.Time) ([]ReservationCore, error)
+	MyVenueCharts(userId string, keyword string, request MyReservationCore) ([]MyReservationCore, error)
 }

@@ -99,6 +99,38 @@ func requestReservation(data interface{}) reservation.ReservationCore {
 	return result
 }
 
+func reqReservation(data interface{}) reservation.MyReservationCore {
+	result := reservation.MyReservationCore{}
+	validate := validator.New()
+	validate.RegisterValidation("datetime", customDateTimeFormatValidator)
+
+	err := validate.Struct(data)
+	if err != nil {
+		return result
+	}
+
+	switch v := data.(type) {
+	case makeReservationRequest:
+		result.VenueID = v.VenueID
+		checkInDate, err := time.Parse("2006-01-02 15:04:05", v.CheckInDate)
+		if err != nil {
+			log.Error("error while parsing string to time format")
+			return reservation.MyReservationCore{}
+		}
+		result.CheckInDate = checkInDate
+		checkOutDate, err := time.Parse("2006-01-02 15:04:05", v.CheckOutDate)
+		if err != nil {
+			log.Error("error while parsing string to time format")
+			return reservation.MyReservationCore{}
+		}
+		result.CheckOutDate = checkOutDate
+	default:
+		return reservation.MyReservationCore{}
+	}
+
+	return result
+}
+
 func (p createPaymentRequest) requestPayment() reservation.PaymentCore {
 	return reservation.PaymentCore{
 		PaymentType: p.PaymentType,

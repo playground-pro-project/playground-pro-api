@@ -205,3 +205,45 @@ func (rh *reservationHandler) DetailTransaction() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful Operation", result, nil))
 	}
 }
+
+// MyVenueCharts implements reservation.ReservationHandler.
+func (rh *reservationHandler) MyVenueCharts() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		request := makeReservationRequest{}
+		userId, errToken := middlewares.ExtractToken(c)
+		if errToken != nil {
+			log.Error("missing or malformed JWT")
+			return helper.UnauthorizedError(c, "Missing or malformed JWT")
+		}
+
+		errBind := c.Bind(&request)
+		if errBind != nil {
+			log.Error("error on bind input")
+			return helper.BadRequestError(c, "Bad request")
+		}
+
+		keyword := c.QueryParam("keyword")
+		res, err := rh.service.MyVenueCharts(userId, keyword, reqReservation(request))
+		if err != nil {
+			if strings.Contains(err.Error(), "list charts record not found") {
+				log.Error("list charts record not found")
+				return helper.NotFoundError(c, "The requested resource was not found")
+			} else {
+				log.Error("internal server error")
+				return helper.InternalServerError(c, "Internal server error")
+			}
+		}
+
+		if len(res) == 0 {
+			log.Error("list charts not found")
+			return helper.NotFoundError(c, "The requested resource was not found")
+		}
+
+		result := make([]chartResponse, len(res))
+		for i, r := range res {
+			result[i] = charts(r)
+		}
+
+		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful Operation", result, nil))
+	}
+}
