@@ -5,10 +5,11 @@ import (
 )
 
 type GetAllReviewResponse struct {
-	UserID string       `json:"user_id"`
-	Review string       `json:"review"`
-	Rating float64      `json:"rating"`
-	User   UserResponse `json:"user"`
+	ReviewID string       `json:"review_id`
+	UserID   string       `json:"user_id"`
+	Review   string       `json:"review"`
+	Rating   float64      `json:"rating"`
+	User     UserResponse `json:"user"`
 }
 
 type UserResponse struct {
@@ -17,10 +18,11 @@ type UserResponse struct {
 
 func ReviewCoreToGetAllReviewResponse(r review.ReviewCore) GetAllReviewResponse {
 	return GetAllReviewResponse{
-		UserID: r.UserID,
-		Review: r.Review,
-		Rating: r.Rating,
-		User:   UserCoreToUserResponse(r.User),
+		ReviewID: r.ReviewID,
+		UserID:   r.UserID,
+		Review:   r.Review,
+		Rating:   r.Rating,
+		User:     UserCoreToUserResponse(r.User),
 	}
 }
 
