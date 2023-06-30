@@ -56,6 +56,10 @@ jobs:
                         -e EMAIL_SENDER_NAME=${{ secrets.EMAIL_SENDER_NAME }} \
                         -e EMAIL_SENDER_ADDRESS=${{ secrets.EMAIL_SENDER_ADDRESS }} \
                         -e EMAIL_SENDER_PASSWORD=${{ secrets.EMAIL_SENDER_PASSWORD }} \
+                        -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
+                        -e REDIS_PORT=${{ secrets.REDIS_PORT }} \
+                        -e REDIS_DATABASE=${{ secrets.REDIS_DATABASE }} \
+                        -e REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
                         -e MIDTRANS_SERVERKEY=${{ secrets.MIDTRANS_SERVERKEY }} \
                         -e MIDTRANS_MERCHANT_ID=${{ secrets.MIDTRANS_MERCHANT_ID }} \
                         --name playgroundpro-api-v1 \
