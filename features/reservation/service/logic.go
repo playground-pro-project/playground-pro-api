@@ -56,7 +56,7 @@ func (rs *reservationService) MakeReservation(userId string, r reservation.Reser
 
 	// TODO 1 : Validate reservation timewindow and check availability
 	minTime := time.Now().Local()
-	maxTime := minTime.AddDate(0, 1, 0)
+	maxTime := minTime.AddDate(0, 3, 0)
 	if r.CheckInDate.Before(minTime) || r.CheckInDate.After(maxTime) {
 		log.Warn("reservation date not within the allowed timewindow")
 		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New("reservation date not within the allowed timewindow")
@@ -194,15 +194,15 @@ func (rs *reservationService) ReservationStatus(request reservation.PaymentCore)
 }
 
 // ReservationHistory implements reservation.ReservationService.
-func (rs *reservationService) MyReservation(userId string) ([]reservation.PaymentCore, error) {
+func (rs *reservationService) MyReservation(userId string) ([]reservation.MyReservationCore, error) {
 	payments, err := rs.query.MyReservation(userId)
 	if err != nil {
 		if strings.Contains(err.Error(), "list reservations record not found") {
 			log.Error("list reservations record not found")
-			return []reservation.PaymentCore{}, errors.New("list reservations record not found")
+			return []reservation.MyReservationCore{}, errors.New("list reservations record not found")
 		} else {
 			log.Error("internal server error")
-			return []reservation.PaymentCore{}, errors.New("internal server error")
+			return []reservation.MyReservationCore{}, errors.New("internal server error")
 		}
 	}
 

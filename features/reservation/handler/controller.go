@@ -151,7 +151,7 @@ func (rh *reservationHandler) MyReservation() echo.HandlerFunc {
 			return helper.UnauthorizedError(c, "Missing or malformed JWT")
 		}
 
-		payments, err := rh.service.MyReservation(userId)
+		res, err := rh.service.MyReservation(userId)
 		if err != nil {
 			if strings.Contains(err.Error(), "list reservations record not found") {
 				log.Error("list reservations record not found")
@@ -162,14 +162,14 @@ func (rh *reservationHandler) MyReservation() echo.HandlerFunc {
 			}
 		}
 
-		if len(payments) == 0 {
+		if len(res) == 0 {
 			log.Error("reservation history not found")
 			return helper.NotFoundError(c, "The requested resource was not found")
 		}
 
-		result := make([]reservationHistoryResponse, len(payments))
-		for i, payment := range payments {
-			result[i] = reservationHistory(payment)
+		result := make([]myReservationResponse, len(res))
+		for i, r := range res {
+			result[i] = myReservation(r)
 		}
 
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful Operation", result, nil))
@@ -201,7 +201,7 @@ func (rh *reservationHandler) DetailTransaction() echo.HandlerFunc {
 			}
 		}
 
-		result := reservationHistory(payment)
+		result, _ := reservationHistory(payment)
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Successful Operation", result, nil))
 	}
 }

@@ -1,6 +1,10 @@
 package handler
 
 import (
+	"errors"
+	"math"
+	"strconv"
+
 	"github.com/playground-pro-project/playground-pro-api/features/reservation"
 	"github.com/playground-pro-project/playground-pro-api/utils/helper"
 )
@@ -30,25 +34,56 @@ type reservationHistoryResponse struct {
 	CheckOutDate  helper.LocalTime `json:"check_out_date,omitempty"`
 	Duration      float64          `json:"duration,omitempty"`
 	Price         float64          `json:"price,omitempty"`
-	GrandTotal    string           `json:"total_price,omitempty"`
+	PaymentID     string           `json:"payment_id,omitempty"`
+	GrandTotal    float64          `json:"total_price,omitempty"`
 	PaymentType   string           `json:"payment_type,omitempty"`
 	PaymentCode   string           `json:"payment_code,omitempty"`
 	Status        string           `json:"status,omitempty"`
 	ReservationID string           `json:"reservation_id,omitempty"`
-	Venues        Venue            `json:"venues,omitempty"`
+	VenueID       string           `json:"venue_id,omitempty"`
 }
 
-type Venue struct {
-	Category     string                       `json:"category,omitempty"`
-	Name         string                       `json:"venue_name,omitempty"`
-	Description  string                       `json:"description,omitempty"`
-	Username     string                       `json:"username,omitempty"`
-	ServiceTime  string                       `json:"service_time,omitempty"`
-	Price        float64                      `json:"price,omitempty"`
-	Reservations []reservationHistoryResponse `json:"reservations,omitempty"`
+type myReservationResponse struct {
+	Name         string           `json:"venue_name,omitempty"`
+	Location     string           `json:"location,omitempty"`
+	CheckInDate  helper.LocalTime `json:"check_in_date,omitempty"`
+	CheckOutDate helper.LocalTime `json:"check_out_date,omitempty"`
+	Duration     float64          `json:"duration,omitempty"`
+	Price        float64          `json:"price,omitempty"`
+	GrandTotal   float64          `json:"total_price,omitempty"`
+	PaymentType  string           `json:"payment_type,omitempty"`
+	PaymentCode  string           `json:"payment_code,omitempty"`
+	Status       string           `json:"status,omitempty"`
 }
 
-func reservationHistory(payment reservation.PaymentCore) reservationHistoryResponse {
+func myReservation(r reservation.MyReservationCore) myReservationResponse {
+	duration := twoDecimals(r.Duration)
+	price := twoDecimals(r.Price)
+	grandTotal := twoDecimals(r.GrandTotal)
+	response := myReservationResponse{
+		Name:         r.VenueName,
+		Location:     r.Location,
+		CheckInDate:  helper.LocalTime(r.CheckInDate),
+		CheckOutDate: helper.LocalTime(r.CheckOutDate),
+		Duration:     duration,
+		Price:        price,
+		GrandTotal:   grandTotal,
+		PaymentType:  r.PaymentType,
+		PaymentCode:  r.PaymentCode,
+		Status:       r.Status,
+	}
+
+	return response
+}
+
+func reservationHistory(payment reservation.PaymentCore) (reservationHistoryResponse, error) {
+	grandTotalStr := payment.GrandTotal
+	grandTotal, err := strconv.ParseFloat(grandTotalStr, 64)
+	if err != nil {
+		log.Sugar().Error("error parsing GrandTotal:", err)
+		return reservationHistoryResponse{}, errors.New("error on parsing string to float64")
+	}
+
 	response := reservationHistoryResponse{
 		Name:         payment.Reservation.Venue.Name,
 		Location:     payment.Reservation.Venue.Location,
@@ -56,13 +91,13 @@ func reservationHistory(payment reservation.PaymentCore) reservationHistoryRespo
 		CheckOutDate: helper.LocalTime(payment.Reservation.CheckOutDate),
 		Duration:     payment.Reservation.Duration,
 		Price:        payment.Reservation.Venue.Price,
-		GrandTotal:   payment.GrandTotal,
+		GrandTotal:   grandTotal,
 		PaymentType:  payment.PaymentType,
 		PaymentCode:  payment.PaymentCode,
 		Status:       payment.Status,
 	}
 
-	return response
+	return response, nil
 }
 
 type availability struct {
@@ -108,4 +143,8 @@ func Availability(reservations []reservation.AvailabilityCore) []venue {
 	}
 
 	return venues
+}
+
+func twoDecimals(value float64) float64 {
+	return math.Round(value*100) / 100
 }
