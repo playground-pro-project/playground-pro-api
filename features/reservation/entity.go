@@ -29,6 +29,7 @@ type PaymentCore struct {
 	Status        string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
+	ReservationID string
 	Reservation   ReservationCore
 	Venue         VenueCore
 }
@@ -59,6 +60,22 @@ type AvailabilityCore struct {
 	CheckOutDate  time.Time
 }
 
+type MyReservationCore struct {
+	VenueID       string
+	VenueName     string
+	Location      string
+	ReservationID string
+	CheckInDate   time.Time
+	CheckOutDate  time.Time
+	Duration      float64
+	Price         float64
+	PaymentID     string
+	GrandTotal    float64
+	PaymentType   string
+	PaymentCode   string
+	Status        string
+}
+
 type ReservationHandler interface {
 	MakeReservation() echo.HandlerFunc
 	ReservationStatus() echo.HandlerFunc
@@ -70,7 +87,7 @@ type ReservationHandler interface {
 type ReservationService interface {
 	MakeReservation(userId string, r ReservationCore, p PaymentCore) (ReservationCore, PaymentCore, error)
 	ReservationStatus(request PaymentCore) (PaymentCore, error)
-	MyReservation(userId string) ([]PaymentCore, error)
+	MyReservation(userId string) ([]MyReservationCore, error)
 	DetailTransaction(userId string, paymentId string) (PaymentCore, error)
 	CheckAvailability(venueId string) ([]AvailabilityCore, error)
 }
@@ -80,7 +97,7 @@ type ReservationData interface {
 	ReservationStatus(request PaymentCore) (PaymentCore, error)
 	PriceVenue(venueID string) (float64, error)
 	ReservationCheckOutDate(reservation_id string) (time.Time, error)
-	MyReservation(userId string) ([]PaymentCore, error)
+	MyReservation(userId string) ([]MyReservationCore, error)
 	DetailTransaction(userId string, paymentId string) (PaymentCore, error)
 	CheckAvailability(venueId string) ([]AvailabilityCore, error)
 	GetReservationsByTimeSlot(venueID string, checkInDate, checkOutDate time.Time) ([]ReservationCore, error)

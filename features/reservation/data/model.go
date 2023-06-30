@@ -33,8 +33,7 @@ type Payment struct {
 	CreatedAt     time.Time      `gorm:"type:datetime"`
 	UpdatedAt     time.Time      `gorm:"type:datetime"`
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
-	ReservationID string
-	Reservation   Reservation `gorm:"foreignKey:PaymentID;references:PaymentID"`
+	Reservation   Reservation    `gorm:"foreignKey:PaymentID;references:PaymentID"`
 }
 
 type Venue struct {
@@ -57,18 +56,57 @@ type Venue struct {
 // `gorm:"type:enum('none','card','bca','bri','bni','mandiri','qris','gopay','shopeepay');default:'none'"`
 // `gorm:"type:enum('cash','debit_card','bank_transfer','e-wallet');default:'cash'"`
 // Struct helper for query raw in gorm
-type Result struct {
-	VenueID        string
-	Name           string
-	Category       string
-	PaymentID      string
-	ReservationID  string
-	Check_In_Date  time.Time
-	Check_Out_Date time.Time
+type Availability struct {
+	VenueID       string
+	Name          string
+	Category      string
+	PaymentID     string
+	ReservationID string
+	CheckInDate   time.Time
+	CheckOutDate  time.Time
+}
+
+type MyReservation struct {
+	VenueID       string
+	VenueName     string
+	Location      string
+	ReservationID string
+	CheckInDate   time.Time
+	CheckOutDate  time.Time
+	Duration      float64
+	Price         float64
+	PaymentID     string
+	GrandTotal    float64
+	PaymentType   string
+	PaymentCode   string
+	Status        string
+}
+
+func modelToMyReservationCore(result []MyReservation) []reservation.MyReservationCore {
+	myReservations := []reservation.MyReservationCore{}
+	for _, r := range result {
+		myReservation := reservation.MyReservationCore{
+			VenueID:       r.VenueID,
+			VenueName:     r.VenueName,
+			Location:      r.Location,
+			ReservationID: r.ReservationID,
+			CheckInDate:   r.CheckInDate,
+			CheckOutDate:  r.CheckOutDate,
+			Duration:      r.Duration,
+			Price:         r.Price,
+			PaymentID:     r.PaymentID,
+			GrandTotal:    r.GrandTotal,
+			PaymentType:   r.PaymentType,
+			PaymentCode:   r.PaymentCode,
+			Status:        r.Status,
+		}
+		myReservations = append(myReservations, myReservation)
+	}
+	return myReservations
 }
 
 // Convert model to AvailabilityCore
-func modelToAvailabilityCore(result []Result) []reservation.AvailabilityCore {
+func modelToAvailabilityCore(result []Availability) []reservation.AvailabilityCore {
 	var availabilities []reservation.AvailabilityCore
 	for _, r := range result {
 		availability := reservation.AvailabilityCore{
@@ -77,8 +115,8 @@ func modelToAvailabilityCore(result []Result) []reservation.AvailabilityCore {
 			Category:      r.Category,
 			PaymentID:     r.PaymentID,
 			ReservationID: r.ReservationID,
-			CheckInDate:   r.Check_In_Date,
-			CheckOutDate:  r.Check_Out_Date,
+			CheckInDate:   r.CheckInDate,
+			CheckOutDate:  r.CheckOutDate,
 		}
 		availabilities = append(availabilities, availability)
 	}
@@ -173,6 +211,7 @@ func PaymentCoreFromChargeResponse(res *paymentgateway.ChargeResponse) reservati
 		Status:        res.TransactionStatus,
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
+		ReservationID: res.OrderID,
 		Reservation:   reservation.ReservationCore{},
 	}
 }

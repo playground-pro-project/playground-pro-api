@@ -144,9 +144,26 @@ func (rq *reservationQuery) ReservationCheckOutDate(reservation_id string) (time
 }
 
 // ReservationHistory implements reservation.ReservationData.
-func (rq *reservationQuery) MyReservation(userId string) ([]reservation.PaymentCore, error) {
-	paymentData := []Payment{}
-	query := rq.db.Preload("Reservation", "user_id = ?", userId).Find(&paymentData)
+func (rq *reservationQuery) MyReservation(userId string) ([]reservation.MyReservationCore, error) {
+	result := []MyReservation{}
+	query := rq.db.Raw(`
+		SELECT venues.venue_id,
+			venues.name,
+			venues.location,
+			venues.price,
+			reservations.reservation_id, 
+			reservations.check_in_date,
+			reservations.check_out_date,	
+			reservations.duration,
+			payments.payment_id,
+			payments.payment_type,
+			payments.payment_code,
+			payments.status
+		FROM payments
+		INNER JOIN reservations ON payments.payment_id = reservations.payment_id
+		INNER JOIN venues ON reservations.venue_id = venues.venue_id
+		WHERE reservations.user_id = ?
+	`, userId).Scan(&result)
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
 		log.Error("list reservations record not found")
 		return nil, errors.New("list reservations record not found")
@@ -157,22 +174,7 @@ func (rq *reservationQuery) MyReservation(userId string) ([]reservation.PaymentC
 		log.Sugar().Info("list reservations data found in the database")
 	}
 
-	result := make([]reservation.PaymentCore, len(paymentData))
-	for i, payment := range paymentData {
-		result[i] = paymentToCore(payment)
-		if payment.Reservation.VenueID != "" {
-			venueName, venueLocation, venuePrice, err := rq.GetVenueNameAndPrice(payment.Reservation.VenueID)
-			if err != nil {
-				log.Sugar().Error("error retrieving venue name and price:", err)
-				return nil, err
-			}
-			result[i].Reservation.Venue.Name = venueName
-			result[i].Reservation.Venue.Location = venueLocation
-			result[i].Reservation.Venue.Price = venuePrice
-		}
-	}
-
-	return result, nil
+	return modelToMyReservationCore(result), nil
 }
 
 // GetVenueNameAndPrice retrieves the name and price of a venue by its ID
@@ -219,7 +221,7 @@ func (rq *reservationQuery) DetailTransaction(userId string, paymentId string) (
 
 // CheckAvailability implements reservation.ReservationData.
 func (rq *reservationQuery) CheckAvailability(venueId string) ([]reservation.AvailabilityCore, error) {
-	var result []Result
+	var result []Availability
 	query := rq.db.Raw(`
 	SELECT venues.venue_id,
 		venues.name, 
