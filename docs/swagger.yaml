@@ -567,6 +567,18 @@ paths:
                   description: String range value of price to retrieve list of price venues
                   required: false
                 - in: query
+                  name: latitude
+                  schema:
+                      type: integer
+                  description: float64 range value of latitude of current user location
+                  required: false
+                - in: query
+                  name: longitude
+                  schema:
+                      type: integer
+                  description: float64 range value of longitude of current user location
+                  required: false
+                - in: query
                   name: limit
                   schema:
                       type: integer

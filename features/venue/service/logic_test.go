@@ -69,6 +69,9 @@ func TestSearchVenue(t *testing.T) {
 	data := mocks.NewVenueData(t)
 	service := New(data)
 	keyword := "basket"
+	latitude := 123.45
+	longitude := 67.89
+
 	page := pagination.Pagination{
 		Limit:  3,
 		Offset: 0,
@@ -104,7 +107,7 @@ func TestSearchVenue(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		data.On("SearchVenues", keyword, page).Return(expectedResult, expectedTotalRows, expectedTotalPages, nil)
-		result, totalRows, totalPages, err := service.SearchVenues(keyword, page)
+		result, totalRows, totalPages, err := service.SearchVenues(keyword, latitude, longitude, page)
 		assert.Nil(t, err)
 		assert.Len(t, result, 1)
 		assert.Equal(t, expectedResult[0].VenueID, result[0].VenueID)
@@ -120,7 +123,7 @@ func TestSearchVenue(t *testing.T) {
 
 	t.Run("list venues record not found", func(t *testing.T) {
 		data.On("SearchVenues", keyword, page).Return([]venue.VenueCore{}, int64(0), 0, errors.New("list venues record not found")).Once()
-		result, totalRows, totalPages, err := service.SearchVenues(keyword, page)
+		result, totalRows, totalPages, err := service.SearchVenues(keyword, latitude, longitude, page)
 		assert.Error(t, err)
 		assert.Len(t, result, 0)
 		assert.EqualError(t, err, "list venues record not found")
@@ -133,7 +136,7 @@ func TestSearchVenue(t *testing.T) {
 
 	t.Run("internal server error", func(t *testing.T) {
 		data.On("SearchVenues", keyword, page).Return([]venue.VenueCore{}, int64(0), 0, errors.New("internal server error"))
-		result, totalRows, totalPages, err := service.SearchVenues(keyword, page)
+		result, totalRows, totalPages, err := service.SearchVenues(keyword, latitude, longitude, page)
 		assert.Error(t, err)
 		assert.Empty(t, result)
 		assert.EqualError(t, err, "internal server error")

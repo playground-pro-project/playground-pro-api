@@ -12,7 +12,7 @@ type SearchVenueResponse struct {
 	Name          string  `json:"name,omitempty"`
 	Username      string  `json:"username,omitempty"`
 	Location      string  `json:"location,omitempty"`
-	Distance      uint    `json:"distance,omitempty"`
+	Distance      float64 `json:"distance,omitempty"`
 	Price         float64 `json:"price,omitempty"`
 	AverageRating float64 `json:"average_rating,omitempty"`
 	VenuePicture  string  `json:"venue_picture,omitempty"`
@@ -27,7 +27,7 @@ type SelectVenueResponse struct {
 	Username      string         `json:"username,omitempty"`
 	ServiceTime   string         `json:"service_time,omitempty"`
 	Location      string         `json:"location,omitempty"`
-	Distance      uint           `json:"distance,omitempty"`
+	Distance      float64        `json:"distance,omitempty"`
 	Price         float64        `json:"price,omitempty"`
 	TotalReviews  uint           `json:"total_reviews,omitempty"`
 	AverageRating float64        `json:"average_rating,omitempty"`
@@ -72,7 +72,7 @@ func SearchVenue(v venue.VenueCore) SearchVenueResponse {
 		Name:          v.Name,
 		Username:      v.Username,
 		Location:      v.Location,
-		Distance:      v.Distance,
+		Distance:      helper.TwoDecimals(v.Distance),
 		Price:         v.Price,
 		AverageRating: v.AverageRating,
 	}

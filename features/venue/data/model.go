@@ -84,6 +84,64 @@ type Reservation struct {
 	User          User           `gorm:"references:UserID"`
 }
 
+type Venues struct {
+	VenueID       string          `gorm:"primaryKey;type:varchar(45)"`
+	OwnerID       string          `gorm:"type:varchar(45)"`
+	Category      string          `gorm:"type:enum('basketball','football','futsal','badminton');default:'basketball'"`
+	Name          string          `gorm:"type:varchar(225);not null;unique"`
+	Description   string          `gorm:"type:text"`
+	ServiceTime   string          `gorm:"type:varchar(100)"`
+	Location      string          `gorm:"type:text"`
+	Price         float64         `gorm:"type:double"`
+	Longitude     float64         `gorm:"type:double"`
+	Latitude      float64         `gorm:"type:double"`
+	Distance      float64         `gorm:"type:double"`
+	CreatedAt     time.Time       `gorm:"type:datetime"`
+	UpdatedAt     time.Time       `gorm:"type:datetime"`
+	DeletedAt     gorm.DeletedAt  `gorm:"index"`
+	User          User            `gorm:"references:OwnerID;foreignKey:UserID"`
+	VenuePictures []VenuePicture  `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Reservations  []Reservation   `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	Reviews       []review.Review `gorm:"foreignKey:VenueID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+}
+
+func searchVenueModel(v Venues) venue.VenueCore {
+	var totalRating float64
+	var averageRating float64 = 0.0
+	var picture string
+	for _, r := range v.Reviews {
+		totalRating += r.Rating
+	}
+
+	if len(v.Reviews) > 0 {
+		averageRating = totalRating / float64(len(v.Reviews))
+	}
+
+	averageRating = math.Round(averageRating*100) / 100
+
+	if len(v.VenuePictures) > 0 {
+		picture = v.VenuePictures[0].URL
+	}
+
+	result := venue.VenueCore{
+		VenueID:       v.VenueID,
+		Category:      v.Category,
+		Name:          v.Name,
+		OwnerID:       v.OwnerID,
+		Location:      v.Location,
+		Distance:      v.Distance,
+		Price:         v.Price,
+		AverageRating: averageRating,
+		VenuePictures: []venue.VenuePictureCore{
+			{
+				URL: picture,
+			},
+		},
+	}
+
+	return result
+}
+
 func searchVenueModels(v Venue) venue.VenueCore {
 	var totalRating float64
 	var averageRating float64 = 0.0

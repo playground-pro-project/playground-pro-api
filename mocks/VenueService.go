@@ -91,23 +91,23 @@ func (_m *VenueService) GetAllVenueImage(venueID string) ([]venue.VenuePictureCo
 	return r0, r1
 }
 
-// GetVenueByImageID provides a mock function with given fields: venueImageID
-func (_m *VenueService) GetVenueByImageID(venueImageID string) (venue.VenuePictureCore, error) {
-	ret := _m.Called(venueImageID)
+// GetVenueImageByID provides a mock function with given fields: venueID, venueImageID
+func (_m *VenueService) GetVenueImageByID(venueID string, venueImageID string) (venue.VenuePictureCore, error) {
+	ret := _m.Called(venueID, venueImageID)
 
 	var r0 venue.VenuePictureCore
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (venue.VenuePictureCore, error)); ok {
-		return rf(venueImageID)
+	if rf, ok := ret.Get(0).(func(string, string) (venue.VenuePictureCore, error)); ok {
+		return rf(venueID, venueImageID)
 	}
-	if rf, ok := ret.Get(0).(func(string) venue.VenuePictureCore); ok {
-		r0 = rf(venueImageID)
+	if rf, ok := ret.Get(0).(func(string, string) venue.VenuePictureCore); ok {
+		r0 = rf(venueID, venueImageID)
 	} else {
 		r0 = ret.Get(0).(venue.VenuePictureCore)
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(venueImageID)
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(venueID, venueImageID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -165,39 +165,39 @@ func (_m *VenueService) RegisterVenue(userId string, request venue.VenueCore) (v
 	return r0, r1
 }
 
-// SearchVenues provides a mock function with given fields: keyword, page
-func (_m *VenueService) SearchVenues(keyword string, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
-	ret := _m.Called(keyword, page)
+// SearchVenues provides a mock function with given fields: keyword, destLatitude, destLongitude, page
+func (_m *VenueService) SearchVenues(keyword string, destLatitude float64, destLongitude float64, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
+	ret := _m.Called(keyword, destLatitude, destLongitude, page)
 
 	var r0 []venue.VenueCore
 	var r1 int64
 	var r2 int
 	var r3 error
-	if rf, ok := ret.Get(0).(func(string, pagination.Pagination) ([]venue.VenueCore, int64, int, error)); ok {
-		return rf(keyword, page)
+	if rf, ok := ret.Get(0).(func(string, float64, float64, pagination.Pagination) ([]venue.VenueCore, int64, int, error)); ok {
+		return rf(keyword, destLatitude, destLongitude, page)
 	}
-	if rf, ok := ret.Get(0).(func(string, pagination.Pagination) []venue.VenueCore); ok {
-		r0 = rf(keyword, page)
+	if rf, ok := ret.Get(0).(func(string, float64, float64, pagination.Pagination) []venue.VenueCore); ok {
+		r0 = rf(keyword, destLatitude, destLongitude, page)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]venue.VenueCore)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, pagination.Pagination) int64); ok {
-		r1 = rf(keyword, page)
+	if rf, ok := ret.Get(1).(func(string, float64, float64, pagination.Pagination) int64); ok {
+		r1 = rf(keyword, destLatitude, destLongitude, page)
 	} else {
 		r1 = ret.Get(1).(int64)
 	}
 
-	if rf, ok := ret.Get(2).(func(string, pagination.Pagination) int); ok {
-		r2 = rf(keyword, page)
+	if rf, ok := ret.Get(2).(func(string, float64, float64, pagination.Pagination) int); ok {
+		r2 = rf(keyword, destLatitude, destLongitude, page)
 	} else {
 		r2 = ret.Get(2).(int)
 	}
 
-	if rf, ok := ret.Get(3).(func(string, pagination.Pagination) error); ok {
-		r3 = rf(keyword, page)
+	if rf, ok := ret.Get(3).(func(string, float64, float64, pagination.Pagination) error); ok {
+		r3 = rf(keyword, destLatitude, destLongitude, page)
 	} else {
 		r3 = ret.Error(3)
 	}

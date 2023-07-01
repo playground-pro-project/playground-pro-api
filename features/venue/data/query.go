@@ -51,8 +51,8 @@ func (vq *venueQuery) RegisterVenue(userId string, request venue.VenueCore) (ven
 }
 
 // SearchVenue implements venue.VenueData.
-func (vq *venueQuery) SearchVenues(keyword string, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
-	venues := []Venue{}
+func (vq *venueQuery) SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
+	res := []Venues{}
 	search := "%" + keyword + "%"
 	expTime := 5 * time.Second
 	cacheKey := fmt.Sprintf("venues:%s:%d", keyword, page.Page)
@@ -69,18 +69,25 @@ func (vq *venueQuery) SearchVenues(keyword string, page pagination.Pagination) (
 		return result, page.TotalRows, page.TotalPages, nil
 	}
 
-	query := vq.db.Table("venues").
-		Select("venues.*, AVG(reviews.rating) AS average_rating, COUNT(reviews.review_id) AS total_reviews, users.fullname").
-		Joins("LEFT JOIN venue_pictures ON venue_pictures.venue_id = venues.venue_id").
-		Joins("LEFT JOIN reviews ON reviews.venue_id = venues.venue_id").
-		Joins("LEFT JOIN users ON users.user_id = venues.owner_id").
-		Where("venues.category LIKE ? AND venues.location LIKE ? AND venues.price LIKE ? AND venues.deleted_at IS NULL", search, search, search).
-		Group("venues.venue_id").
-		Preload("User").
-		Preload("VenuePictures").
-		Preload("Reviews").
-		Scopes(pagination.Paginate(&venues, &page, vq.db)).
-		Find(&venues)
+	query := vq.db.Raw(`
+		SELECT venues.*, 
+		    AVG(reviews.rating) AS average_rating, 
+		    COUNT(reviews.review_id) AS total_reviews, 
+		    users.fullname,
+		    6371 * 2 * ASIN(SQRT(
+		        POWER(SIN((RADIANS(? - RADIANS(venues.latitude)) / 2)), 2) +
+		        COS(RADIANS(venues.latitude)) * COS(RADIANS(?)) *
+		        POWER(SIN((RADIANS(? - RADIANS(venues.longitude)) / 2)), 2)
+		    )) AS distance
+		FROM venues
+		LEFT JOIN venue_pictures ON venue_pictures.venue_id = venues.venue_id
+		LEFT JOIN reviews ON reviews.venue_id = venues.venue_id
+		LEFT JOIN users ON users.user_id = venues.owner_id
+		WHERE venues.category LIKE ? AND venues.location LIKE ? AND venues.price LIKE ? AND venues.deleted_at IS NULL
+		GROUP BY venues.venue_id;
+		`, latitude, latitude, longitude, search, search, search).
+		Scopes(pagination.Paginate(&res, &page, vq.db)).
+		Scan(&res)
 
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
 		log.Error("list venues not found")
@@ -92,9 +99,9 @@ func (vq *venueQuery) SearchVenues(keyword string, page pagination.Pagination) (
 		log.Sugar().Info("Venues data found in the database")
 	}
 
-	result := make([]venue.VenueCore, len(venues))
-	for i, venue := range venues {
-		result[i] = searchVenueModels(venue)
+	result := make([]venue.VenueCore, len(res))
+	for i, venue := range res {
+		result[i] = searchVenueModel(venue)
 	}
 
 	err = cache.SetCached(context.Background(), cacheKey, result, expTime)

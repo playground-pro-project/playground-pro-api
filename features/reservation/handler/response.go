@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"math"
 	"strconv"
 
 	"github.com/playground-pro-project/playground-pro-api/features/reservation"
@@ -57,17 +56,14 @@ type myReservationResponse struct {
 }
 
 func myReservation(r reservation.MyReservationCore) myReservationResponse {
-	duration := twoDecimals(r.Duration)
-	price := twoDecimals(r.Price)
-	grandTotal := twoDecimals(r.GrandTotal)
 	response := myReservationResponse{
 		Name:         r.VenueName,
 		Location:     r.Location,
 		CheckInDate:  helper.LocalTime(r.CheckInDate),
 		CheckOutDate: helper.LocalTime(r.CheckOutDate),
-		Duration:     duration,
-		Price:        price,
-		GrandTotal:   grandTotal,
+		Duration:     helper.TwoDecimals(r.Duration),
+		Price:        helper.TwoDecimals(r.Price),
+		GrandTotal:   helper.TwoDecimals(r.GrandTotal),
 		PaymentType:  r.PaymentType,
 		PaymentCode:  r.PaymentCode,
 		Status:       r.Status,
@@ -159,8 +155,4 @@ func Availability(reservations []reservation.AvailabilityCore) []venue {
 	}
 
 	return venues
-}
-
-func twoDecimals(value float64) float64 {
-	return math.Round(value*100) / 100
 }
