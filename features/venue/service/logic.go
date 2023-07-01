@@ -152,24 +152,24 @@ func (vs *venueService) VenueAvailability(venueId string) (venue.VenueCore, erro
 	return venues, err
 }
 
-// func (vs *venueService) CreateVenueImage(req venue.VenuePictureCore) (venue.VenuePictureCore, error) {
-// 	switch {
-// 	case req.VenueID == "":
-// 		log.Error("error, venue ID is required")
-// 		return venue.VenuePictureCore{}, errors.New("error, venue ID is required")
-// 	case req.URL == "":
-// 		log.Error("error, venue URL image is required")
-// 		return venue.VenuePictureCore{}, errors.New("error, venue URL image is required")
-// 	}
+func (vs *venueService) CreateVenueImage(req venue.VenuePictureCore) (venue.VenuePictureCore, error) {
+	switch {
+	case req.VenueID == "":
+		log.Error("error, venue ID is required")
+		return venue.VenuePictureCore{}, errors.New("error, venue ID is required")
+	case req.URL == "":
+		log.Error("error, venue URL image is required")
+		return venue.VenuePictureCore{}, errors.New("error, venue URL image is required")
+	}
 
-// 	vn, err := vs.query.InsertVenueImage(req)
-// 	if err != nil {
-// 		log.Error(err.Error())
-// 		return venue.VenuePictureCore{}, err
-// 	}
+	vn, err := vs.query.InsertVenueImage(req)
+	if err != nil {
+		log.Error(err.Error())
+		return venue.VenuePictureCore{}, err
+	}
 
-// 	return vn, nil
-// }
+	return vn, nil
+}
 
 func (vs *venueService) GetAllVenueImage(venueID string) ([]venue.VenuePictureCore, error) {
 	venueImages, err := vs.query.GetAllVenueImage(venueID)

@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
     description: |
         Playground Pro adalah sebuah marketplace yang digunakan untuk memesan venue.
-    version: "1.0.0"
+    version: 1.0.2
     title: Playground Pro Restful-API
     contact:
         email: apiteam@swagger.io
@@ -11,6 +11,9 @@ info:
         url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 servers:
     # Added by API Auto Mocking Plugin
+    # Added by API Auto Mocking Plugin
+    - description: SwaggerHub API Auto Mocking
+      url: https://virtserver.swaggerhub.com/pradanadp/Playground-Pro/1.0.2
     - description: SwaggerHub API Auto Mocking
       url: https://virtserver.swaggerhub.com/dimasyudhana/playground-pro/1.0.0
     - description: Production
@@ -504,37 +507,6 @@ paths:
             security:
                 - bearerAuth: []
 
-    "/users/venues/charts":
-        get:
-            tags:
-                - Users
-            summary: Get user that hosting venue, order by lastest update
-            parameters:
-                - in: query
-                  name: keyword
-                  schema:
-                      type: string
-                  description: String value of payment status (pending, success, or expire)
-                  required: false
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            $ref: "#/components/schemas/reservations"
-                        example:
-                            check-in_date: "2023/06/05 08:05:00"
-                            check-out_date: "2023/06/05 10:05:00"
-            responses:
-                "200":
-                    $ref: "#/components/responses/Response200UsersVenuesCharts"
-                "404":
-                    $ref: "#/components/responses/Response404"
-                "500":
-                    $ref: "#/components/responses/Response500"
-            security:
-                - bearerAuth: []
-
     "/venues":
         get:
             tags:
@@ -565,18 +537,6 @@ paths:
                   schema:
                       type: integer
                   description: String range value of price to retrieve list of price venues
-                  required: false
-                - in: query
-                  name: latitude
-                  schema:
-                      type: integer
-                  description: float64 range value of latitude of current user location
-                  required: false
-                - in: query
-                  name: longitude
-                  schema:
-                      type: integer
-                  description: float64 range value of longitude of current user location
                   required: false
                 - in: query
                   name: limit
@@ -641,6 +601,14 @@ paths:
                                     type: number
                                     description: Harga sewa tempat olahraga
                                     format: float
+                                lat:
+                                    type: number
+                                    description: latitude tempat olahraga
+                                    format: float
+                                lon:
+                                    type: number
+                                    description: longitude tempat olahraga
+                                    format: float
                         example:
                             category: "football"
                             name: "Bola Bolaan"
@@ -648,6 +616,17 @@ paths:
                             service_time: "07:45 - 23:00"
                             location: "Jalan Utama No. 123, Kota Anywhere"
                             price: 29.99
+                            lat: 34.567
+                            lon: -87.65
+
+                    multipart/form-data:
+                        schema:
+                            type: object
+                            properties:
+                                file:
+                                    type: string
+                                    format: binary
+
             responses:
                 "201":
                     $ref: "#/components/responses/Response201"
@@ -1277,6 +1256,15 @@ components:
                             message:
                                 type: string
                                 example: "Successful operation"
+                            data:
+                                type: object
+                                properties:
+                                    lat:
+                                        type: number
+                                        example: 34.567
+                                    lon:
+                                        type: number
+                                        example: -87.65
 
         Response400:
             description: Bad request
@@ -1357,19 +1345,19 @@ components:
                         code: 200
                         message: "Successful Operation"
                         data:
-                            - user_id : "string-uuid"
-                              venue_id: "string-uuid"
+                            - venue_id: "string-uuid"
                               category: "basketball"
                               name: "Venue 1"
+                              username: "User 1"
                               location: "Jakarta"
                               distance: 1
                               price: 100.50
                               average_rating: 4.55
                               venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
-                            - user_id : "string-uuid" 
-                              venue_id: "string-uuid"
+                            - venue_id: "string-uuid"
                               category: "football"
                               name: "Venue 2"
+                              username: "User 2"
                               location: "Jakarta"
                               distance: 1.3
                               price: 200.75
@@ -1423,37 +1411,6 @@ components:
                               price: 200.75
                               average_rating: 4.75
                               venue_picture_url: "https://images.app.goo.gl/t5b981L6oUTU3fE18"
-
-        Response200UsersVenuesCharts:
-            description: Get list of venues for charts
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            code:
-                                type: integer
-                                example: 200
-                            message:
-                                type: string
-                                example: "Successful Operation"
-                            data:
-                                type: array
-                                items:
-                                    $ref: "#/components/schemas/venues"
-                    example:
-                        code: 200
-                        message: "Successful Operation"
-                        data:
-                            - venue_id: "string-uuid"
-                              venue_name: "Venue 1"
-                              sales_volume: 100
-                            - venue_id: "string-uuid"
-                              venue_name: "Venue 1"
-                              sales_volume: 100
-                            - venue_id: "string-uuid"
-                              venue_name: "Venue 1"
-                              sales_volume: 100
 
         Response200SelectVenues:
             description: Get specific venue
@@ -2117,7 +2074,7 @@ components:
         EditUserProfileRequest:
             type: object
             properties:
-                full_name:
+                fullname:
                     type: string
                     example: John Doe
                 email:
