@@ -165,19 +165,19 @@ func (_m *VenueService) RegisterVenue(userId string, request venue.VenueCore) (v
 	return r0, r1
 }
 
-// SearchVenues provides a mock function with given fields: keyword, destLatitude, destLongitude, page
-func (_m *VenueService) SearchVenues(keyword string, destLatitude float64, destLongitude float64, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
-	ret := _m.Called(keyword, destLatitude, destLongitude, page)
+// SearchVenues provides a mock function with given fields: keyword, latitude, longitude, page
+func (_m *VenueService) SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
+	ret := _m.Called(keyword, latitude, longitude, page)
 
 	var r0 []venue.VenueCore
 	var r1 int64
 	var r2 int
 	var r3 error
 	if rf, ok := ret.Get(0).(func(string, float64, float64, pagination.Pagination) ([]venue.VenueCore, int64, int, error)); ok {
-		return rf(keyword, destLatitude, destLongitude, page)
+		return rf(keyword, latitude, longitude, page)
 	}
 	if rf, ok := ret.Get(0).(func(string, float64, float64, pagination.Pagination) []venue.VenueCore); ok {
-		r0 = rf(keyword, destLatitude, destLongitude, page)
+		r0 = rf(keyword, latitude, longitude, page)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]venue.VenueCore)
@@ -185,19 +185,19 @@ func (_m *VenueService) SearchVenues(keyword string, destLatitude float64, destL
 	}
 
 	if rf, ok := ret.Get(1).(func(string, float64, float64, pagination.Pagination) int64); ok {
-		r1 = rf(keyword, destLatitude, destLongitude, page)
+		r1 = rf(keyword, latitude, longitude, page)
 	} else {
 		r1 = ret.Get(1).(int64)
 	}
 
 	if rf, ok := ret.Get(2).(func(string, float64, float64, pagination.Pagination) int); ok {
-		r2 = rf(keyword, destLatitude, destLongitude, page)
+		r2 = rf(keyword, latitude, longitude, page)
 	} else {
 		r2 = ret.Get(2).(int)
 	}
 
 	if rf, ok := ret.Get(3).(func(string, float64, float64, pagination.Pagination) error); ok {
-		r3 = rf(keyword, destLatitude, destLongitude, page)
+		r3 = rf(keyword, latitude, longitude, page)
 	} else {
 		r3 = ret.Error(3)
 	}

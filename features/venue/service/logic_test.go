@@ -37,6 +37,53 @@ func TestRegisterVenue(t *testing.T) {
 		Location:    "venue_location_1",
 		Price:       9.99,
 	}
+	emptyRequest := venue.VenueCore{
+		VenueID:     "venue_id_1",
+		OwnerID:     "owner_id_1",
+		Category:    "",
+		Name:        "",
+		Description: "venue_description_1",
+		Username:    "owner_username_1",
+		ServiceTime: "",
+		Location:    "",
+		Price:       0,
+	}
+
+	t.Run("name cannot be empty", func(t *testing.T) {
+		invalidRequest := emptyRequest
+		invalidRequest.Name = "name_1"
+		res, err := service.RegisterVenue(userID, invalidRequest)
+		assert.NotNil(t, err)
+		assert.Equal(t, venue.VenueCore{}, res)
+		assert.ErrorContains(t, err, "name cannot be empty")
+	})
+
+	t.Run("service time cannot be empty", func(t *testing.T) {
+		invalidRequest := emptyRequest
+		invalidRequest.ServiceTime = "venue_name_1"
+		res, err := service.RegisterVenue(userID, invalidRequest)
+		assert.NotNil(t, err)
+		assert.Equal(t, venue.VenueCore{}, res)
+		assert.ErrorContains(t, err, "service time cannot be empty")
+	})
+
+	t.Run("location cannot be empty", func(t *testing.T) {
+		invalidRequest := emptyRequest
+		invalidRequest.Location = "07:00 - 23:00"
+		res, err := service.RegisterVenue(userID, invalidRequest)
+		assert.NotNil(t, err)
+		assert.Equal(t, venue.VenueCore{}, res)
+		assert.ErrorContains(t, err, "location cannot be empty")
+	})
+
+	t.Run("price cannot be empty", func(t *testing.T) {
+		invalidRequest := emptyRequest
+		invalidRequest.Location = "venue_location_1"
+		res, err := service.RegisterVenue(userID, invalidRequest)
+		assert.NotNil(t, err)
+		assert.Equal(t, venue.VenueCore{}, res)
+		assert.ErrorContains(t, err, "price cannot be empty")
+	})
 
 	t.Run("success create a venue", func(t *testing.T) {
 		data.On("RegisterVenue", userID, request).Return(expectedResult, nil).Once()

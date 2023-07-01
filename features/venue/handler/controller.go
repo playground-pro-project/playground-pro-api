@@ -171,22 +171,19 @@ func (vh *venueHandler) EditVenue() echo.HandlerFunc {
 		}
 
 		venueId := c.Param("venue_id")
-		if venueId == "" {
-			log.Error("empty venue_id parameter")
-			return helper.NotFoundError(c, "The requested resource was not found")
-		}
-
 		err := vh.service.EditVenue(userId, venueId, RequestToCore(&request))
 		if err != nil {
-			if strings.Contains(err.Error(), "not found") {
-				log.Error("venue not found")
+			switch {
+			case strings.Contains(err.Error(), "venue profile record not found"):
+				log.Error("venue profile record not found")
 				return helper.NotFoundError(c, "The requested resource was not found")
-			} else if strings.Contains(err.Error(), "no venue has been created") {
+			case strings.Contains(err.Error(), "no venue has been created"):
 				log.Error("no venue has been created")
-				return helper.NotFoundError(c, "no venue has been created")
+				return helper.NotFoundError(c, "The requested resource was not found")
+			default:
+				log.Error("internal server error")
+				return helper.InternalServerError(c, "Internal server error")
 			}
-			log.Error("internal server error")
-			return helper.InternalServerError(c, "Internal server error")
 		}
 		return c.JSON(http.StatusOK, helper.ResponseFormat(http.StatusOK, "Venue updated successfully", nil, nil))
 	}
