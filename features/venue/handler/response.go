@@ -36,6 +36,11 @@ type SelectVenueResponse struct {
 	Reservations  []Reservation  `json:"reservations,omitempty"`
 }
 
+type RegistVenueResp struct {
+	Longitude float64 `json:"lon"`
+	Latitude  float64 `json:"lat"`
+}
+
 type Review struct {
 	Review string  `json:"review,omitempty"`
 	Rating float64 `json:"rating,omitempty"`
@@ -79,6 +84,14 @@ func SearchVenueRaw(v venue.VenueCoreRaw) SearchVenueResponse {
 	}
 
 	return response
+
+}
+
+func RegistVenueResponse(v venue.VenueCore) RegistVenueResp {
+	return RegistVenueResp{
+		Longitude: v.Longitude,
+		Latitude:  v.Latitude,
+	}
 }
 
 func SearchVenue(v venue.VenueCore) SearchVenueResponse {

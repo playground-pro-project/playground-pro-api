@@ -27,8 +27,7 @@ func New(vs venue.VenueService) venue.VenueHandler {
 	}
 }
 
-// RegisterVenue implements venue.VenueHandler.
-func (vh *venueHandler) RegisterVenue() echo.HandlerFunc {
+func (vh *venueHandler) CreateVenue() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		request := RegisterVenueRequest{}
 		userId, errToken := middlewares.ExtractToken(c)
@@ -43,22 +42,107 @@ func (vh *venueHandler) RegisterVenue() echo.HandlerFunc {
 			return helper.BadRequestError(c, "Bad request")
 		}
 
-		_, err := vh.service.RegisterVenue(userId, RequestToCore(request))
-		if err != nil {
-			if strings.Contains(err.Error(), "empty") {
-				log.Error("request cannot be empty")
-				return helper.BadRequestError(c, "Bad request")
-			}
-			if strings.Contains(err.Error(), "error insert data, duplicated") {
-				log.Error("error insert data, duplicated")
-				return helper.BadRequestError(c, "Bad request")
-			}
-			log.Error("internal server error")
-			return helper.InternalServerError(c, "Internal server error")
+		// Validate the required fields in the request
+		if err := validateRegisterVenueRequest(request); err != nil {
+			log.Error("error register venue request")
+			return helper.BadRequestError(c, "error register venue request")
 		}
-		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully operation", nil, nil))
+
+		file, err := c.FormFile("file")
+		if err != nil {
+			log.Error("Failed to retrieve image venue: " + err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Failed to retrieve image venue: "+err.Error()))
+		}
+
+		// Get the file type from the Content-Type header
+		fileType := file.Header.Get("Content-Type")
+		fileExtension := filepath.Ext(file.Filename)
+		fileExtension = strings.ToLower(fileExtension)
+
+		allowedExtensions := []string{".jpg", ".jpeg", ".png"}
+		extensionAllowed := false
+		for _, ext := range allowedExtensions {
+			if ext == fileExtension {
+				extensionAllowed = true
+				break
+			}
+		}
+		if !extensionAllowed {
+			log.Error(fileExtension + " is not allowed")
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(fileExtension+" is not allowed. Only JPG, JPEG, and PNG files are allowed."))
+		}
+
+		fileSize := file.Size
+		if fileSize > maxVenueFileSize {
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Please upload a file smaller than 2 MB."))
+		}
+
+		id := helper.GenerateIdentifier()
+		filename := id + "-" + file.Filename
+		path := "venue-images/" + filename
+
+		fileContent, err := file.Open()
+		if err != nil {
+			log.Error("Failed to open file: " + err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to open file: "+err.Error()))
+		}
+		defer fileContent.Close()
+
+		image := venue.VenuePictureCore{
+			URL: fmt.Sprintf("%s%s", venueFileBaseURL, filepath.Base(filename)),
+		}
+
+		venue, err := vh.service.CreateVenue(userId, RequestToCore(request), image)
+		if err != nil {
+			log.Error(err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
+		}
+
+		awsService := aws.InitS3()
+		// Upload profile picture file to cloud
+		err = awsService.UploadFile(path, fileType, fileContent)
+		if err != nil {
+			log.Error("Failed to upload file to cloud service: " + err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to upload file to cloud service: "+err.Error()))
+		}
+
+		resp := RegistVenueResponse(venue)
+		log.Info("success to create new venue")
+		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully operation", resp, nil))
 	}
 }
+
+// func (vh *venueHandler) RegisterVenue() echo.HandlerFunc {
+// 	return func(c echo.Context) error {
+// 		request := RegisterVenueRequest{}
+// 		userId, errToken := middlewares.ExtractToken(c)
+// 		if errToken != nil {
+// 			log.Error("missing or malformed JWT")
+// 			return helper.UnauthorizedError(c, "Missing or malformed JWT")
+// 		}
+
+// 		errBind := c.Bind(&request)
+// 		if errBind != nil {
+// 			log.Error("error on bind input")
+// 			return helper.BadRequestError(c, "Bad request")
+// 		}
+
+// 		_, err := vh.service.RegisterVenue(userId, RequestToCore(request))
+// 		if err != nil {
+// 			if strings.Contains(err.Error(), "empty") {
+// 				log.Error("request cannot be empty")
+// 				return helper.BadRequestError(c, "Bad request")
+// 			}
+// 			if strings.Contains(err.Error(), "error insert data, duplicated") {
+// 				log.Error("error insert data, duplicated")
+// 				return helper.BadRequestError(c, "Bad request")
+// 			}
+// 			log.Error("internal server error")
+// 			return helper.InternalServerError(c, "Internal server error")
+// 		}
+// 		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully operation", nil, nil))
+// 	}
+// }
 
 // SearchVenue implements venue.VenueHandler.
 func (vh *venueHandler) SearchVenues() echo.HandlerFunc {
@@ -251,87 +335,87 @@ func (vh *venueHandler) VenueAvailability() echo.HandlerFunc {
 	}
 }
 
-func (vh *venueHandler) CreateVenueImage() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		_, errToken := middlewares.ExtractToken(c)
-		if errToken != nil {
-			log.Error("missing or malformed JWT")
-			return helper.UnauthorizedError(c, "Missing or malformed JWT")
-		}
+// func (vh *venueHandler) CreateVenueImage() echo.HandlerFunc {
+// 	return func(c echo.Context) error {
+// 		_, errToken := middlewares.ExtractToken(c)
+// 		if errToken != nil {
+// 			log.Error("missing or malformed JWT")
+// 			return helper.UnauthorizedError(c, "Missing or malformed JWT")
+// 		}
 
-		venueId := c.Param("venue_id")
-		if venueId == "" {
-			log.Error("empty venue_id parameter")
-			return helper.NotFoundError(c, "The requested resource was not found")
-		}
+// 		venueId := c.Param("venue_id")
+// 		if venueId == "" {
+// 			log.Error("empty venue_id parameter")
+// 			return helper.NotFoundError(c, "The requested resource was not found")
+// 		}
 
-		form, err := c.MultipartForm()
-		if err != nil {
-			log.Error("Failed to retrieve file: " + err.Error())
-			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Failed to retrieve file: "+err.Error()))
-		}
+// 		form, err := c.MultipartForm()
+// 		if err != nil {
+// 			log.Error("Failed to retrieve file: " + err.Error())
+// 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Failed to retrieve file: "+err.Error()))
+// 		}
 
-		files := form.File["files"]
-		for _, file := range files {
-			// Get the file type from the Content-Type header
-			fileType := file.Header.Get("Content-Type")
-			fileExtension := filepath.Ext(file.Filename)
-			fileExtension = strings.ToLower(fileExtension)
+// 		files := form.File["files"]
+// 		for _, file := range files {
+// 			// Get the file type from the Content-Type header
+// 			fileType := file.Header.Get("Content-Type")
+// 			fileExtension := filepath.Ext(file.Filename)
+// 			fileExtension = strings.ToLower(fileExtension)
 
-			allowedExtensions := []string{".jpg", ".jpeg", ".png"}
-			extensionAllowed := false
-			for _, ext := range allowedExtensions {
-				if ext == fileExtension {
-					extensionAllowed = true
-					break
-				}
-			}
-			if !extensionAllowed {
-				log.Error(fileExtension + " is not allowed")
-				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(fileExtension+" is not allowed. Only JPG, JPEG, and PNG files are allowed."))
-			}
+// 			allowedExtensions := []string{".jpg", ".jpeg", ".png"}
+// 			extensionAllowed := false
+// 			for _, ext := range allowedExtensions {
+// 				if ext == fileExtension {
+// 					extensionAllowed = true
+// 					break
+// 				}
+// 			}
+// 			if !extensionAllowed {
+// 				log.Error(fileExtension + " is not allowed")
+// 				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(fileExtension+" is not allowed. Only JPG, JPEG, and PNG files are allowed."))
+// 			}
 
-			fileSize := file.Size
-			if fileSize > maxVenueFileSize {
-				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Please upload a file smaller than 2 MB."))
-			}
+// 			fileSize := file.Size
+// 			if fileSize > maxVenueFileSize {
+// 				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Please upload a file smaller than 2 MB."))
+// 			}
 
-			id := helper.GenerateIdentifier()
-			filename := id + "-" + file.Filename
-			path := "venue-images/" + filename
+// 			id := helper.GenerateIdentifier()
+// 			filename := id + "-" + file.Filename
+// 			path := "venue-images/" + filename
 
-			fileContent, err := file.Open()
-			if err != nil {
-				log.Error("Failed to open file: " + err.Error())
-				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to open file: "+err.Error()))
-			}
-			defer fileContent.Close()
+// 			fileContent, err := file.Open()
+// 			if err != nil {
+// 				log.Error("Failed to open file: " + err.Error())
+// 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to open file: "+err.Error()))
+// 			}
+// 			defer fileContent.Close()
 
-			image := venue.VenuePictureCore{
-				VenueID: venueId,
-				URL:     fmt.Sprintf("%s%s", venueFileBaseURL, filepath.Base(filename)),
-			}
+// 			image := venue.VenuePictureCore{
+// 				VenueID: venueId,
+// 				URL:     fmt.Sprintf("%s%s", venueFileBaseURL, filepath.Base(filename)),
+// 			}
 
-			_, err = vh.service.CreateVenueImage(image)
-			if err != nil {
-				log.Error("Failed to insert image. " + err.Error())
-				return c.JSON(http.StatusNotFound, helper.ErrorResponse("Failed to insert image. "+err.Error()))
-			}
+// 			_, err = vh.service.CreateVenueImage(image)
+// 			if err != nil {
+// 				log.Error("Failed to insert image. " + err.Error())
+// 				return c.JSON(http.StatusNotFound, helper.ErrorResponse("Failed to insert image. "+err.Error()))
+// 			}
 
-			awsService := aws.InitS3()
+// 			awsService := aws.InitS3()
 
-			// Upload profile picture file to cloud
-			err = awsService.UploadFile(path, fileType, fileContent)
-			if err != nil {
-				log.Error("Failed to upload file to cloud service: " + err.Error())
-				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to upload file to cloud service: "+err.Error()))
-			}
-		}
+// 			// Upload profile picture file to cloud
+// 			err = awsService.UploadFile(path, fileType, fileContent)
+// 			if err != nil {
+// 				log.Error("Failed to upload file to cloud service: " + err.Error())
+// 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to upload file to cloud service: "+err.Error()))
+// 			}
+// 		}
 
-		log.Sugar().Infof(venueId + " venue image added successfully")
-		return c.JSON(http.StatusCreated, helper.SuccessResponse(nil, "venue image added successfully"))
-	}
-}
+// 		log.Sugar().Infof(venueId + " venue image added successfully")
+// 		return c.JSON(http.StatusCreated, helper.SuccessResponse(nil, "venue image added successfully"))
+// 	}
+// }
 
 func (vh *venueHandler) DeleteVenueImage() echo.HandlerFunc {
 	return func(c echo.Context) error {
