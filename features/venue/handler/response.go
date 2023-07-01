@@ -15,7 +15,7 @@ type SearchVenueResponse struct {
 	Distance      float64 `json:"distance,omitempty"`
 	Price         float64 `json:"price,omitempty"`
 	AverageRating float64 `json:"average_rating,omitempty"`
-	VenuePicture  string  `json:"venue_picture"`
+	VenuePicture  string  `json:"venue_picture,omitempty"`
 }
 
 type SelectVenueResponse struct {

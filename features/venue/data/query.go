@@ -112,7 +112,7 @@ func (vq *venueQuery) SearchVenues(keyword string, latitude float64, longitude f
 	if err != nil {
 		return nil, 0, 0, err
 	}
-	log.Sugar().Info(result)
+
 	return result, page.TotalRows, page.TotalPages, nil
 }
 
