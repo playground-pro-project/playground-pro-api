@@ -215,7 +215,6 @@ func (rq *reservationQuery) DetailTransaction(userId string, paymentId string) (
 		payment.Reservation.Venue.Price = venuePrice
 	}
 
-	log.Sugar().Info("payment data found in the database")
 	return paymentToCore(payment), nil
 }
 

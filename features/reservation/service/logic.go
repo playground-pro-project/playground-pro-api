@@ -68,17 +68,6 @@ func (rs *reservationService) MakeReservation(userId string, r reservation.Reser
 	}
 
 	// TODO 1.5: Check if there is an existing reservation for the same time slot
-	availability, err := rs.query.CheckAvailability(r.VenueID)
-	if err != nil {
-		log.Sugar().Errorf("error on checking availability: %s", err.Error())
-		return reservation.ReservationCore{}, reservation.PaymentCore{}, err
-	}
-
-	if len(availability) > 0 {
-		log.Warn("reservation not available for the specified venue and timewindow")
-		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New("reservation not available")
-	}
-
 	existingReservations, err := rs.query.GetReservationsByTimeSlot(r.VenueID, r.CheckInDate, r.CheckOutDate)
 	if err != nil {
 		log.Sugar().Errorf("error on retrieving existing reservations: %s", err.Error())
