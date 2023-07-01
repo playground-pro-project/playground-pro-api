@@ -492,8 +492,24 @@ func (uh *userHandler) UploadOwnerFile() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 		}
 
+		usr, err := uh.userService.GetByID(userId)
+		if err != nil {
+			log.Error(err.Error())
+			return c.JSON(http.StatusNotFound, helper.ErrorResponse("User not found: "+err.Error()))
+		}
+
+		// Delete profile picture in the cloud before updated
+		prevFilename := filepath.Base(usr.ProfilePicture)
+		prevPath := "owner-docs/" + prevFilename
+
+		err = awsService.DeleteFile(prevPath)
+		if err != nil {
+			log.Error("Failed to delete file from cloud service: " + err.Error())
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("Failed to delete file from cloud service: "+err.Error()))
+		}
+
 		var updatedUser user.UserCore
-		updatedUser.OwnerFile = fmt.Sprintf("%s%s", ownerFileBaseURL, filepath.Base(file.Filename))
+		updatedUser.OwnerFile = fmt.Sprintf("%s%s", ownerFileBaseURL, filepath.Base(filename))
 		updatedUser.Role = "owner"
 
 		err = uh.userService.UpdateByID(userId, updatedUser)
