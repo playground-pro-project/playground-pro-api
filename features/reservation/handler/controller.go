@@ -192,8 +192,8 @@ func (rh *reservationHandler) DetailTransaction() echo.HandlerFunc {
 		}
 		payment, err := rh.service.DetailTransaction(userId, paymentId)
 		if err != nil {
-			if strings.Contains(err.Error(), "reservation not found") {
-				log.Error("reservation not found")
+			if strings.Contains(err.Error(), "payment not found") {
+				log.Error("payment not found")
 				return helper.NotFoundError(c, "The requested resource was not found")
 			} else {
 				log.Error("internal server error")

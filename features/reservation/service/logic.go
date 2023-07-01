@@ -201,9 +201,9 @@ func (rs *reservationService) MyReservation(userId string) ([]reservation.MyRese
 func (rs *reservationService) DetailTransaction(userId string, paymentId string) (reservation.PaymentCore, error) {
 	payment, err := rs.query.DetailTransaction(userId, paymentId)
 	if err != nil {
-		if strings.Contains(err.Error(), "reservation not found") {
-			log.Error("reservation record not found")
-			return reservation.PaymentCore{}, err
+		if strings.Contains(err.Error(), "payment not found") {
+			log.Error("payment not found")
+			return reservation.PaymentCore{}, errors.New("payment not found")
 		} else {
 			log.Error("internal server error")
 			return reservation.PaymentCore{}, err

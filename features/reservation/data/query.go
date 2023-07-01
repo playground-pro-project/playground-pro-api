@@ -289,13 +289,13 @@ func (rq *reservationQuery) MyVenueCharts(userId string, keyword string, request
 	`, userId, request.CheckInDate, request.CheckOutDate, search).
 		Scan(&result)
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
-		log.Error("list reservations record not found")
-		return nil, errors.New("list reservations record not found")
+		log.Error("list charts record not found")
+		return nil, errors.New("list charts record not found")
 	} else if query.Error != nil {
-		log.Sugar().Error("error executing list reservations query:", query.Error)
+		log.Sugar().Error("error executing list charts query:", query.Error)
 		return nil, query.Error
 	} else {
-		log.Sugar().Info("list reservations data found in the database")
+		log.Sugar().Info("list charts data found in the database")
 	}
 	log.Sugar().Info(result)
 	log.Sugar().Info(modelToMyReservationCore(result))
