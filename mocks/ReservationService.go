@@ -12,6 +12,32 @@ type ReservationService struct {
 	mock.Mock
 }
 
+// CheckAvailability provides a mock function with given fields: venueId
+func (_m *ReservationService) CheckAvailability(venueId string) ([]reservation.AvailabilityCore, error) {
+	ret := _m.Called(venueId)
+
+	var r0 []reservation.AvailabilityCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]reservation.AvailabilityCore, error)); ok {
+		return rf(venueId)
+	}
+	if rf, ok := ret.Get(0).(func(string) []reservation.AvailabilityCore); ok {
+		r0 = rf(venueId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]reservation.AvailabilityCore)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(venueId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DetailTransaction provides a mock function with given fields: userId, paymentId
 func (_m *ReservationService) DetailTransaction(userId string, paymentId string) (reservation.PaymentCore, error) {
 	ret := _m.Called(userId, paymentId)
@@ -68,24 +94,50 @@ func (_m *ReservationService) MakeReservation(userId string, r reservation.Reser
 }
 
 // MyReservation provides a mock function with given fields: userId
-func (_m *ReservationService) MyReservation(userId string) ([]reservation.PaymentCore, error) {
+func (_m *ReservationService) MyReservation(userId string) ([]reservation.MyReservationCore, error) {
 	ret := _m.Called(userId)
 
-	var r0 []reservation.PaymentCore
+	var r0 []reservation.MyReservationCore
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]reservation.PaymentCore, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) ([]reservation.MyReservationCore, error)); ok {
 		return rf(userId)
 	}
-	if rf, ok := ret.Get(0).(func(string) []reservation.PaymentCore); ok {
+	if rf, ok := ret.Get(0).(func(string) []reservation.MyReservationCore); ok {
 		r0 = rf(userId)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]reservation.PaymentCore)
+			r0 = ret.Get(0).([]reservation.MyReservationCore)
 		}
 	}
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {
 		r1 = rf(userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MyVenueCharts provides a mock function with given fields: userId, keyword, request
+func (_m *ReservationService) MyVenueCharts(userId string, keyword string, request reservation.MyReservationCore) ([]reservation.MyReservationCore, error) {
+	ret := _m.Called(userId, keyword, request)
+
+	var r0 []reservation.MyReservationCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string, reservation.MyReservationCore) ([]reservation.MyReservationCore, error)); ok {
+		return rf(userId, keyword, request)
+	}
+	if rf, ok := ret.Get(0).(func(string, string, reservation.MyReservationCore) []reservation.MyReservationCore); ok {
+		r0 = rf(userId, keyword, request)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]reservation.MyReservationCore)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string, reservation.MyReservationCore) error); ok {
+		r1 = rf(userId, keyword, request)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -70,8 +70,28 @@ func (vh *venueHandler) SearchVenues() echo.HandlerFunc {
 		page.Page = pageInt
 		page.Sort = c.QueryParam("sort")
 		keyword := c.QueryParam("keyword")
+		latitudeStr := c.QueryParam("latitude")
+		latitude := -8.6870282
+		if latitudeStr != "" {
+			var err error
+			latitude, err = strconv.ParseFloat(latitudeStr, 64)
+			if err != nil {
+				log.Error("invalid latitude")
+				return helper.BadRequestError(c, "Invalid latitude")
+			}
+		}
+		longitudeStr := c.QueryParam("longitude")
+		longitude := 115.201581
+		if longitudeStr != "" {
+			var err error
+			longitude, err = strconv.ParseFloat(longitudeStr, 64)
+			if err != nil {
+				log.Error("invalid longitude")
+				return helper.BadRequestError(c, "Invalid longitude")
+			}
+		}
 
-		venues, rows, pages, err := vh.service.SearchVenues(keyword, page)
+		venues, rows, pages, err := vh.service.SearchVenues(keyword, latitude, longitude, page)
 		if err != nil {
 			if strings.Contains(err.Error(), "venues not found") {
 				log.Error("venues not found")

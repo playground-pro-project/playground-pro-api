@@ -16,7 +16,7 @@ type VenueCore struct {
 	Username      string
 	ServiceTime   string `validate:"required"`
 	Location      string `validate:"required"`
-	Distance      uint
+	Distance      float64
 	Price         float64 `validate:"required"`
 	Longitude     float64
 	Latitude      float64
@@ -101,7 +101,7 @@ type VenueHandler interface {
 
 type VenueService interface {
 	RegisterVenue(userId string, request VenueCore) (VenueCore, error)
-	SearchVenues(keyword string, page pagination.Pagination) ([]VenueCore, int64, int, error)
+	SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]VenueCore, int64, int, error)
 	SelectVenue(venueId string) (VenueCore, error)
 	EditVenue(userId string, venueId string, request VenueCore) error
 	UnregisterVenue(userId string, venueId string) error
@@ -115,7 +115,7 @@ type VenueService interface {
 
 type VenueData interface {
 	RegisterVenue(userId string, request VenueCore) (VenueCore, error)
-	SearchVenues(keyword string, page pagination.Pagination) ([]VenueCore, int64, int, error)
+	SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]VenueCore, int64, int, error)
 	SelectVenue(venueId string) (VenueCore, error)
 	EditVenue(userId string, venueId string, request VenueCore) error
 	UnregisterVenue(userId string, venueId string) error

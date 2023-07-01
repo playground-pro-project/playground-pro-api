@@ -12,6 +12,22 @@ type ReservationHandler struct {
 	mock.Mock
 }
 
+// CheckAvailability provides a mock function with given fields:
+func (_m *ReservationHandler) CheckAvailability() echo.HandlerFunc {
+	ret := _m.Called()
+
+	var r0 echo.HandlerFunc
+	if rf, ok := ret.Get(0).(func() echo.HandlerFunc); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(echo.HandlerFunc)
+		}
+	}
+
+	return r0
+}
+
 // DetailTransaction provides a mock function with given fields:
 func (_m *ReservationHandler) DetailTransaction() echo.HandlerFunc {
 	ret := _m.Called()
@@ -46,6 +62,22 @@ func (_m *ReservationHandler) MakeReservation() echo.HandlerFunc {
 
 // MyReservation provides a mock function with given fields:
 func (_m *ReservationHandler) MyReservation() echo.HandlerFunc {
+	ret := _m.Called()
+
+	var r0 echo.HandlerFunc
+	if rf, ok := ret.Get(0).(func() echo.HandlerFunc); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(echo.HandlerFunc)
+		}
+	}
+
+	return r0
+}
+
+// MyVenueCharts provides a mock function with given fields:
+func (_m *ReservationHandler) MyVenueCharts() echo.HandlerFunc {
 	ret := _m.Called()
 
 	var r0 echo.HandlerFunc

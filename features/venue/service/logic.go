@@ -64,13 +64,13 @@ func (vs *venueService) RegisterVenue(userId string, request venue.VenueCore) (v
 }
 
 // SearchVenue implements venue.VenueService.
-func (vs *venueService) SearchVenues(keyword string, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
+func (vs *venueService) SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
 	if page.Sort != "" {
 		ps := strings.Replace(page.Sort, "_", " ", 1)
 		page.Sort = ps
 	}
 
-	venues, rows, pages, err := vs.query.SearchVenues(keyword, page)
+	venues, rows, pages, err := vs.query.SearchVenues(keyword, latitude, longitude, page)
 	if err != nil {
 		if strings.Contains(err.Error(), "venues not found") {
 			log.Error("list venues record not found")
