@@ -84,7 +84,8 @@ func (vq *venueQuery) SearchVenues(keyword string, latitude float64, longitude f
 		LEFT JOIN reviews ON reviews.venue_id = venues.venue_id
 		LEFT JOIN users ON users.user_id = venues.owner_id
 		WHERE venues.category LIKE ? AND venues.location LIKE ? AND venues.price LIKE ? AND venues.deleted_at IS NULL
-		GROUP BY venues.venue_id;
+		GROUP BY venues.venue_id
+		ORDER BY venues.updated_at DESC;
 		`, latitude, latitude, longitude, search, search, search).
 		Scopes(pagination.Paginate(&res, &page, vq.db)).
 		Scan(&res)
