@@ -203,6 +203,14 @@ func (uh *userHandler) UpdatePassword() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Invalid request payload"))
 		}
 
+		if req.OldPassword == "" {
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("Old password is required"))
+		}
+
+		if req.NewPassword == "" {
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("New password is required"))
+		}
+
 		user, err := uh.userService.GetByID(userId)
 		if err != nil {
 			if strings.Contains(err.Error(), "user not found") {
