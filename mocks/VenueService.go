@@ -13,23 +13,23 @@ type VenueService struct {
 	mock.Mock
 }
 
-// CreateVenueImage provides a mock function with given fields: req
-func (_m *VenueService) CreateVenueImage(req venue.VenuePictureCore) (venue.VenuePictureCore, error) {
-	ret := _m.Called(req)
+// CreateVenue provides a mock function with given fields: userID, venueReq, venueImageReq
+func (_m *VenueService) CreateVenue(userID string, venueReq venue.VenueCore, venueImageReq venue.VenuePictureCore) (venue.VenueCore, error) {
+	ret := _m.Called(userID, venueReq, venueImageReq)
 
-	var r0 venue.VenuePictureCore
+	var r0 venue.VenueCore
 	var r1 error
-	if rf, ok := ret.Get(0).(func(venue.VenuePictureCore) (venue.VenuePictureCore, error)); ok {
-		return rf(req)
+	if rf, ok := ret.Get(0).(func(string, venue.VenueCore, venue.VenuePictureCore) (venue.VenueCore, error)); ok {
+		return rf(userID, venueReq, venueImageReq)
 	}
-	if rf, ok := ret.Get(0).(func(venue.VenuePictureCore) venue.VenuePictureCore); ok {
-		r0 = rf(req)
+	if rf, ok := ret.Get(0).(func(string, venue.VenueCore, venue.VenuePictureCore) venue.VenueCore); ok {
+		r0 = rf(userID, venueReq, venueImageReq)
 	} else {
-		r0 = ret.Get(0).(venue.VenuePictureCore)
+		r0 = ret.Get(0).(venue.VenueCore)
 	}
 
-	if rf, ok := ret.Get(1).(func(venue.VenuePictureCore) error); ok {
-		r1 = rf(req)
+	if rf, ok := ret.Get(1).(func(string, venue.VenueCore, venue.VenuePictureCore) error); ok {
+		r1 = rf(userID, venueReq, venueImageReq)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -134,30 +134,6 @@ func (_m *VenueService) MyVenues(userId string) ([]venue.VenueCore, error) {
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {
 		r1 = rf(userId)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// RegisterVenue provides a mock function with given fields: userId, request
-func (_m *VenueService) RegisterVenue(userId string, request venue.VenueCore) (venue.VenueCore, error) {
-	ret := _m.Called(userId, request)
-
-	var r0 venue.VenueCore
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string, venue.VenueCore) (venue.VenueCore, error)); ok {
-		return rf(userId, request)
-	}
-	if rf, ok := ret.Get(0).(func(string, venue.VenueCore) venue.VenueCore); ok {
-		r0 = rf(userId, request)
-	} else {
-		r0 = ret.Get(0).(venue.VenueCore)
-	}
-
-	if rf, ok := ret.Get(1).(func(string, venue.VenueCore) error); ok {
-		r1 = rf(userId, request)
 	} else {
 		r1 = ret.Error(1)
 	}

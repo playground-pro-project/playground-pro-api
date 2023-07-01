@@ -112,38 +112,6 @@ func (vh *venueHandler) CreateVenue() echo.HandlerFunc {
 	}
 }
 
-// func (vh *venueHandler) RegisterVenue() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		request := RegisterVenueRequest{}
-// 		userId, errToken := middlewares.ExtractToken(c)
-// 		if errToken != nil {
-// 			log.Error("missing or malformed JWT")
-// 			return helper.UnauthorizedError(c, "Missing or malformed JWT")
-// 		}
-
-// 		errBind := c.Bind(&request)
-// 		if errBind != nil {
-// 			log.Error("error on bind input")
-// 			return helper.BadRequestError(c, "Bad request")
-// 		}
-
-// 		_, err := vh.service.RegisterVenue(userId, RequestToCore(request))
-// 		if err != nil {
-// 			if strings.Contains(err.Error(), "empty") {
-// 				log.Error("request cannot be empty")
-// 				return helper.BadRequestError(c, "Bad request")
-// 			}
-// 			if strings.Contains(err.Error(), "error insert data, duplicated") {
-// 				log.Error("error insert data, duplicated")
-// 				return helper.BadRequestError(c, "Bad request")
-// 			}
-// 			log.Error("internal server error")
-// 			return helper.InternalServerError(c, "Internal server error")
-// 		}
-// 		return c.JSON(http.StatusCreated, helper.ResponseFormat(http.StatusCreated, "Successfully operation", nil, nil))
-// 	}
-// }
-
 // SearchVenue implements venue.VenueHandler.
 func (vh *venueHandler) SearchVenues() echo.HandlerFunc {
 	return func(c echo.Context) error {

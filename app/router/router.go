@@ -78,7 +78,6 @@ func initVenueRouter(db *gorm.DB, e *echo.Echo) {
 	reservationService := rss.New(reservationData, refund)
 	reservationHandler := rsh.New(reservationService)
 
-	// e.POST("/venues", venueHandler.RegisterVenue(), middlewares.JWTMiddleware())
 	e.POST("/venues", venueHandler.CreateVenue(), middlewares.JWTMiddleware())
 	e.GET("/venues", venueHandler.SearchVenues())
 	e.GET("/venues/:venue_id", venueHandler.SelectVenue(), middlewares.JWTMiddleware())
@@ -87,7 +86,6 @@ func initVenueRouter(db *gorm.DB, e *echo.Echo) {
 	e.POST("/venues/:venue_id/reviews", reviewHandler.CreateReview, middlewares.JWTMiddleware())
 	e.GET("/venues/:venue_id/reviews", reviewHandler.GetAllReview, middlewares.JWTMiddleware())
 	e.DELETE("/reviews/:review_id", reviewHandler.DeleteReview, middlewares.JWTMiddleware())
-	// e.POST("/venues/:venue_id/images", venueHandler.CreateVenueImage(), middlewares.JWTMiddleware())
 	e.DELETE("/venues/:venue_id/images/:image_id", venueHandler.DeleteVenueImage(), middlewares.JWTMiddleware())
 	e.GET("/venues/:venue_id/images", venueHandler.GetAllVenueImage(), middlewares.JWTMiddleware())
 	e.GET("/venues/:venue_id/availability", reservationHandler.CheckAvailability(), middlewares.JWTMiddleware())

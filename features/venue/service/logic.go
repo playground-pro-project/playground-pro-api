@@ -62,44 +62,6 @@ func (vs *venueService) CreateVenue(userID string, venueReq venue.VenueCore, ven
 	return result, nil
 }
 
-func (vs *venueService) RegisterVenue(userId string, request venue.VenueCore) (venue.VenueCore, error) {
-	err := vs.validate.Struct(request)
-	if err != nil {
-		switch {
-		case strings.Contains(err.Error(), "category"):
-			log.Warn("category cannot be empty")
-			return venue.VenueCore{}, errors.New("category cannot be empty")
-		case strings.Contains(err.Error(), "name"):
-			log.Warn("name cannot be empty")
-			return venue.VenueCore{}, errors.New("name cannot be empty")
-		case strings.Contains(err.Error(), "servicetime"):
-			log.Warn("service time cannot be empty")
-			return venue.VenueCore{}, errors.New("service time cannot be empty")
-		case strings.Contains(err.Error(), "location"):
-			log.Warn("location cannot be empty")
-			return venue.VenueCore{}, errors.New("location cannot be empty")
-		case strings.Contains(err.Error(), "price"):
-			log.Warn("price cannot be empty")
-			return venue.VenueCore{}, errors.New("price cannot be empty")
-		}
-	}
-
-	result, err := vs.query.RegisterVenue(userId, request)
-	if err != nil {
-		message := ""
-		if strings.Contains(err.Error(), "duplicated") {
-			log.Error("error insert data, duplicated")
-			message = "error insert data, duplicated"
-		} else {
-			log.Error("internal server error")
-			message = "internal server error"
-		}
-		return venue.VenueCore{}, errors.New(message)
-	}
-
-	return result, nil
-}
-
 // SearchVenue implements venue.VenueService.
 func (vs *venueService) SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]venue.VenueCoreRaw, int64, int, error) {
 	if page.Sort != "" {
