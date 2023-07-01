@@ -37,12 +37,8 @@ import (
 // 		Price:       9.99,
 // 	}
 // 	emptyRequest := venue.VenueCore{
-// 		VenueID:     "venue_id_1",
-// 		OwnerID:     "owner_id_1",
 // 		Category:    "",
 // 		Name:        "",
-// 		Description: "venue_description_1",
-// 		Username:    "owner_username_1",
 // 		ServiceTime: "",
 // 		Location:    "",
 // 		Price:       0,

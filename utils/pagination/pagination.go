@@ -40,6 +40,10 @@ func (p *Pagination) GetSort() string {
 	return p.Sort
 }
 
+func CalculateTotalPages(totalRows int64, limit int) int {
+	return int(math.Ceil(float64(totalRows) / float64(limit)))
+}
+
 // Clousure function implementation
 func Paginate(value interface{}, pagination *Pagination, db *gorm.DB) func(db *gorm.DB) *gorm.DB {
 	var totalRows int64

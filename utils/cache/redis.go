@@ -21,14 +21,6 @@ func InitRedis(ctx context.Context) (*redis.Client, error) {
 		Addr:     config.REDIS_HOST + ":" + config.REDIS_PORT,
 		Password: config.REDIS_PASSWORD,
 		DB:       config.REDIS_DATABASE,
-
-		// Addr:     "172.31.3.99:6379",
-		// Password: "",
-		// DB:       0,
-
-		// Addr:     "localhost:6379",
-		// Password: "",
-		// DB:       0,
 	})
 
 	pong, err := client.Ping(ctx).Result()
@@ -69,7 +61,7 @@ func GetCached(ctx context.Context, cacheKey string) (interface{}, error) {
 		log.Sugar().Error("error while retrieving data from Redis cache:", err)
 		return nil, err
 	} else if cachedResult != "" {
-		var result []venue.VenueCore
+		var result []venue.VenueCoreRaw
 		err = json.Unmarshal([]byte(cachedResult), &result)
 		if err != nil {
 			log.Sugar().Error("error while unmarshaling cached result:", err)

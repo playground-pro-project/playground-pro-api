@@ -116,16 +116,15 @@ func (vh *venueHandler) CreateVenue() echo.HandlerFunc {
 func (vh *venueHandler) SearchVenues() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var page pagination.Pagination
+		var err error
 		limitInt, _ := strconv.Atoi(c.QueryParam("limit"))
 		pageInt, _ := strconv.Atoi(c.QueryParam("page"))
 		page.Limit = limitInt
 		page.Page = pageInt
-		page.Sort = c.QueryParam("sort")
 		keyword := c.QueryParam("keyword")
 		latitudeStr := c.QueryParam("latitude")
 		latitude := -8.6870282
 		if latitudeStr != "" {
-			var err error
 			latitude, err = strconv.ParseFloat(latitudeStr, 64)
 			if err != nil {
 				log.Error("invalid latitude")
@@ -135,7 +134,6 @@ func (vh *venueHandler) SearchVenues() echo.HandlerFunc {
 		longitudeStr := c.QueryParam("longitude")
 		longitude := 115.201581
 		if longitudeStr != "" {
-			var err error
 			longitude, err = strconv.ParseFloat(longitudeStr, 64)
 			if err != nil {
 				log.Error("invalid longitude")
