@@ -154,6 +154,23 @@ func (vq *venueQuery) SearchVenues(keyword string, latitude float64, longitude f
 		return result, page.TotalRows, page.TotalPages, nil
 	}
 
+	var totalRows int64
+	queryPagination := vq.db.Raw(`
+		SELECT COUNT(*) FROM venues
+		WHERE venues.category LIKE ? 
+			AND venues.location LIKE ? 
+			AND venues.price LIKE ? 
+			AND venues.deleted_at IS NULL;
+		`, search, search, search).
+		Count(&totalRows)
+	if queryPagination.Error != nil {
+		log.Sugar().Error("error executing count query:", queryPagination.Error)
+		return nil, 0, 0, queryPagination.Error
+	}
+
+	page.TotalRows = totalRows
+	page.TotalPages = pagination.CalculateTotalPages(totalRows, page.GetLimit())
+
 	query := vq.db.Raw(`
 		SELECT venues.*, 
 		    AVG(reviews.rating) AS average_rating, 
@@ -174,9 +191,9 @@ func (vq *venueQuery) SearchVenues(keyword string, latitude float64, longitude f
 			AND venues.price LIKE ? 
 			AND venues.deleted_at IS NULL
 		GROUP BY venues.venue_id
-		ORDER BY venues.updated_at DESC;
-		`, latitude, latitude, longitude, search, search, search).
-		Scopes(pagination.Paginate(&res, &page, vq.db)).
+		ORDER BY venues.updated_at DESC
+		LIMIT ? OFFSET ?;
+		`, latitude, latitude, longitude, search, search, search, page.GetLimit(), page.GetOffset()).
 		Scan(&res)
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
 		log.Error("list venues not found")
