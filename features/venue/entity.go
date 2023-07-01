@@ -87,16 +87,17 @@ type ReservationCore struct {
 }
 
 type VenueHandler interface {
-	RegisterVenue() echo.HandlerFunc
+	// RegisterVenue() echo.HandlerFunc
 	SearchVenues() echo.HandlerFunc
 	SelectVenue() echo.HandlerFunc
 	EditVenue() echo.HandlerFunc
 	UnregisterVenue() echo.HandlerFunc
 	VenueAvailability() echo.HandlerFunc
-	CreateVenueImage() echo.HandlerFunc
+	// CreateVenueImage() echo.HandlerFunc
 	GetAllVenueImage() echo.HandlerFunc
 	DeleteVenueImage() echo.HandlerFunc
 	MyVenues() echo.HandlerFunc
+	CreateVenue() echo.HandlerFunc
 }
 
 type VenueService interface {
@@ -106,11 +107,12 @@ type VenueService interface {
 	EditVenue(userId string, venueId string, request VenueCore) error
 	UnregisterVenue(userId string, venueId string) error
 	VenueAvailability(venueId string) (VenueCore, error)
-	CreateVenueImage(req VenuePictureCore) (VenuePictureCore, error)
+	// CreateVenueImage(req VenuePictureCore) (VenuePictureCore, error)
 	GetAllVenueImage(venueID string) ([]VenuePictureCore, error)
 	DeleteVenueImage(venueImageID string) error
 	GetVenueImageByID(venueID, venueImageID string) (VenuePictureCore, error)
 	MyVenues(userId string) ([]VenueCore, error)
+	CreateVenue(userID string, venueReq VenueCore, venueImageReq VenuePictureCore) (VenueCore, error)
 }
 
 type VenueData interface {
@@ -120,9 +122,10 @@ type VenueData interface {
 	EditVenue(userId string, venueId string, request VenueCore) error
 	UnregisterVenue(userId string, venueId string) error
 	VenueAvailability(venueId string) (VenueCore, error)
-	InsertVenueImage(req VenuePictureCore) (VenuePictureCore, error)
+	// InsertVenueImage(req VenuePictureCore) (VenuePictureCore, error)
 	GetAllVenueImage(venueID string) ([]VenuePictureCore, error)
 	DeleteVenueImage(venueImageID string) error
 	GetVenueImageByID(venueID, venueImageID string) (VenuePictureCore, error)
 	MyVenues(userId string) ([]VenueCore, error)
+	InsertVenue(userID string, venueReq VenueCore, venueImageReq VenuePictureCore) (VenueCore, error)
 }
