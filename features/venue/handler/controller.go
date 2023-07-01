@@ -104,7 +104,7 @@ func (vh *venueHandler) SearchVenues() echo.HandlerFunc {
 
 		result := make([]SearchVenueResponse, len(venues))
 		for i, venue := range venues {
-			result[i] = SearchVenue(venue)
+			result[i] = SearchVenueRaw(venue)
 		}
 
 		pagination := &pagination.Pagination{

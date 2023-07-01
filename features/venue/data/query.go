@@ -51,7 +51,7 @@ func (vq *venueQuery) RegisterVenue(userId string, request venue.VenueCore) (ven
 }
 
 // SearchVenue implements venue.VenueData.
-func (vq *venueQuery) SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
+func (vq *venueQuery) SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]venue.VenueCoreRaw, int64, int, error) {
 	res := []Venues{}
 	search := "%" + keyword + "%"
 	expTime := 5 * time.Second
@@ -62,7 +62,7 @@ func (vq *venueQuery) SearchVenues(keyword string, latitude float64, longitude f
 	}
 
 	if cachedVenues != nil {
-		result, ok := cachedVenues.([]venue.VenueCore)
+		result, ok := cachedVenues.([]venue.VenueCoreRaw)
 		if !ok {
 			return nil, 0, 0, errors.New("unexpected type for cachedVenues")
 		}
@@ -78,18 +78,21 @@ func (vq *venueQuery) SearchVenues(keyword string, latitude float64, longitude f
 		        POWER(SIN((RADIANS(? - RADIANS(venues.latitude)) / 2)), 2) +
 		        COS(RADIANS(venues.latitude)) * COS(RADIANS(?)) *
 		        POWER(SIN((RADIANS(? - RADIANS(venues.longitude)) / 2)), 2)
-		    )) AS distance
+		    )) AS distance,
+			(SELECT url FROM venue_pictures WHERE venue_pictures.venue_id = venues.venue_id LIMIT 1) AS venue_picture
 		FROM venues
 		LEFT JOIN venue_pictures ON venue_pictures.venue_id = venues.venue_id
 		LEFT JOIN reviews ON reviews.venue_id = venues.venue_id
 		LEFT JOIN users ON users.user_id = venues.owner_id
-		WHERE venues.category LIKE ? AND venues.location LIKE ? AND venues.price LIKE ? AND venues.deleted_at IS NULL
+		WHERE venues.category LIKE ? 
+			AND venues.location LIKE ? 
+			AND venues.price LIKE ? 
+			AND venues.deleted_at IS NULL
 		GROUP BY venues.venue_id
 		ORDER BY venues.updated_at DESC;
 		`, latitude, latitude, longitude, search, search, search).
 		Scopes(pagination.Paginate(&res, &page, vq.db)).
 		Scan(&res)
-
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
 		log.Error("list venues not found")
 		return nil, 0, 0, errors.New("venues not found")
@@ -100,7 +103,7 @@ func (vq *venueQuery) SearchVenues(keyword string, latitude float64, longitude f
 		log.Sugar().Info("Venues data found in the database")
 	}
 
-	result := make([]venue.VenueCore, len(res))
+	result := make([]venue.VenueCoreRaw, len(res))
 	for i, venue := range res {
 		result[i] = searchVenueModel(venue)
 	}
@@ -109,7 +112,7 @@ func (vq *venueQuery) SearchVenues(keyword string, latitude float64, longitude f
 	if err != nil {
 		return nil, 0, 0, err
 	}
-
+	log.Sugar().Info(result)
 	return result, page.TotalRows, page.TotalPages, nil
 }
 

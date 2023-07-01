@@ -15,7 +15,7 @@ type SearchVenueResponse struct {
 	Distance      float64 `json:"distance,omitempty"`
 	Price         float64 `json:"price,omitempty"`
 	AverageRating float64 `json:"average_rating,omitempty"`
-	VenuePicture  string  `json:"venue_picture,omitempty"`
+	VenuePicture  string  `json:"venue_picture"`
 }
 
 type SelectVenueResponse struct {
@@ -64,6 +64,23 @@ func GetAllVenueImageToResponse(v venue.VenuePictureCore) GetAllVenueImageRespon
 	}
 }
 
+func SearchVenueRaw(v venue.VenueCoreRaw) SearchVenueResponse {
+	response := SearchVenueResponse{
+		UserID:        v.OwnerID,
+		VenueID:       v.VenueID,
+		Category:      v.Category,
+		Name:          v.Name,
+		Username:      v.Username,
+		Location:      v.Location,
+		Distance:      helper.TwoDecimals(v.Distance),
+		Price:         v.Price,
+		AverageRating: helper.TwoDecimals(v.AverageRating),
+		VenuePicture:  v.VenuePicture,
+	}
+
+	return response
+}
+
 func SearchVenue(v venue.VenueCore) SearchVenueResponse {
 	response := SearchVenueResponse{
 		UserID:        v.OwnerID,
@@ -74,7 +91,7 @@ func SearchVenue(v venue.VenueCore) SearchVenueResponse {
 		Location:      v.Location,
 		Distance:      helper.TwoDecimals(v.Distance),
 		Price:         v.Price,
-		AverageRating: v.AverageRating,
+		AverageRating: helper.TwoDecimals(v.AverageRating),
 	}
 
 	pictures := make([]VenuePicture, len(v.VenuePictures))

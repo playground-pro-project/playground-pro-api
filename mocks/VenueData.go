@@ -166,21 +166,21 @@ func (_m *VenueData) RegisterVenue(userId string, request venue.VenueCore) (venu
 }
 
 // SearchVenues provides a mock function with given fields: keyword, latitude, longitude, page
-func (_m *VenueData) SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]venue.VenueCore, int64, int, error) {
+func (_m *VenueData) SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]venue.VenueCoreRaw, int64, int, error) {
 	ret := _m.Called(keyword, latitude, longitude, page)
 
-	var r0 []venue.VenueCore
+	var r0 []venue.VenueCoreRaw
 	var r1 int64
 	var r2 int
 	var r3 error
-	if rf, ok := ret.Get(0).(func(string, float64, float64, pagination.Pagination) ([]venue.VenueCore, int64, int, error)); ok {
+	if rf, ok := ret.Get(0).(func(string, float64, float64, pagination.Pagination) ([]venue.VenueCoreRaw, int64, int, error)); ok {
 		return rf(keyword, latitude, longitude, page)
 	}
-	if rf, ok := ret.Get(0).(func(string, float64, float64, pagination.Pagination) []venue.VenueCore); ok {
+	if rf, ok := ret.Get(0).(func(string, float64, float64, pagination.Pagination) []venue.VenueCoreRaw); ok {
 		r0 = rf(keyword, latitude, longitude, page)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]venue.VenueCore)
+			r0 = ret.Get(0).([]venue.VenueCoreRaw)
 		}
 	}
 

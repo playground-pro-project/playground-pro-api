@@ -86,6 +86,33 @@ type ReservationCore struct {
 	User          UserCore
 }
 
+type VenueCoreRaw struct {
+	VenueID       string
+	OwnerID       string
+	Category      string `validate:"required"`
+	Name          string `validate:"required"`
+	Description   string
+	Username      string
+	ServiceTime   string `validate:"required"`
+	Location      string `validate:"required"`
+	Distance      float64
+	Price         float64 `validate:"required"`
+	Longitude     float64
+	Latitude      float64
+	TotalRows     int64
+	TotalPages    int
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     time.Time
+	TotalReviews  uint
+	AverageRating float64
+	VenuePicture  string
+	VenuePictures []VenuePictureCore
+	Reviews       []ReviewCore
+	Reservations  []ReservationCore
+	User          UserCore
+}
+
 type VenueHandler interface {
 	RegisterVenue() echo.HandlerFunc
 	SearchVenues() echo.HandlerFunc
@@ -101,7 +128,7 @@ type VenueHandler interface {
 
 type VenueService interface {
 	RegisterVenue(userId string, request VenueCore) (VenueCore, error)
-	SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]VenueCore, int64, int, error)
+	SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]VenueCoreRaw, int64, int, error)
 	SelectVenue(venueId string) (VenueCore, error)
 	EditVenue(userId string, venueId string, request VenueCore) error
 	UnregisterVenue(userId string, venueId string) error
@@ -115,7 +142,7 @@ type VenueService interface {
 
 type VenueData interface {
 	RegisterVenue(userId string, request VenueCore) (VenueCore, error)
-	SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]VenueCore, int64, int, error)
+	SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]VenueCoreRaw, int64, int, error)
 	SelectVenue(venueId string) (VenueCore, error)
 	EditVenue(userId string, venueId string, request VenueCore) error
 	UnregisterVenue(userId string, venueId string) error
