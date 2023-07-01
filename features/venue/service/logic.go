@@ -103,12 +103,12 @@ func (vs *venueService) SelectVenue(venueId string) (venue.VenueCore, error) {
 func (vs *venueService) EditVenue(userId string, venueId string, request venue.VenueCore) error {
 	err := vs.query.EditVenue(userId, venueId, request)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if strings.Contains(err.Error(), "venue profile record not found") {
 			log.Error("venue profile record not found")
 			return errors.New("venue profile record not found")
-		} else if strings.Contains(err.Error(), "duplicate data entry") {
-			log.Error("failed to update venue, duplicate data entry")
-			return errors.New("failed to update venue, duplicate data entry")
+		} else if strings.Contains(err.Error(), "no venue has been created") {
+			log.Error("failed to update venue, no venue has been created")
+			return errors.New("no venue has been created")
 		} else {
 			log.Error("internal server error")
 			return errors.New("internal server error")
