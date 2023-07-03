@@ -31,6 +31,13 @@ type userService struct {
 	validator *validator.Validate
 }
 
+func New(d user.UserData, v *validator.Validate) user.UserService {
+	return &userService{
+		userData:  d,
+		validator: v,
+	}
+}
+
 // Login implements user.UserService.
 func (s *userService) Login(req user.UserCore) (user.UserCore, string, error) {
 	err := s.validator.Struct(req)
@@ -250,7 +257,7 @@ func (s *userService) UpdateByID(userID string, updatedUser user.UserCore) error
 	if updatedUser.Password != "" {
 		err := helper.ValidatePassword(updatedUser.Password)
 		if err != nil {
-			return fmt.Errorf("%w", err)
+			return err
 		}
 	}
 	if updatedUser.Email != "" {
@@ -262,15 +269,8 @@ func (s *userService) UpdateByID(userID string, updatedUser user.UserCore) error
 
 	err := s.userData.UpdateByID(userID, updatedUser)
 	if err != nil {
-		return fmt.Errorf("error: %w", err)
+		return err
 	}
 
 	return nil
-}
-
-func New(d user.UserData, v *validator.Validate) user.UserService {
-	return &userService{
-		userData:  d,
-		validator: v,
-	}
 }

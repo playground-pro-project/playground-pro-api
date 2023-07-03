@@ -37,6 +37,30 @@ func (_m *VenueService) CreateVenue(userID string, venueReq venue.VenueCore, ven
 	return r0, r1
 }
 
+// CreateVenueImage provides a mock function with given fields: req
+func (_m *VenueService) CreateVenueImage(req venue.VenuePictureCore) (venue.VenuePictureCore, error) {
+	ret := _m.Called(req)
+
+	var r0 venue.VenuePictureCore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(venue.VenuePictureCore) (venue.VenuePictureCore, error)); ok {
+		return rf(req)
+	}
+	if rf, ok := ret.Get(0).(func(venue.VenuePictureCore) venue.VenuePictureCore); ok {
+		r0 = rf(req)
+	} else {
+		r0 = ret.Get(0).(venue.VenuePictureCore)
+	}
+
+	if rf, ok := ret.Get(1).(func(venue.VenuePictureCore) error); ok {
+		r1 = rf(req)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteVenueImage provides a mock function with given fields: venueImageID
 func (_m *VenueService) DeleteVenueImage(venueImageID string) error {
 	ret := _m.Called(venueImageID)
