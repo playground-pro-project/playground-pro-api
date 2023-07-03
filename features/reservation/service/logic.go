@@ -42,11 +42,7 @@ func (rs *reservationService) MakeReservation(userId string, r reservation.Reser
 	} else if r.CheckOutDate.IsZero() {
 		log.Warn("check_out_date cannot be empty")
 		message = "check_out_date cannot be empty"
-	} else {
-		log.Error("internal server error")
-		message = "internal server error"
 	}
-
 	if message != "" {
 		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New(message)
 	}
@@ -228,8 +224,8 @@ func (rs *reservationService) CheckAvailability(venueId string) ([]reservation.A
 }
 
 // MyVenueCharts implements reservation.ReservationService.
-func (rs *reservationService) MyVenueCharts(userId string, keyword string, request reservation.MyReservationCore) ([]reservation.MyReservationCore, error) {
-	result, err := rs.query.MyVenueCharts(userId, keyword, request)
+func (rs *reservationService) MyVenueCharts(userId string, keyword string, checkInDate time.Time, checkOutDate time.Time) ([]reservation.MyReservationCore, error) {
+	result, err := rs.query.MyVenueCharts(userId, keyword, checkInDate, checkOutDate)
 	if err != nil {
 		if strings.Contains(err.Error(), "list charts record not found") {
 			log.Error("list charts record not found")
