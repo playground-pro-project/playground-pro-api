@@ -17,6 +17,10 @@ func TestMyVenueCharts(t *testing.T) {
 	service := New(data, refund)
 	userID := "user_id_1"
 	keyword := "keyword"
+	checkInDateStr := "2022-12-25 20:00:00"
+	checkOutDateStr := "2022-12-25 21:00:00"
+	checkInDate, _ := time.Parse("2006-01-02", checkInDateStr)
+	checkOutDate, _ := time.Parse("2006-01-02", checkOutDateStr)
 	request := reservation.MyReservationCore{
 		// Set the necessary fields for the request object
 	}
@@ -28,7 +32,7 @@ func TestMyVenueCharts(t *testing.T) {
 		}
 
 		data.On("MyVenueCharts", userID, keyword, request).Return(mockReservations, nil).Once()
-		result, err := service.MyVenueCharts(userID, keyword, request)
+		result, err := service.MyVenueCharts(userID, keyword, checkInDate, checkOutDate)
 		assert.Nil(t, err)
 		assert.Equal(t, mockReservations, result)
 		data.AssertExpectations(t)
@@ -37,7 +41,7 @@ func TestMyVenueCharts(t *testing.T) {
 	t.Run("list charts record not found", func(t *testing.T) {
 		mockError := errors.New("list charts record not found")
 		data.On("MyVenueCharts", userID, keyword, request).Return([]reservation.MyReservationCore{}, mockError).Once()
-		result, err := service.MyVenueCharts(userID, keyword, request)
+		result, err := service.MyVenueCharts(userID, keyword, checkInDate, checkOutDate)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "list charts record not found")
 		assert.Equal(t, []reservation.MyReservationCore{}, result)
@@ -47,7 +51,7 @@ func TestMyVenueCharts(t *testing.T) {
 	t.Run("query error", func(t *testing.T) {
 		mockError := errors.New("internal server error")
 		data.On("MyVenueCharts", userID, keyword, request).Return([]reservation.MyReservationCore{}, mockError).Once()
-		result, err := service.MyVenueCharts(userID, keyword, request)
+		result, err := service.MyVenueCharts(userID, keyword, checkInDate, checkOutDate)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "internal server error")
 		assert.Equal(t, []reservation.MyReservationCore{}, result)

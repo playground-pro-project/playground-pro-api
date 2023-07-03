@@ -92,7 +92,7 @@ type ReservationService interface {
 	MyReservation(userId string) ([]MyReservationCore, error)
 	DetailTransaction(userId string, paymentId string) (PaymentCore, error)
 	CheckAvailability(venueId string) ([]AvailabilityCore, error)
-	MyVenueCharts(userId string, keyword string, request MyReservationCore) ([]MyReservationCore, error)
+	MyVenueCharts(userId string, keyword string, checkInDate time.Time, checkOutDate time.Time) ([]MyReservationCore, error)
 }
 
 type ReservationData interface {
@@ -104,5 +104,5 @@ type ReservationData interface {
 	DetailTransaction(userId string, paymentId string) (PaymentCore, error)
 	CheckAvailability(venueId string) ([]AvailabilityCore, error)
 	GetReservationsByTimeSlot(venueID string, checkInDate, checkOutDate time.Time) ([]ReservationCore, error)
-	MyVenueCharts(userId string, keyword string, request MyReservationCore) ([]MyReservationCore, error)
+	MyVenueCharts(userId string, keyword string, checkInDate time.Time, checkOutDate time.Time) ([]MyReservationCore, error)
 }

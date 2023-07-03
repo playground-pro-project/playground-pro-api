@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/playground-pro-project/playground-pro-api/app/middlewares"
@@ -209,21 +210,28 @@ func (rh *reservationHandler) DetailTransaction() echo.HandlerFunc {
 // MyVenueCharts implements reservation.ReservationHandler.
 func (rh *reservationHandler) MyVenueCharts() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		request := makeReservationRequest{}
 		userId, errToken := middlewares.ExtractToken(c)
 		if errToken != nil {
 			log.Error("missing or malformed JWT")
 			return helper.UnauthorizedError(c, "Missing or malformed JWT")
 		}
 
-		errBind := c.Bind(&request)
-		if errBind != nil {
-			log.Error("error on bind input")
-			return helper.BadRequestError(c, "Bad request")
-		}
-
 		keyword := c.QueryParam("keyword")
-		res, err := rh.service.MyVenueCharts(userId, keyword, reqReservation(request))
+		checkInDateStr := c.QueryParam("check_in_date")
+		checkOutDateStr := c.QueryParam("check_out_date")
+		checkInDate, err := time.Parse("2006-01-02 15:04:05", checkInDateStr)
+		if err != nil {
+			log.Error("failed to parse check_in_date")
+			return helper.BadRequestError(c, "Invalid value for check_in_date")
+		}
+		log.Sugar().Info(checkInDate)
+		checkOutDate, err := time.Parse("2006-01-02 15:04:05", checkOutDateStr)
+		if err != nil {
+			log.Error("failed to parse check_out_date")
+			return helper.BadRequestError(c, "Invalid value for check_out_date")
+		}
+		log.Sugar().Info(checkOutDate)
+		res, err := rh.service.MyVenueCharts(userId, keyword, checkInDate, checkOutDate)
 		if err != nil {
 			if strings.Contains(err.Error(), "list charts record not found") {
 				log.Error("list charts record not found")

@@ -272,7 +272,7 @@ func (rq *reservationQuery) GetReservationsByTimeSlot(venueID string, checkInDat
 }
 
 // ReservationHistory implements reservation.ReservationData.
-func (rq *reservationQuery) MyVenueCharts(userId string, keyword string, request reservation.MyReservationCore) ([]reservation.MyReservationCore, error) {
+func (rq *reservationQuery) MyVenueCharts(userId string, keyword string, checkInDate time.Time, checkOutDate time.Time) ([]reservation.MyReservationCore, error) {
 	result := []MyReservation{}
 	search := "%" + keyword + "%"
 	query := rq.db.Raw(`
@@ -283,10 +283,10 @@ func (rq *reservationQuery) MyVenueCharts(userId string, keyword string, request
 	JOIN reservations ON payments.payment_id = reservations.payment_id
 	JOIN venues ON reservations.venue_id = venues.venue_id
 	WHERE reservations.user_id = ? 
-		AND reservations.check_in_date BETWEEN ? AND ?
+		AND ((reservations.check_in_date BETWEEN ? AND ?) OR (reservations.check_out_date BETWEEN ? AND ?))
 		AND payments.status LIKE ?
 	GROUP BY venues.venue_id;
-	`, userId, request.CheckInDate, request.CheckOutDate, search).
+	`, userId, checkInDate, checkOutDate, checkInDate, checkOutDate, search).
 		Scan(&result)
 	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
 		log.Error("list charts record not found")
