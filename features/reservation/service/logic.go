@@ -31,26 +31,23 @@ func New(rd reservation.ReservationData, refund paymentgateway.Refund) reservati
 
 // MakeReservation implements reservation.ReservationService.
 func (rs *reservationService) MakeReservation(userId string, r reservation.ReservationCore, p reservation.PaymentCore) (reservation.ReservationCore, reservation.PaymentCore, error) {
-	err := rs.validate.Struct(r)
-	if err != nil {
-		var message string
-		switch {
-		case strings.Contains(err.Error(), "venue_id"):
-			log.Warn("venue_id cannot be empty")
-			message = "venue_id cannot be empty"
-		case strings.Contains(err.Error(), "format"):
-			log.Warn("invalid datetime format")
-			message = "invalid datetime format"
-		case strings.Contains(err.Error(), "check_in_date"):
-			log.Warn("check_in_date cannot be empty")
-			message = "check_in_date cannot be empty"
-		case strings.Contains(err.Error(), "check_out_date"):
-			log.Warn("check_out_date cannot be empty")
-			message = "check_out_date cannot be empty"
-		default:
-			log.Error("internal server error")
-			message = "internal server error"
-		}
+	var message string
+
+	if r.VenueID == "" {
+		log.Warn("venue_id cannot be empty")
+		message = "venue_id cannot be empty"
+	} else if r.CheckInDate.IsZero() {
+		log.Warn("check_in_date cannot be empty")
+		message = "check_in_date cannot be empty"
+	} else if r.CheckOutDate.IsZero() {
+		log.Warn("check_out_date cannot be empty")
+		message = "check_out_date cannot be empty"
+	} else {
+		log.Error("internal server error")
+		message = "internal server error"
+	}
+
+	if message != "" {
 		return reservation.ReservationCore{}, reservation.PaymentCore{}, errors.New(message)
 	}
 
@@ -134,7 +131,7 @@ func (rs *reservationService) ReservationStatus(request reservation.PaymentCore)
 		res, err := rs.query.ReservationStatus(request)
 		if err != nil {
 			log.Error("failed to update reservation status")
-			return res, err
+			return res, errors.New("failed to update reservation status: " + err.Error())
 		}
 
 	case "cancel":
@@ -143,13 +140,12 @@ func (rs *reservationService) ReservationStatus(request reservation.PaymentCore)
 			grandTotal, errConv := strconv.ParseFloat(request.GrandTotal, 64)
 			if errConv != nil {
 				log.Error("failed to parse grand total")
-				return request, errors.New("failed to parse grand total")
+				return request, errors.New("failed to parse grand total: " + errConv.Error())
 			}
 
 			checkInTime, errQuery := rs.query.ReservationCheckOutDate(request.Reservation.ReservationID)
 			if errQuery != nil {
-				log.Sugar().Errorf("failed to get checkout date %v", checkInTime)
-				return reservation.PaymentCore{}, errQuery
+				return reservation.PaymentCore{}, errors.New("failed to get checkout date: " + errQuery.Error())
 			}
 
 			timeDiff := time.Until(checkInTime)
@@ -161,21 +157,21 @@ func (rs *reservationService) ReservationStatus(request reservation.PaymentCore)
 			err := rs.refund.RefundTransaction(request.Reservation.ReservationID, int64(grandTotal), "reason")
 			if err != nil {
 				log.Error("failed to refund transaction")
-				return request, err
+				return request, errors.New("failed to refund transaction: " + err.Error())
 			}
 		}
 
 		res, err := rs.query.ReservationStatus(request)
 		if err != nil {
 			log.Error("failed to update status to cancel")
-			return res, err
+			return res, errors.New("failed to update status to cancel: " + err.Error())
 		}
 
 	case "expire":
 		res, err := rs.query.ReservationStatus(request)
 		if err != nil {
 			log.Error("error on updating status to expire")
-			return res, err
+			return res, errors.New("error on updating status to expire: " + err.Error())
 		}
 	}
 
@@ -228,7 +224,7 @@ func (rs *reservationService) CheckAvailability(venueId string) ([]reservation.A
 
 	log.Sugar().Info(result)
 
-	return result, err
+	return result, nil
 }
 
 // MyVenueCharts implements reservation.ReservationService.
@@ -244,5 +240,5 @@ func (rs *reservationService) MyVenueCharts(userId string, keyword string, reque
 		}
 	}
 
-	return result, err
+	return result, nil
 }

@@ -25,25 +25,29 @@ func New(vd venue.VenueData) venue.VenueService {
 }
 
 func (vs *venueService) CreateVenue(userID string, venueReq venue.VenueCore, venueImageReq venue.VenuePictureCore) (venue.VenueCore, error) {
-	err := vs.validate.Struct(venueReq)
-	if err != nil {
-		switch {
-		case strings.Contains(err.Error(), "category"):
-			log.Warn("category cannot be empty")
-			return venue.VenueCore{}, errors.New("category cannot be empty")
-		case strings.Contains(err.Error(), "name"):
-			log.Warn("name cannot be empty")
-			return venue.VenueCore{}, errors.New("name cannot be empty")
-		case strings.Contains(err.Error(), "servicetime"):
-			log.Warn("service time cannot be empty")
-			return venue.VenueCore{}, errors.New("service time cannot be empty")
-		case strings.Contains(err.Error(), "location"):
-			log.Warn("location cannot be empty")
-			return venue.VenueCore{}, errors.New("location cannot be empty")
-		case strings.Contains(err.Error(), "price"):
-			log.Warn("price cannot be empty")
-			return venue.VenueCore{}, errors.New("price cannot be empty")
-		}
+	if venueReq.Category == "" {
+		log.Warn("category cannot be empty")
+		return venue.VenueCore{}, errors.New("category cannot be empty")
+	}
+
+	if venueReq.Name == "" {
+		log.Warn("name cannot be empty")
+		return venue.VenueCore{}, errors.New("name cannot be empty")
+	}
+
+	if venueReq.ServiceTime == "" {
+		log.Warn("service time cannot be empty")
+		return venue.VenueCore{}, errors.New("service time cannot be empty")
+	}
+
+	if venueReq.Location == "" {
+		log.Warn("location cannot be empty")
+		return venue.VenueCore{}, errors.New("location cannot be empty")
+	}
+
+	if venueReq.Price == 0 {
+		log.Warn("price cannot be empty")
+		return venue.VenueCore{}, errors.New("price cannot be empty")
 	}
 
 	result, err := vs.query.InsertVenue(userID, venueReq, venueImageReq)
@@ -64,11 +68,6 @@ func (vs *venueService) CreateVenue(userID string, venueReq venue.VenueCore, ven
 
 // SearchVenue implements venue.VenueService.
 func (vs *venueService) SearchVenues(keyword string, latitude float64, longitude float64, page pagination.Pagination) ([]venue.VenueCoreRaw, int64, int, error) {
-	if page.Sort != "" {
-		ps := strings.Replace(page.Sort, "_", " ", 1)
-		page.Sort = ps
-	}
-
 	venues, rows, pages, err := vs.query.SearchVenues(keyword, latitude, longitude, page)
 	if err != nil {
 		if strings.Contains(err.Error(), "venues not found") {
@@ -76,11 +75,11 @@ func (vs *venueService) SearchVenues(keyword string, latitude float64, longitude
 			return []venue.VenueCoreRaw{}, 0, 0, errors.New("venues not found")
 		} else {
 			log.Error("internal server error")
-			return []venue.VenueCoreRaw{}, 0, 0, errors.New("internal server error")
+			return []venue.VenueCoreRaw{}, 0, 0, err
 		}
 	}
 
-	return venues, rows, pages, err
+	return venues, rows, pages, nil
 }
 
 // SelectVenue implements venue.VenueService.
@@ -149,7 +148,7 @@ func (vs *venueService) VenueAvailability(venueId string) (venue.VenueCore, erro
 		}
 	}
 
-	return venues, err
+	return venues, nil
 }
 
 func (vs *venueService) CreateVenueImage(req venue.VenuePictureCore) (venue.VenuePictureCore, error) {
@@ -214,5 +213,5 @@ func (vs *venueService) MyVenues(userId string) ([]venue.VenueCore, error) {
 		}
 	}
 
-	return venues, err
+	return venues, nil
 }
