@@ -2,6 +2,27 @@
 
 Playground Pro is a sport venue reservation system designed to provide users with a convenient platform for reserving sport venues. This project aims to streamline the process of finding, booking, and managing sport venues for both users and venue owners.
 
+# Entity Relational Diagram
+![playground-pro-erd](https://github.com/playground-pro-project/playground-pro-api/assets/128290172/4b45432b-0bf1-419c-a2e6-6c8be6905c04)
+
+# How To Run
+If you want to run the app locally, you can use Docker to containerize the application and also set up Redis in Docker. This way, you can ensure consistent environments and easily manage dependencies.
+You can setup redis by this way:
+- Pull the Redis Docker image from the official Docker registry
+```
+docker pull redis
+```
+
+- Run a Redis container
+```
+docker run -d --name my-redis -p 6379:6379 redis
+```
+
+- To Access Redis you can run
+```
+docker exec -it my-redis redis-cli
+```
+
 ## MVP Features
 
 The minimum viable product (MVP) of Playground Pro includes the following key features:
