@@ -115,9 +115,13 @@ func (rh *reservationHandler) MakeReservation() echo.HandlerFunc {
 // ReservationStatus implements reservation.ReservationHandler.
 func (rh *reservationHandler) ReservationStatus() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		if c.Request().UserAgent() != "Veritrans" {
+			log.Error("invalid client's User-Agent")
+			return helper.UnauthorizedError(c, "Invalid client's User-Agent")
+		}
+
 		midtransResponse := MidtransCallback{}
 		log.Sugar().Info(midtransResponse)
-
 		// https + verify signature key between midtrans and system, to enhance security issues
 		if !validSignatureKey(midtransResponse) {
 			log.Error("invalid signature key")
