@@ -115,8 +115,15 @@ func (rh *reservationHandler) MakeReservation() echo.HandlerFunc {
 // ReservationStatus implements reservation.ReservationHandler.
 func (rh *reservationHandler) ReservationStatus() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		midtransResponse := midtransCallback{}
+		midtransResponse := MidtransCallback{}
 		log.Sugar().Info(midtransResponse)
+
+		// https + verify signature key between midtrans and system, to enhance security issues
+		if !validSignatureKey(midtransResponse) {
+			log.Error("invalid signature key")
+			return helper.UnauthorizedError(c, "Invalid Signature Key")
+		}
+
 		errBind := c.Bind(&midtransResponse)
 		if errBind != nil {
 			log.Sugar().Errorf("error on binding notification input", errBind)

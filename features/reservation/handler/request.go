@@ -1,9 +1,12 @@
 package handler
 
 import (
+	"crypto/sha512"
+	"encoding/hex"
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/playground-pro-project/playground-pro-api/app/config"
 	"github.com/playground-pro-project/playground-pro-api/features/reservation"
 )
 
@@ -22,13 +25,13 @@ type editReservationRequest struct {
 	CheckOutDate *string `json:"check_out_date" form:"check_out_date" validate:"datetime"`
 }
 
-type midtransCallback struct {
+type MidtransCallback struct {
 	TransactionTime     string `json:"transaction_time"`
 	TransactionStatus   string `json:"transaction_status"`
 	TransactionID       string `json:"transaction_id"`
 	StatusMessage       string `json:"status_message"`
 	StatusCode          string `json:"status_code"`
-	SignatureKey        string `json:"signature_key"`
+	SignatureKey        string `json:"signature_key"` // Hash SHA512
 	PaymentType         string `json:"payment_type"`
 	OrderID             string `json:"order_id"`
 	MerchantID          string `json:"merchant_id"`
@@ -137,7 +140,7 @@ func (p createPaymentRequest) requestPayment() reservation.PaymentCore {
 	}
 }
 
-func reservationStatusRequest(r midtransCallback) reservation.PaymentCore {
+func reservationStatusRequest(r MidtransCallback) reservation.PaymentCore {
 	res := reservation.PaymentCore{
 		PaymentID: r.TransactionID,
 		Reservation: reservation.ReservationCore{
@@ -148,4 +151,10 @@ func reservationStatusRequest(r midtransCallback) reservation.PaymentCore {
 	}
 
 	return res
+}
+
+func validSignatureKey(response MidtransCallback) bool {
+	hash := sha512.Sum512([]byte(response.OrderID + response.StatusCode + response.GrossAmount + config.MIDTRANS_SERVERKEY))
+	hashStr := hex.EncodeToString(hash[:])
+	return string(hashStr) == response.SignatureKey
 }
